@@ -12,6 +12,16 @@ public enum SettingType {
 	INTEGER,
 
 	/** A JSON string with a host name or an IP address. */
-	HOST
+	HOST;
+
+	/**
+	 * @param value a value from the settings API, never {@code null}
+	 * @param min   the lower bound of the setting definition
+	 * @param max   the upper bound of the setting definition
+	 * @return {@code true} when the value has the JSON form of this type and is inside the bounds
+	 */
+	boolean validate(Object value, int min, int max) {
+		throw new UnsupportedOperationException("not implemented yet");
+	}
 
 }

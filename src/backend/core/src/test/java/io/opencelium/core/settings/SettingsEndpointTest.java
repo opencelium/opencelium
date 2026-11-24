@@ -11,6 +11,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -28,9 +29,10 @@ import static io.opencelium.core.testsupport.SettingsRequests.field;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * An admin of a self-host installation reads the settings of the installation through the settings API, and each
- * setting without a value in the database has its default. An OpenCelium user without the admin role gets
- * {@code access-denied}, and a request without a session JWT gets the status code 401 and no body.
+ * An admin of a self-host installation reads and changes the settings of the installation through the settings API,
+ * and each setting without a value in the database has its default. A change with an incorrect setting key or value
+ * changes nothing. An OpenCelium user without the admin role gets {@code access-denied}, and a request without a
+ * session JWT gets the status code 401 and no body.
  */
 @MongoIntegrationTest
 @AutoConfigureMockMvc
@@ -110,6 +112,90 @@ class SettingsEndpointTest {
 		LoginRequests.assertProblem(read, HttpStatus.FORBIDDEN, "access-denied");
 		assertThat(read).bodyJson().extractingPath("$.instance").isEqualTo(SettingsRequests.PATH);
 		assertThat(read).bodyText().doesNotContain("broker.");
+	}
+
+	@Test
+	void patchGivesTheNewValueWhenTheValueIsValid() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+
+		MvcTestResult change = SettingsRequests.change(mvc, admin,
+				"{\"broker.host\": \"rabbit.internal\", \"broker.port\": 5673}");
+
+		assertThat(change).hasStatusOk();
+		assertThat(change).bodyJson().extractingPath(field("broker.host", "value")).isEqualTo("rabbit.internal");
+		assertThat(change).bodyJson().extractingPath(field("broker.host", "default")).isEqualTo(false);
+		assertThat(change).bodyJson().extractingPath(field("broker.port", "value")).isEqualTo(5673);
+		assertThat(change).bodyJson().extractingPath(field("broker.virtual-host", "default")).isEqualTo(true);
+		MvcTestResult read = SettingsRequests.read(mvc, admin);
+		assertThat(read).bodyJson().extractingPath(field("broker.port", "value")).isEqualTo(5673);
+	}
+
+	@Test
+	void patchGivesInvalidSettingsWithEachIncorrectKeyWhenAKeyIsUnknown() {
+		MvcTestResult change = SettingsRequests.change(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				"{\"broker.port\": \"abc\", \"broker.vhost\": \"x\"}");
+
+		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "invalid-settings");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].key").isEqualTo("broker.port");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].problem").isEqualTo("invalid-value");
+		assertThat(change).bodyJson().extractingPath("$.errors[1].key").isEqualTo("broker.vhost");
+		assertThat(change).bodyJson().extractingPath("$.errors[1].problem").isEqualTo("unknown-key");
+		assertThat(change).bodyText().doesNotContain("abc");
+	}
+
+	@Test
+	void patchChangesNoSettingWhenOneOfTwoValuesIsNotValid() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+
+		MvcTestResult change = SettingsRequests.change(mvc, admin,
+				"{\"broker.host\": \"rabbit.internal\", \"broker.port\": 0}");
+
+		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "invalid-settings");
+		MvcTestResult read = SettingsRequests.read(mvc, admin);
+		assertThat(read).bodyJson().extractingPath(field("broker.host", "default")).isEqualTo(true);
+		assertThat(mongo.getCollection("settings").countDocuments()).isZero();
+	}
+
+	@Test
+	void patchResetsTheSettingWhenTheValueIsNull() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(SettingsRequests.change(mvc, admin,
+				"{\"broker.host\": \"rabbit.internal\", \"broker.port\": 5673}")).as("the change before the reset")
+				.hasStatusOk();
+
+		MvcTestResult reset = SettingsRequests.change(mvc, admin, MediaType.valueOf("application/merge-patch+json"),
+				"{\"broker.port\": null}");
+
+		assertThat(reset).hasStatusOk();
+		assertThat(reset).bodyJson().extractingPath(field("broker.port", "value")).isEqualTo(5672);
+		assertThat(reset).bodyJson().extractingPath(field("broker.port", "default")).isEqualTo(true);
+		assertThat(reset).bodyJson().extractingPath(field("broker.host", "value")).isEqualTo("rabbit.internal");
+		Document broker = mongo.getCollection("settings").find(new Document("_id", "installation")).first()
+				.get("broker", Document.class);
+		assertThat(broker).isEqualTo(new Document("host", "rabbit.internal"));
+	}
+
+	@Test
+	void patchGivesBadRequestWhenTheBodyIsNotAJsonObject() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+
+		LoginRequests.assertProblem(SettingsRequests.change(mvc, admin, "[\"broker.port\", 5673]"),
+				HttpStatus.BAD_REQUEST, "bad-request");
+		LoginRequests.assertProblem(SettingsRequests.change(mvc, admin, "broker.port=5673"), HttpStatus.BAD_REQUEST,
+				"bad-request");
+	}
+
+	@Test
+	void patchGivesAccessDeniedWhenTheUserHasNoAdminRole() {
+		UserFixture.aUser("carol", "Carol-Password-1").storeIn(tenantRunner, documents);
+		MvcTestResult login = LoginRequests.logIn(mvc, "carol", "Carol-Password-1");
+		assertThat(login).as("the login of a user without a role").hasStatusOk();
+
+		MvcTestResult change = SettingsRequests.change(mvc, LoginRequests.sessionJwtOf(login),
+				"{\"broker.host\": \"attacker.example\"}");
+
+		LoginRequests.assertProblem(change, HttpStatus.FORBIDDEN, "access-denied");
+		assertThat(mongo.getCollection("settings").countDocuments()).isZero();
 	}
 
 	@Test

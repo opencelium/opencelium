@@ -2,6 +2,7 @@ package io.opencelium.core.settings;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.bson.Document;
 
@@ -24,6 +25,19 @@ final class SettingsService {
 	List<SettingValue> read() {
 		Document values = repository.installationValues().orElseGet(Document::new);
 		return registry.definitions().stream().map(definition -> valueOf(definition, values)).toList();
+	}
+
+	/**
+	 * Changes the settings of the map in 1 update: a valid new value replaces the database value, and the value
+	 * {@code null} or the default removes it. A map with 1 unknown setting key or 1 value that is not valid changes
+	 * nothing.
+	 *
+	 * @param changes the setting keys and their new values; a value can be {@code null}
+	 * @return each declared setting with its value after the change
+	 * @throws InvalidSettingsException when a setting key is unknown or a value is not valid; it names each such key
+	 */
+	List<SettingValue> change(Map<String, Object> changes) {
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 
 	private static SettingValue valueOf(SettingDefinition definition, Document values) {

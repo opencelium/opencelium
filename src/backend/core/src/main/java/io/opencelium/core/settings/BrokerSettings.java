@@ -10,13 +10,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 class BrokerSettings {
 
-	static final SettingDefinition HOST = new SettingDefinition("broker.host", SettingType.HOST, null);
+	static final SettingDefinition HOST = new SettingDefinition("broker.host", SettingType.HOST, null, 1, 253);
 
-	static final SettingDefinition PORT = new SettingDefinition("broker.port", SettingType.INTEGER, 5672);
+	static final SettingDefinition PORT = new SettingDefinition("broker.port", SettingType.INTEGER, 5672, 1, 65535);
 
-	static final SettingDefinition VIRTUAL_HOST = new SettingDefinition("broker.virtual-host", SettingType.TEXT, "/");
+	static final SettingDefinition VIRTUAL_HOST = new SettingDefinition("broker.virtual-host", SettingType.TEXT, "/", 1,
+			255);
 
-	static final SettingDefinition USERNAME = new SettingDefinition("broker.username", SettingType.TEXT, null);
+	static final SettingDefinition USERNAME = new SettingDefinition("broker.username", SettingType.TEXT, null, 1, 255);
 
 	@Bean
 	SettingDefinition brokerHostSetting() {

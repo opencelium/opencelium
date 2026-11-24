@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -46,6 +47,9 @@ class SettingsCloudTest {
 	@Autowired
 	TokenSignature signature;
 
+	@Autowired
+	MongoTemplate mongo;
+
 	@Test
 	void getGivesAccessDeniedWhenTheModeIsCloud() {
 		String adminOfATenant = SessionJwtFixture.sessionJwt(signature, TenantId.of("tenant-a"), Set.of("ADMIN"));
@@ -54,6 +58,17 @@ class SettingsCloudTest {
 
 		LoginRequests.assertProblem(read, HttpStatus.FORBIDDEN, "access-denied");
 		assertThat(read).bodyText().doesNotContain("broker.");
+	}
+
+	@Test
+	void patchGivesAccessDeniedWhenTheModeIsCloud() {
+		String adminOfATenant = SessionJwtFixture.sessionJwt(signature, TenantId.of("tenant-a"), Set.of("ADMIN"));
+
+		MvcTestResult change = SettingsRequests.change(mvc, adminOfATenant,
+				"{\"broker.host\": \"attacker.example\"}");
+
+		LoginRequests.assertProblem(change, HttpStatus.FORBIDDEN, "access-denied");
+		assertThat(mongo.getCollection("settings").countDocuments()).isZero();
 	}
 
 }
