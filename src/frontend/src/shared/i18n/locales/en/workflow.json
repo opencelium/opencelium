@@ -1337,8 +1337,6 @@
     "consoleLog": "console does not exist on the server engine (Nashorn · ES5.1). Use print(...) instead of console.log; its text appears in the Output tab."
   },
   "notification": {
-    "demo": "Notification demo",
-    "demoStart": "Start",
     "node": {
       "chooseTool": "Choose tool",
       "ariaLabel": "Notification {{label}}",

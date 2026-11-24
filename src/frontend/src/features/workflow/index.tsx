@@ -1,8 +1,7 @@
-import { Button } from '@shared/ui/primitives/Button';
 import { runWithoutUnsavedChangesGuard } from './hooks/unsavedChangesGuard';
 import { listLocation } from '@shared/navigation/listLocation';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { message } from 'antd';
 import { WorkflowLoadError } from './components/WorkflowLoadError/WorkflowLoadError';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -33,21 +32,8 @@ type WorkflowProps = {
   readOnly?: boolean;
 };
 
-const NotificationNodePreview = import.meta.env.DEV
-  ? lazy(() => import('./nodes/NotificationNode/NotificationNodePreview'))
-  : null;
-
-export default function Workflow(props: WorkflowProps = {}) {
-  const { pathname, search } = useLocation();
-  if (NotificationNodePreview && pathname === '/workflow/create' && new URLSearchParams(search).has('previewNotification')) {
-    return <Suspense fallback={null}><NotificationNodePreview /></Suspense>;
-  }
-  return <WorkflowEditor {...props} />;
-}
-
-function WorkflowEditor({ readOnly = false }: WorkflowProps) {
+export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const navigate = useNavigate();
-  const [notificationDemoOpen, setNotificationDemoOpen] = useState(false);
   const { state } = useLocation();
   const listSearch = state?.workflowListSearch;
   const openedFromList = typeof listSearch === 'string' && (listSearch === '' || listSearch.startsWith('?'));
@@ -153,18 +139,12 @@ function WorkflowEditor({ readOnly = false }: WorkflowProps) {
               runWithoutUnsavedChangesGuard(() => navigate(returnUrl, { replace: true }));
             }
           }, confirmBeforeSave,
-          problemsSlot: <>
-            <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />
-            {NotificationNodePreview && <Button testId="workflow-notification-demo"
-              onClick={() => setNotificationDemoOpen(true)}>{t('notification.demo')}</Button>}
-          </>,
+          problemsSlot: <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory,
           readOnly: readOnly || isTestRunLocked, testRunLocked: isTestRunLocked,
           loading: isConnectionLoading,
           hasSavedConnection: !!activeConnectionId }} />
-      {NotificationNodePreview && notificationDemoOpen &&
-        <Suspense fallback={null}><NotificationNodePreview onClose={() => setNotificationDemoOpen(false)} /></Suspense>}
       <TemplateConnectorMappingDialog open={connection.mappingGroups.length > 0}
         purpose="repair" groups={connection.mappingGroups} connectors={connectors} invokers={invokers}
         onConfirm={connection.confirmRepair} onCancel={() => navigate(returnUrl)} />

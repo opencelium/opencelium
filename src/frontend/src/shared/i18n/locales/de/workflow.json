@@ -849,7 +849,7 @@
     "rootObject": "Das Wurzelobjekt",
     "rootObjectHint": "Der gesamte Antworttext, unverändert.",
     "firstArrayElement": "Erstes Element des Arrays",
-    "firstArrayElementHint": "Das erste Element des Arrays als einzelner Wert. Mit einem Fieldname fortfahren, um ein Feld daraus zu nehmen.",
+    "firstArrayElementHint": "Das erste Element des Arrays als einzelner Wert. Mit einem Feldnamen fortfahren, um ein Feld daraus zu nehmen.",
     "lastArrayElement": "Letztes Element des Arrays",
     "lastArrayElementHint": "Das letzte Element des Arrays als einzelner Wert. Mit einem Feldnamen fortfahren, um ein Feld daraus zu nehmen.",
     "wholeArray": "Das gesamte Array",
@@ -1249,7 +1249,7 @@
       "failed": "Der Test konnte nicht ausgeführt werden",
       "connectorError": "Die Daten von Konnektor {{connector}} konnten nicht gelesen werden – es wurde nichts gesendet",
       "sentHint": "Der Request, wie er gesendet wurde. Verborgene Konnektorwerte (Passwörter, Secrets, Tokens) werden als **** angezeigt.",
-      "binary": "Binary Antwort ({{type}})",
+      "binary": "Binäre Antwort ({{type}})",
       "download": "Herunterladen",
       "downloadFailed": "Die Antwort konnte nicht heruntergeladen werden."
     },
@@ -1337,8 +1337,6 @@
     "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“."
   },
   "notification": {
-    "demo": "Benachrichtigungsdemo",
-    "demoStart": "Start",
     "node": {
       "chooseTool": "Tool wählen",
       "ariaLabel": "Benachrichtigung {{label}}",
