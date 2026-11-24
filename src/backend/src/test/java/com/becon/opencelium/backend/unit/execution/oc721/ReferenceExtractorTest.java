@@ -54,6 +54,24 @@ public class ReferenceExtractorTest {
         return extractor.extractValue(rawReference);
     }
 
+    //-----------------------------------------------------------
+    //                    ENHANCEMENT_REFERENCE
+    //-----------------------------------------------------------
+
+    @Test
+    @DisplayName("extractValue — a failing enhancement is named by the field it fills, not by its binding id")
+    void extractValueNamesTargetFieldWhenEnhancementFails() {
+        String bindId = "6b053f677e52075a4b71c82d";
+        when(executionManager.executeScript(bindId)).thenThrow(new IllegalStateException("boom"));
+        when(executionManager.describeEnhancement(bindId))
+                .thenReturn("the enhancement that fills #ABCDEF.(request).body.$.x");
+
+        assertThatThrownBy(() -> extractValue("#{%" + bindId + "%}"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Failed to run the enhancement that fills #ABCDEF.(request).body.$.x. Reason = boom")
+                .hasCauseInstanceOf(IllegalStateException.class);
+    }
+
 
     //-----------------------------------------------------------
     //                    DIRECT_REFERENCE

@@ -7,6 +7,8 @@ public class EnhancementEx {
     private String script;
     private Map<String, String> args;
     private String lang;
+    // the field the enhancement fills, its RESULT_VAR reference; names it in an error
+    private String resultRef;
 
     public EnhancementEx() {
     }
@@ -41,5 +43,13 @@ public class EnhancementEx {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public String getResultRef() {
+        return resultRef;
+    }
+
+    public void setResultRef(String resultRef) {
+        this.resultRef = resultRef;
     }
 }
