@@ -16,6 +16,38 @@ Typical uses:
 - a small function, such as a date formatter, that many field bindings share
   (a **script variable**).
 
+## Contents
+
+- [1. The three kinds](#1-the-three-kinds)
+- [2. Creating a variable](#2-creating-a-variable)
+- [3. Values](#3-values)
+  - [How a value is put into a request](#how-a-value-is-put-into-a-request)
+- [4. Scope](#4-scope)
+- [5. Permissions](#5-permissions)
+- [6. Using a variable](#6-using-a-variable)
+  - [Reference syntax](#reference-syntax)
+  - [Where a reference may stand](#where-a-reference-may-stand)
+  - [Loops over a variable](#loops-over-a-variable)
+  - [6.1 Secrets](#61-secrets)
+- [7. Mutable variables](#7-mutable-variables)
+  - [7.1 Initial and current value](#71-initial-and-current-value)
+  - [7.2 Writing the value](#72-writing-the-value)
+  - [7.3 One run at a time](#73-one-run-at-a-time)
+  - [7.4 Who is writing it now](#74-who-is-writing-it-now)
+- [8. Script variables](#8-script-variables)
+  - [Defining a script](#defining-a-script)
+  - [Calling a script](#calling-a-script)
+- [9. Changing a variable that is in use](#9-changing-a-variable-that-is-in-use)
+  - [Change log and restore](#change-log-and-restore)
+- [10. What a run does](#10-what-a-run-does)
+- [11. Limits and settings](#11-limits-and-settings)
+- [12. Error messages](#12-error-messages)
+  - [Saving a workflow, connector or notification](#saving-a-workflow-connector-or-notification)
+  - [Saving a variable](#saving-a-variable)
+  - [During a run](#during-a-run)
+- [13. API overview](#13-api-overview)
+  - [Current values](#current-values)
+
 ---
 
 ## 1. The three kinds
