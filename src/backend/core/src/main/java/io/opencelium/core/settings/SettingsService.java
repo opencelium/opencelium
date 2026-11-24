@@ -1,14 +1,21 @@
 package io.opencelium.core.settings;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 import org.bson.Document;
 
+import io.opencelium.core.settings.InvalidSettingsException.Problem;
+import io.opencelium.core.settings.InvalidSettingsException.SettingError;
+
 /**
- * Reads the runtime settings. The only path of the code to the settings collection. It reads the database at each
- * call and keeps no copy, so a value that another core instance changes is visible at the next read.
+ * Reads and changes the runtime settings. The only path of the code to the settings collection. It reads the database
+ * at each call and keeps no copy, so a value that another core instance changes is visible at the next read.
  */
 final class SettingsService {
 
@@ -37,7 +44,41 @@ final class SettingsService {
 	 * @throws InvalidSettingsException when a setting key is unknown or a value is not valid; it names each such key
 	 */
 	List<SettingValue> change(Map<String, Object> changes) {
-		throw new UnsupportedOperationException("not implemented yet");
+		Map<String, Object> sorted = new TreeMap<>(changes);
+		List<SettingError> errors = new ArrayList<>();
+		Map<String, Object> values = new LinkedHashMap<>();
+		List<String> resets = new ArrayList<>();
+		sorted.forEach((key, value) -> {
+			Optional<SettingDefinition> definition = registry.definition(key);
+			if (definition.isEmpty()) {
+				errors.add(new SettingError(key, Problem.UNKNOWN_KEY));
+			}
+			else if (value == null) {
+				resets.add(key);
+			}
+			else if (!definition.get().type().validate(value, definition.get().min(), definition.get().max())) {
+				errors.add(new SettingError(key, Problem.INVALID_VALUE));
+			}
+			else if (databaseValue(definition.get(), value).equals(definition.get().defaultValue())) {
+				resets.add(key);
+			}
+			else {
+				values.put(key, databaseValue(definition.get(), value));
+			}
+		});
+		if (!errors.isEmpty()) {
+			throw new InvalidSettingsException(errors);
+		}
+		repository.change(values, resets);
+		return read();
+	}
+
+	/**
+	 * The value as the database keeps it: an integer always as a 32-bit number, also when the JSON parser gave a
+	 * long.
+	 */
+	private static Object databaseValue(SettingDefinition definition, Object valid) {
+		return definition.type() == SettingType.INTEGER ? Integer.valueOf(((Number) valid).intValue()) : valid;
 	}
 
 	private static SettingValue valueOf(SettingDefinition definition, Document values) {

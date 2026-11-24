@@ -199,6 +199,28 @@ class SettingsEndpointTest {
 	}
 
 	@Test
+	void patchGivesAccessDeniedWhenAUserWithoutTheAdminRoleSendsABadBody() {
+		UserFixture.aUser("dave", "Dave-Password-1").storeIn(tenantRunner, documents);
+		MvcTestResult login = LoginRequests.logIn(mvc, "dave", "Dave-Password-1");
+		assertThat(login).as("the login of a user without a role").hasStatusOk();
+
+		MvcTestResult change = SettingsRequests.change(mvc, LoginRequests.sessionJwtOf(login), "[1]");
+
+		LoginRequests.assertProblem(change, HttpStatus.FORBIDDEN, "access-denied");
+	}
+
+	@Test
+	void patchGivesBadRequestWhenTheBodyIsLongerThan64Kilobytes() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		String longBody = "{\"broker.username\": \"" + "u".repeat(64 * 1024) + "\"}";
+
+		MvcTestResult change = SettingsRequests.change(mvc, admin, longBody);
+
+		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "bad-request");
+		assertThat(mongo.getCollection("settings").countDocuments()).isZero();
+	}
+
+	@Test
 	void getGivesStatus401WithoutABodyWhenTheRequestHasNoToken() {
 		MvcTestResult read = mvc.get().uri(SettingsRequests.PATH).exchange();
 

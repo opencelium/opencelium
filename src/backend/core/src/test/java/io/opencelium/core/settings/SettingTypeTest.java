@@ -73,6 +73,15 @@ class SettingTypeTest {
 	}
 
 	@Test
+	void validateRefusesAHostWhenItsLastLabelIsDigitsButItIsNotAnIpv4Address() {
+		assertThat(SettingType.HOST.validate("300.1.1.1", 1, 253)).isFalse();
+		assertThat(SettingType.HOST.validate("1.2.3", 1, 253)).isFalse();
+		assertThat(SettingType.HOST.validate("10.0.0.015", 1, 253)).isFalse();
+		assertThat(SettingType.HOST.validate("rabbit.10", 1, 253)).isFalse();
+		assertThat(SettingType.HOST.validate("10.rabbit", 1, 253)).isTrue();
+	}
+
+	@Test
 	void validateAcceptsAnIpv6Address() {
 		assertThat(SettingType.HOST.validate("::1", 1, 253)).isTrue();
 		assertThat(SettingType.HOST.validate("2001:db8::8a2e:370:7334", 1, 253)).isTrue();
@@ -81,6 +90,12 @@ class SettingTypeTest {
 	@Test
 	void validateRefusesAnIpv6AddressWhenItHasAWrongForm() {
 		assertThat(SettingType.HOST.validate("2001:db8:::1", 1, 253)).isFalse();
+	}
+
+	@Test
+	void validateRefusesAnIpv6AddressWhenItHasBracketsOrAZone() {
+		assertThat(SettingType.HOST.validate("[::1]", 1, 253)).isFalse();
+		assertThat(SettingType.HOST.validate("fe80::1%en0", 1, 253)).isFalse();
 	}
 
 	@Test
