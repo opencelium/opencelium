@@ -85,6 +85,8 @@ public class ReferenceValidationServiceImp implements ReferenceValidationService
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Pattern INDEX = Pattern.compile("-?\\d{1,9}");
+    // {{name}} or {{name.path}}: a global variable written without 'global.'
+    private static final Pattern GLOBAL_WITHOUT_PREFIX = Pattern.compile("\\{\\{[A-Za-z][A-Za-z0-9_]*([.\\[][^{}]*)?}}");
     private static final Pattern SLICE_OR_UNION =
             Pattern.compile("-?\\d*:-?\\d*(:-?\\d+)?|-?\\d+(\\s*,\\s*-?\\d+)+");
     private static final Pattern QUOTED_UNION = Pattern.compile("'[^']*'(\\s*,\\s*'[^']*')+");
@@ -173,6 +175,13 @@ public class ReferenceValidationServiceImp implements ReferenceValidationService
                 validateSimple(ReferenceType.GLOBAL, GlobalReference::parse,
                         "Write {{global.name}}, optionally with a path into the value, e.g. "
                                 + "{{global.limits.maxPerPage}} or {{global.tenants[0].id}}.");
+            } else if (GLOBAL_WITHOUT_PREFIX.matcher(reference).matches()) {
+                // {{name}} is no reference at all and would be sent as text: request data never
+                // starts on '{{', so this is a global variable written without 'global.'
+                type = ReferenceType.GLOBAL;
+                error(INVALID_REFERENCE, "A global variable reference starts with {{global.",
+                        "Did you mean {{global." + reference.substring(2) + "?", 0, reference);
+                return;
             } else if (reference.startsWith("{")) {
                 validateSimple(ReferenceType.REQUEST_DATA, RequestDataReference::parse,
                         "Write {key} or {#connectorId.key}, e.g. {token} or {#12.token}.");
