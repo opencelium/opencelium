@@ -287,27 +287,115 @@ class UserServiceImplTest {
         saved.setId(10);
         saved.setEmail("bob@example.com");
 
+        when(userRepository.existsByEmailAndIdNot("bob@example.com", 0)).thenReturn(false);
         when(userRepository.save(input)).thenReturn(saved);
 
         User result = userService.save(input);
 
         assertThat(result.getId()).isEqualTo(10);
         assertThat(result.getEmail()).isEqualTo("bob@example.com");
+        verify(userRepository).existsByEmailAndIdNot("bob@example.com", 0);
         verify(userRepository).save(input);
         verifyNoMoreInteractions(userRepository);
     }
 
     @Test
-    void saveThrowsWhenBasicUserEmailIsNull() {
+    void saveReturnsSavedBasicUserWhenEmailIsNullAndUsernameIsPresent() {
         User input = UserFixture.anEmptyUser();
         input.setAuthMethod(AuthMethod.BASIC);
         input.setEmail(null);
+        input.setUsername("bob");
+
+        when(userRepository.existsByUsernameAndIdNot("bob", 0)).thenReturn(false);
+        when(userRepository.save(input)).thenReturn(input);
+
+        User result = userService.save(input);
+
+        assertThat(result.getEmail()).isNull();
+        assertThat(result.getUsername()).isEqualTo("bob");
+        verify(userRepository).existsByUsernameAndIdNot("bob", 0);
+        verify(userRepository).save(input);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void saveStoresNullEmailWhenItIsBlank() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail("   ");
+        input.setUsername("bob");
+
+        when(userRepository.existsByUsernameAndIdNot("bob", 0)).thenReturn(false);
+        when(userRepository.save(input)).thenReturn(input);
+
+        User result = userService.save(input);
+
+        assertThat(result.getEmail()).isNull();
+        verify(userRepository).existsByUsernameAndIdNot("bob", 0);
+        verify(userRepository).save(input);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void saveTrimsEmailWhenItHasSurroundingWhitespace() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail("  bob@example.com  ");
+
+        when(userRepository.existsByEmailAndIdNot("bob@example.com", 0)).thenReturn(false);
+        when(userRepository.save(input)).thenReturn(input);
+
+        User result = userService.save(input);
+
+        assertThat(result.getEmail()).isEqualTo("bob@example.com");
+        verify(userRepository).existsByEmailAndIdNot("bob@example.com", 0);
+        verify(userRepository).save(input);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void saveThrowsWhenBasicUserHasNeitherEmailNorUsername() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail(null);
+        input.setUsername(null);
 
         assertThatThrownBy(() -> userService.save(input))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Email is required for BASIC users");
+                .isInstanceOf(GeneralServiceException.class)
+                .hasFieldOrPropertyWithValue("error", ExceptionConstant.EMAIL_OR_USERNAME_REQUIRED);
 
         verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void saveThrowsWhenBasicUserEmailAndUsernameAreBlank() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail("");
+        input.setUsername("  ");
+
+        assertThatThrownBy(() -> userService.save(input))
+                .isInstanceOf(GeneralServiceException.class)
+                .hasFieldOrPropertyWithValue("error", ExceptionConstant.EMAIL_OR_USERNAME_REQUIRED);
+
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void saveThrowsWhenEmailIsTakenByAnotherUser() {
+        User input = UserFixture.anEmptyUser();
+        input.setId(7);
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail("bob@example.com");
+
+        when(userRepository.existsByEmailAndIdNot("bob@example.com", 7)).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.save(input))
+                .isInstanceOf(GeneralServiceException.class)
+                .hasFieldOrPropertyWithValue("error", ExceptionConstant.EMAIL_ALREADY_EXIST);
+
+        verify(userRepository).existsByEmailAndIdNot("bob@example.com", 7);
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -336,6 +424,7 @@ class UserServiceImplTest {
         saved.setEmail("ldap-user@example.com");
 
         when(userRepository.existsByUsernameAndIdNot("ldap-user@example.com", 0)).thenReturn(false);
+        when(userRepository.existsByEmailAndIdNot("ldap-user@example.com", 0)).thenReturn(false);
         when(userRepository.save(input)).thenReturn(saved);
 
         User result = userService.save(input);
@@ -344,6 +433,7 @@ class UserServiceImplTest {
         assertThat(result.getUsername()).isEqualTo("ldap-user@example.com");
         assertThat(result.getEmail()).isEqualTo("ldap-user@example.com");
         verify(userRepository).existsByUsernameAndIdNot("ldap-user@example.com", 0);
+        verify(userRepository).existsByEmailAndIdNot("ldap-user@example.com", 0);
         verify(userRepository).save(input);
         verifyNoMoreInteractions(userRepository);
     }
@@ -393,12 +483,14 @@ class UserServiceImplTest {
         input.setUsername("  bob  ");
 
         when(userRepository.existsByUsernameAndIdNot("bob", 0)).thenReturn(false);
+        when(userRepository.existsByEmailAndIdNot("bob@example.com", 0)).thenReturn(false);
         when(userRepository.save(input)).thenReturn(input);
 
         User result = userService.save(input);
 
         assertThat(result.getUsername()).isEqualTo("bob");
         verify(userRepository).existsByUsernameAndIdNot("bob", 0);
+        verify(userRepository).existsByEmailAndIdNot("bob@example.com", 0);
         verify(userRepository).save(input);
         verifyNoMoreInteractions(userRepository);
     }
@@ -410,11 +502,13 @@ class UserServiceImplTest {
         input.setEmail("bob@example.com");
         input.setUsername("   ");
 
+        when(userRepository.existsByEmailAndIdNot("bob@example.com", 0)).thenReturn(false);
         when(userRepository.save(input)).thenReturn(input);
 
         User result = userService.save(input);
 
         assertThat(result.getUsername()).isNull();
+        verify(userRepository).existsByEmailAndIdNot("bob@example.com", 0);
         verify(userRepository).save(input);
         verifyNoMoreInteractions(userRepository);
     }

@@ -22,7 +22,6 @@ import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
-import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
 import com.becon.opencelium.backend.exception.SessionNotFoundException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
@@ -165,6 +164,10 @@ public class UserController {
         @ApiResponse( responseCode = "200",
                       description = "User is successfully created. The 'id' property will include newly created user's 'id'",
                       content = @Content(schema = @Schema(implementation = UserResource.class))),
+        @ApiResponse( responseCode = "400",
+                      description = "An OC user has neither email nor username (EMAIL_OR_USERNAME_REQUIRED), or the email "
+                              + "or username is taken or invalid (EMAIL_ALREADY_EXIST, USERNAME_ALREADY_EXIST, USERNAME_INVALID)",
+                      content = @Content(schema = @Schema(implementation = ErrorResource.class))),
         @ApiResponse( responseCode = "401",
                       description = "Unauthorized",
                       content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -174,10 +177,9 @@ public class UserController {
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> post(@Valid @RequestBody UserRequestResource userRequestResource) throws IOException {
-
-        if (userService.existsByEmail(userRequestResource.getEmail())) {
-            throw new EmailAlreadyExistException(userRequestResource.getEmail());
-        }
+        // Email and username uniqueness is checked by userService.save, for creation and update alike.
+        // The email is optional, so it can't be checked here: existsByEmail(null) matches every user
+        // without one.
 
 //        if (!userRoleService.existsById(userRequestResource.getUserGroup())) {
 //            throw new RoleNotFoundException(userRequestResource.getUserGroup());
@@ -204,6 +206,10 @@ public class UserController {
         @ApiResponse( responseCode = "200",
                 description = "User is successfully updated.",
                 content = @Content(schema = @Schema(implementation = UserResource.class))),
+        @ApiResponse( responseCode = "400",
+                description = "An OC user has neither email nor username (EMAIL_OR_USERNAME_REQUIRED), or the email "
+                        + "or username is taken or invalid (EMAIL_ALREADY_EXIST, USERNAME_ALREADY_EXIST, USERNAME_INVALID)",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
