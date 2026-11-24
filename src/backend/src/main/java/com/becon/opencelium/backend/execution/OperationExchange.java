@@ -6,6 +6,7 @@ import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompat
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -59,13 +60,34 @@ public final class OperationExchange {
      */
     public static ResponseEntity<?> exchange(
             RestTemplate restTemplate, URI uri, RequestEntity<?> request, Class<?> responseType) {
-        HttpEntity<Object> httpEntity = new HttpEntity<>(request.getBody(), request.getHeaders());
+        HttpEntity<Object> httpEntity = new HttpEntity<>(request.getBody(), withCharset(request));
 
         try {
             return restTemplate.exchange(uri, request.getMethod(), httpEntity, responseType);
         } catch (Exception e) {
             return toResponse(e);
         }
+    }
+
+    /**
+     * Returns the headers to send {@code request} with. A text body whose content type names no
+     * charset, such as {@code application/xml}, is declared as UTF-8: without a charset it would
+     * be encoded as ISO-8859-1 without saying so, and a receiver reading UTF-8 would get other
+     * characters. JSON is sent as UTF-8 already and keeps its content type.
+     */
+    private static HttpHeaders withCharset(RequestEntity<?> request) {
+        MediaType contentType = request.getHeaders().getContentType();
+        if (!(request.getBody() instanceof String)
+                || contentType == null
+                || contentType.getCharset() != null
+                || isJsonCompatible(contentType)) {
+            return request.getHeaders();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.putAll(request.getHeaders());
+        headers.setContentType(new MediaType(contentType, StandardCharsets.UTF_8));
+        return headers;
     }
 
     private static ResponseEntity<?> toResponse(Exception e) {
