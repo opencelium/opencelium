@@ -314,8 +314,7 @@ public class RequestEntityBuilder {
 
         getParamsByLocation(ParamLocation.HEADER).stream()
                 .map(ParameterDTOUtil::copy)
-                .peek(parameter -> replaceRefsOfParameter(parameter.getSchema()))
-                .forEach(parameter -> headers.add(parameter.getName(), ParameterDTOUtil.toString(parameter)));
+                .forEach(parameter -> headers.add(parameter.getName(), headerValue(parameter)));
 
         // collect Cookie parameter(s) in header if exists
         getParamsByLocation(ParamLocation.COOKIE).stream()
@@ -330,6 +329,24 @@ public class RequestEntityBuilder {
         }
 
         return headers;
+    }
+
+    /**
+     * Returns the value of header {@code parameter} with its references replaced. A global
+     * variable that is the whole value and holds {@code null} or an empty string gives an empty
+     * header, because a value is cast to text there and {@code null} becomes an empty string.
+     */
+    private String headerValue(ParameterDTO parameter) {
+        SchemaDTO schema = parameter.getSchema();
+        boolean wholeGlobal = schema != null && ReferenceMatchers.isGlobal(schema.getValue());
+
+        replaceRefsOfParameter(schema);
+
+        if (wholeGlobal && (schema.getValue() == null || schema.getValue().isEmpty())) {
+            return "";
+        }
+
+        return ParameterDTOUtil.toString(parameter);
     }
 
     private Object defaultBodyBuilder(MediaType contentType) {
