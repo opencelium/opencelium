@@ -156,6 +156,7 @@
     }
   },
   "messages": {
+    "focusElementNotFound": "Der verlinkte Schritt existiert in diesem Workflow nicht mehr.",
     "enterWorkflowName": "Bitte geben Sie einen Workflow-Namen ein",
     "workflowNameExists": "Ein Workflow mit diesem Titel existiert bereits",
     "saveTemplateFailed": "Vorlage konnte nicht gespeichert werden",
@@ -510,6 +511,7 @@
     "showResponse": "Antwort anzeigen",
     "tryRequest": "Request ausprobieren…",
     "newLabelPlaceholder": "Neue Bezeichnung",
+    "writeGlobals": "In globale Variablen schreiben",
     "copy": "Kopieren",
     "paste": "Einfügen"
   },
@@ -701,7 +703,8 @@
     "source": {
       "constant": "Konstante",
       "method": "Methode",
-      "webhook": "Webhook"
+      "webhook": "Webhook",
+      "global": "Globale Variable"
     },
     "responseType": {
       "body": "Body",
@@ -841,7 +844,9 @@
       "responseStatus": "Antwort-Status",
       "responseBody": "Antwort-Body",
       "responseHeader": "Antwort-Header"
-    }
+    },
+    "takenFromGlobal": "wird aus der globalen Variablen <global>{{name}}</global> übernommen.",
+    "callsGlobalScript": "ist die Skriptvariable <global>{{name}}</global>: rufen Sie sie als {{key}}(…) auf."
   },
   "references": {
     "responseStatus": "Antwort-Status",
@@ -878,6 +883,7 @@
     },
     "clearField": "Feld leeren",
     "addReference": "Referenz hinzufügen",
+    "globalVariable": "Globale Variable",
     "issueHint": "Hinweis:",
     "issues": {
       "REFERENCE_REQUIRED": "Die Referenz ist leer.",
@@ -942,7 +948,8 @@
     "selectedValue": "Ausgewählter Wert",
     "mixedValueTitle": "Gemischter Wert",
     "mixedValueDescription": "Dieses Feld sollte entweder nur Klartext oder nur Referenzen enthalten. Gemischte Werte sind nicht zulässig.",
-    "help": "Wählen Sie einen einfachen Wert im Anfragebaum aus, um ihn zu prüfen und Referenzen anzuhängen."
+    "help": "Wählen Sie einen einfachen Wert im Anfragebaum aus, um ihn zu prüfen und Referenzen anzuhängen.",
+    "scriptNeedsMethodReference": "Eine Skriptvariable ist eine Funktion: Verwenden Sie sie in einem Feld zusammen mit einer Methodenreferenz und rufen Sie sie im Enhancement dieses Feldes auf, z. B. VAR_1(VAR_0)."
   },
   "referenceInfo": {
     "title": "Referenzinformationen",
@@ -1333,6 +1340,22 @@
       "unauthorized": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an, um das Skript auszuführen.",
       "failed": "Der Testlauf konnte nicht gestartet werden."
     },
-    "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“."
+    "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“.",
+    "globalUnavailable": "Die globalen Variablen {{names}} konnten nicht geladen werden: Sie wurden eventuell umbenannt, gelöscht oder sind für Sie nicht sichtbar.",
+    "refWithoutValue": "Für dieses ref() gibt es im Playground keinen Testwert: ",
+    "globalWritesTitle": "Schreibvorgänge in globale Variablen (nicht gespeichert)",
+    "globalWritesHint": "Ein Lauf schreibt diese Werte, sobald das Enhancement fertig ist. Der Playground zeigt sie nur an.",
+    "scriptArg": "{{name}} ist die Skriptvariable {{global}}: rufen Sie sie als {{name}}(…) auf.",
+    "setNotMutable": "set() kann nur eine veränderbare globale Variable schreiben, angegeben mit ihrer ganzen Referenz wie {{example}} (ohne Pfad). Nicht schreibbar: "
+  },
+  "globalWrites": {
+    "dialogTitle": "In globale Variablen schreiben: {{method}}",
+    "hint": "Nachdem diese Methode geantwortet hat, schreibt jede Zeile ihren Wert in eine veränderliche globale Variable. Nur der Besitzer-Workflow der Variable darf sie schreiben; beim Speichern werden die anderen abgelehnt. Wählen Sie ein Feld dieser oder einer früheren Methode, einen Webhook-Parameter oder geben Sie eine Konstante ein (JSON oder Text). In einer Schleife schreibt jeder Durchlauf erneut.",
+    "variable": "Variable",
+    "value": "Wert",
+    "add": "Schreibvorgang hinzufügen",
+    "remove": "Schreibvorgang entfernen",
+    "save": "Speichern",
+    "empty": "Diese Methode schreibt noch keine globalen Variablen."
   }
 }

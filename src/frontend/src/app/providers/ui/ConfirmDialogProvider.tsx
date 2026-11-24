@@ -107,14 +107,16 @@ export const ConfirmDialogProvider: React.FC<{
                 width={state.width}
                 footer={
                     <>
-                        <Button
-                            variant="secondary"
-                            disabled={loading}
-                            onClick={() => close(false)}
-                            testId={state.cancelTestId ?? "confirm-dialog-cancel"}
-                        >
-                            {state.cancelText ?? 'Cancel'}
-                        </Button>
+                        {state.canCancel !== false && (
+                            <Button
+                                variant="secondary"
+                                disabled={loading}
+                                onClick={() => close(false)}
+                                testId={state.cancelTestId ?? "confirm-dialog-cancel"}
+                            >
+                                {state.cancelText ?? 'Cancel'}
+                            </Button>
+                        )}
 
                         {!state.isConfirmHidden && (
                             <Button

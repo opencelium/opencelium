@@ -1,11 +1,13 @@
 import { useCallback, useMemo } from 'react';
+import { isGlobalReference } from '@entities/globalVariable/lib/globalReference';
 import { BodyPointer } from '../../body-editor/BodyPointer/BodyPointer';
 import { BodyWebhookReference } from '../../body-editor/BodyWebhookReference/BodyWebhookReference';
+import { BodyGlobalReference } from '../../body-editor/BodyReferenceMenu/BodyGlobalReference';
 import { InlineBodyReferenceEditor } from '../../body-editor/InlineBodyReferenceEditor/InlineBodyReferenceEditor';
-import { extractWebhookValue } from '../../body-editor/bodyWebhook';
+import { extractWebhookValue, webhookSnippet } from '../../body-editor/bodyWebhook';
 import { splitReferences } from '../../body-editor/bodyReference';
 import type { useRequestObjectEditor } from '../useRequestObjectEditor';
-import type { LegacyRequestJsonEditorProps } from './LegacyRequestJsonEditor.types';
+import type { JsonGlobalComponent, LegacyRequestJsonEditorProps } from './LegacyRequestJsonEditor.types';
 import { findReferencedField, isString, removeWebhookSnippet } from './legacyRequestJsonEditor.utils';
 
 type Params = LegacyRequestJsonEditorProps & {
@@ -41,20 +43,34 @@ export function useLegacyJsonComponents({ messageProperty, source, readOnly,
 		});
 	}, [updateReferencedField]);
 	const pointerComponent = useMemo(() => ({ id: `${methodId}_${messageProperty}_pointer`,
-		getComponent: (params: Record<string, unknown>) => <BodyPointer
-			pointer={String(params.pointer || '')}
-			pointers={Array.isArray(params.pointers) ? params.pointers.filter(isString) : []}
-			submitEdit={params.submitEdit as (() => void) | undefined}
-			onClick={params.onClick as ((event?: unknown) => void) | undefined}
-			onRemove={removePointer} onEdit={readOnly ? undefined : editPointer}
-			connection={readOnly ? undefined : editor.connection ?? undefined}
-			currentMethod={readOnly ? undefined : editor.method} /> }),
+		getComponent: (params: Record<string, unknown>) => {
+			const pointer = String(params.pointer || '');
+			const pointers = Array.isArray(params.pointers) ? params.pointers.filter(isString) : [];
+			if (isGlobalReference(pointer)) return <BodyGlobalReference reference={pointer}
+				connection={readOnly ? undefined : editor.connection ?? undefined}
+				currentMethod={readOnly ? undefined : editor.method}
+				onEdit={readOnly ? undefined : (reference) => editPointer(pointer, pointers, reference)}
+				onRemove={readOnly ? undefined : () => removePointer(pointer, pointers)} />;
+			return <BodyPointer pointer={pointer} pointers={pointers}
+				submitEdit={params.submitEdit as (() => void) | undefined}
+				onClick={params.onClick as ((event?: unknown) => void) | undefined}
+				onRemove={removePointer} onEdit={readOnly ? undefined : editPointer}
+				connection={readOnly ? undefined : editor.connection ?? undefined}
+				currentMethod={readOnly ? undefined : editor.method} />;
+		} }),
 		[editor.connection, editor.method, editPointer, messageProperty, methodId, readOnly, removePointer]);
+	const replaceWebhook = useCallback((webhook: string, reference: string) => {
+		const snippet = webhookSnippet(webhook);
+		updateReferencedField((value) => value.includes(snippet) ? value.replace(snippet, reference) : null);
+	}, [updateReferencedField]);
 	const webhookComponent = useMemo(() => ({ id: `${methodId}_${messageProperty}_webhook`,
 		getComponent: (params: Record<string, unknown>) => <BodyWebhookReference
 			webhook={extractWebhookValue(String(params.webhook || ''))}
-			onRemove={(webhook) => updateReferencedField((value) => removeWebhookSnippet(value, webhook))} /> }),
-		[messageProperty, methodId, updateReferencedField]);
+			connection={readOnly ? undefined : editor.connection ?? undefined}
+			currentMethod={readOnly ? undefined : editor.method}
+			onEdit={readOnly ? undefined : replaceWebhook}
+			onRemove={readOnly ? undefined : (webhook) => updateReferencedField((value) => removeWebhookSnippet(value, webhook))} /> }),
+		[editor.connection, editor.method, messageProperty, methodId, readOnly, replaceWebhook, updateReferencedField]);
 	const referenceComponent = useMemo(() => ({ id: `${methodId}_${messageProperty}_reference`,
 		self: { current: {} }, getComponent: (params: Record<string, unknown>) => {
 			if (!editor.connection) return null;
@@ -65,5 +81,15 @@ export function useLegacyJsonComponents({ messageProperty, source, readOnly,
 				submitEdit={params.submitEdit as () => void}
 				onClose={params.editCancel as (() => void) | undefined} />;
 		} }), [editor.connection, editor.method, messageProperty, methodId]);
-	return { pointerComponent, webhookComponent, referenceComponent };
+	const globalComponent = useMemo<JsonGlobalComponent>(() => ({ id: `${methodId}_${messageProperty}_global`,
+		matches: (value) => typeof value === 'string' && isGlobalReference(value),
+		getComponent: (params) => {
+			const reference = String(params.value || '');
+			const replace = (next: string) => updateReferencedField((value) => value === reference ? next : null);
+			return <BodyGlobalReference reference={reference}
+				connection={readOnly ? undefined : editor.connection ?? undefined}
+				currentMethod={readOnly ? undefined : editor.method}
+				onEdit={readOnly ? undefined : replace} onRemove={readOnly ? undefined : () => replace('')} />;
+		} }), [editor.connection, editor.method, messageProperty, methodId, readOnly, updateReferencedField]);
+	return { pointerComponent, webhookComponent, referenceComponent, globalComponent };
 }

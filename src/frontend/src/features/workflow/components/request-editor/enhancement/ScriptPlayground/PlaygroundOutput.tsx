@@ -13,9 +13,13 @@ type Props = {
 	isStale: boolean;
 	missingNames?: string[];
 	onLocate: (line: number, column: number) => void;
+	/** Runners that return no console output can drop the Console tab. */
+	hasConsole?: boolean;
+	/** Runner-specific warnings shown after the compatibility issues. */
+	notes?: string[];
 };
 
-export function PlaygroundOutput({ result, issues, isStale, missingNames = [], onLocate }: Props) {
+export function PlaygroundOutput({ result, issues, isStale, missingNames = [], onLocate, hasConsole = true, notes = [] }: Props) {
 	const { t } = useI18n('workflow');
 	const output = result && result.kind !== 'rejected' ? result.output : '';
 	const consoleLines = output ? output.replace(/\n$/, '').split('\n') : [];
@@ -47,22 +51,24 @@ export function PlaygroundOutput({ result, issues, isStale, missingNames = [], o
 							</div>
 						),
 					},
-					{
-						key: 'console',
-						label: tabLabel('console', consoleLines.length),
-						content: (
-							<ol className="scriptPlaygroundPanel scriptPlaygroundConsole">
-								{consoleLines.map((line, index) => (
-									<li key={index}>
-										<pre>{line}</pre>
-									</li>
-								))}
-							</ol>
-						),
-					},
+					...(hasConsole ? [
+						{
+							key: 'console',
+							label: tabLabel('console', consoleLines.length),
+							content: (
+								<ol className="scriptPlaygroundPanel scriptPlaygroundConsole">
+									{consoleLines.map((line, index) => (
+										<li key={index}>
+											<pre>{line}</pre>
+										</li>
+									))}
+								</ol>
+							),
+						},
+					] : []),
 					{
 						key: 'warnings',
-						label: tabLabel('warnings', issues.length),
+						label: tabLabel('warnings', issues.length + notes.length),
 						content: (
 							<div className="scriptPlaygroundPanel scriptPlaygroundWarnings">
 								{issues.map((issue, index) => (
@@ -84,6 +90,9 @@ export function PlaygroundOutput({ result, issues, isStale, missingNames = [], o
 											</Button>
 										}
 									/>
+								))}
+								{notes.map((note) => (
+									<Alert key={note} type="warning" showIcon message={note} />
 								))}
 							</div>
 						),

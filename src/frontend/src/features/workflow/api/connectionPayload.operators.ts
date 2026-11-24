@@ -21,11 +21,15 @@ const normalizeOperatorExpression = (expression: string, type: string) => {
 	return value.startsWith('(') && value.endsWith(')') ? value : `(${value})`;
 };
 
+export type OperatorPayload = {
+	id: string; index: string; type: string; dataAggregator: number | null; expression: string; iterator?: string;
+};
+
 export const buildOperatorPayload = (
 	node: WorkflowNodeModel,
 	index: string,
 	iterator?: string,
-) => {
+): OperatorPayload => {
 	const type = nodeKind(node);
 	return {
 		id: node.id,

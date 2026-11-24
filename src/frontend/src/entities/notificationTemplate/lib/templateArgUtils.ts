@@ -1,6 +1,7 @@
 import type { Aggregator } from '../model/types'
 
-const DISPLAY_PATTERN = /\{\{([^.}]+)\.([^}]+)\}\}/g
+// `{{global.x}}` is a global variable reference, never an aggregator placeholder.
+const DISPLAY_PATTERN = /\{\{(?!global\.)([^.}]+)\.([^}]+)\}\}/g
 const SERVER_PATTERN = /\{\{(\d+)\}\}/g
 
 
@@ -37,8 +38,7 @@ export function replaceInactiveArgs(text: string, aggregators: Aggregator[]): st
 // Replace a specific aggregator's args with {{OC_ARG_NOT_EXIST}} if it is inactive
 export function replaceAggregatorArgs(text: string, aggregator: Aggregator): string {
     if (aggregator.active) return text
-    const re = /\{\{([^.}]+)\.([^}]+)\}\}/g
-    return text.replace(re, (match, aggName) =>
+    return text.replace(DISPLAY_PATTERN, (match, aggName) =>
         aggName === aggregator.name ? OC_TOKEN : match
     )
 }

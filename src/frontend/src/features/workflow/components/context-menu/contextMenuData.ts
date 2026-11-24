@@ -3,7 +3,7 @@ import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
 
 export type NodeMenuActionId = 'change-label' | 'change-connector' | 'change-connector-image'
   | 'configure-aggregator' | 'open-config' | 'edit-url' | 'edit-headers' | 'edit-body'
-  | 'try-request' | 'show-response' | 'copy' | 'paste';
+  | 'try-request' | 'show-response' | 'write-globals' | 'copy' | 'paste';
 
 export type NodeMenuAction = { id: NodeMenuActionId; labelKey: string; icon: IconName; newFeatureId?: NewFeatureId };
 
@@ -20,6 +20,7 @@ const action = (item: NodeMenuAction): NodeMenuRow => ({ kind: 'action', action:
 
 const changeLabel = action({ id: 'change-label', labelKey: 'contextMenu.changeLabel', icon: 'edit' });
 const configureAggregator = action({ id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator', icon: 'aggregator' });
+const writeGlobals = action({ id: 'write-globals', labelKey: 'contextMenu.writeGlobals', icon: 'global-variable' });
 const changeConnector: NodeMenuAction = { id: 'change-connector', labelKey: 'contextMenu.changeConnector', icon: 'arrow-switch' };
 const connectorImage: NodeMenuAction = { id: 'change-connector-image', labelKey: 'contextMenu.changeConnectorImage', icon: 'image' };
 
@@ -46,14 +47,14 @@ const connectorMenu: NodeMenuSection[] = [
   { id: 'request', rows: [requestRow, tryRequest] },
   responseSection,
   { id: 'main', rows: [changeLabel, { kind: 'submenu', id: 'connector', labelKey: 'contextMenu.connector', icon: 'connector',
-    actions: [changeConnector, connectorImage] }, configureAggregator] },
+    actions: [changeConnector, connectorImage] }, configureAggregator, writeGlobals] },
   clipboardSection,
 ];
 
 const systemMenu: NodeMenuSection[] = [
   { id: 'request', rows: [requestRow, tryRequest] },
   responseSection,
-  { id: 'main', rows: [changeLabel, action(changeConnector), configureAggregator] },
+  { id: 'main', rows: [changeLabel, action(changeConnector), configureAggregator, writeGlobals] },
   clipboardSection,
 ];
 
@@ -62,7 +63,7 @@ const systemMenu: NodeMenuSection[] = [
 const triggerConnectionMenu: NodeMenuSection[] = [
   { id: 'request', rows: [requestRow] },
   responseSection,
-  { id: 'main', rows: [changeLabel, configureAggregator] },
+  { id: 'main', rows: [changeLabel, configureAggregator, writeGlobals] },
   clipboardSection,
 ];
 

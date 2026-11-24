@@ -17,6 +17,7 @@
     "invokers": "API-Definitionen",
     "connectionTemplates": "Workflow-Vorlagen",
     "dataAggregator": "Datenaggregatoren",
+    "globalVariables": "Globale Variablen",
     "notificationTemplates": "Benachrichtigungsvorlagen",
     "categories": "Kategorien",
     "supportFiles": "Support-Dateien",
@@ -156,6 +157,10 @@
     "changelog": {
       "title": "Änderungsprotokoll",
       "description": "Sehen Sie, was sich in jeder OpenCelium-Version geändert hat: die aktuelle Version zuerst, ältere darunter. Sie finden es im Hilfemenü."
+    },
+    "globalVariables": {
+      "title": "Globale Variablen",
+      "description": "Legen Sie einen Wert einmal an und verweisen Sie in jedem Workflow, Konnektor oder jeder Benachrichtigung darauf: Konstanten, Werte, die Workflows aktualisieren, und wiederverwendbare Skripte."
     }
   },
   "user": {

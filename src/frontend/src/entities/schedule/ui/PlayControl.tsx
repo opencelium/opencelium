@@ -36,6 +36,16 @@ function isConcurrentTestForbidden(error: unknown): boolean {
     )
 }
 
+// A workflow with a mutable global variable runs once at a time; a start its busy policy
+// refuses answers 409 with code BUSY, whose message names the variable and the running execution.
+function readBusyMessage(error: unknown): string | null {
+    if (!error || typeof error !== 'object') return null
+    const data = (error as {data?: unknown}).data
+    if (!data || typeof data !== 'object') return null
+    const {code, message: detail} = data as Record<string, unknown>
+    return code === 'BUSY' ? (typeof detail === 'string' ? detail : '') : null
+}
+
 type Props = {
     schedule: Schedule
     variant: PlayVariant
@@ -59,6 +69,11 @@ export function PlayControl({schedule, variant, blockedHint}: Props) {
             }).unwrap()
             message.success(tEntities('schedule.start.success'))
         } catch (error) {
+            const busy = readBusyMessage(error)
+            if (busy !== null) {
+                notifyError(tEntities('schedule.start.error.busy', {detail: busy}))
+                return
+            }
             const key = isConcurrentTestForbidden(error)
                 ? 'schedule.start.error.concurrentForbidden'
                 : 'schedule.start.error.failed'

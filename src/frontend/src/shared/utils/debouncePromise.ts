@@ -1,11 +1,11 @@
-export function debouncePromise<T extends (...args: unknown[]) => Promise<unknown>>(
-    fn: T,
+export function debouncePromise<TArgs extends unknown[], TResult>(
+    fn: (...args: TArgs) => Promise<TResult>,
     delay: number
-): T {
+): (...args: TArgs) => Promise<TResult> {
     let timeout: ReturnType<typeof setTimeout> | null = null;
 
-    return ((...args: unknown[]) => {
-        return new Promise((resolve) => {
+    return (...args: TArgs) => {
+        return new Promise<TResult>((resolve) => {
             if (timeout) clearTimeout(timeout);
 
             timeout = setTimeout(async () => {
@@ -13,5 +13,5 @@ export function debouncePromise<T extends (...args: unknown[]) => Promise<unknow
                 resolve(result);
             }, delay);
         });
-    }) as T;
+    };
 }

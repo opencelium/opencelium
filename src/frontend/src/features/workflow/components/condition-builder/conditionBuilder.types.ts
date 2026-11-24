@@ -1,4 +1,4 @@
-export type ConditionValueSource = 'constant' | 'direct' | 'webhook';
+export type ConditionValueSource = 'constant' | 'direct' | 'webhook' | 'global';
 
 export const Conjunction = {
 	AND: '&&',

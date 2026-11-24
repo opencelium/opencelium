@@ -46,5 +46,18 @@
     "collapse": "Collapse logs panel",
     "clear": "Clear logs",
     "orphaned": "This test was started before the page was reopened, so its live logs are no longer available. Please stop the test and run it again to see the logs."
+  },
+  "globals": {
+    "title": "Global variables",
+    "lockWait": "Waited {{ms}} ms for the run lock",
+    "callSummary": "{{variable}}: {{total}} calls, {{failed}} failed",
+    "duration": "{{ms}} ms · version {{version}}",
+    "result": {
+      "SAVED": "Saved",
+      "REJECTED": "Rejected"
+    },
+    "writeCount": "{{count}} writes combined",
+    "snapshot": "Values read at start ({{count}})",
+    "valueOmitted": "value not logged ({{bytes}} bytes)"
   }
 }
