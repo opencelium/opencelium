@@ -7,6 +7,7 @@ import { LegacyBodyReferenceGenerator }
 import type { Connection, MethodWithId } from '../../types/connection';
 import type { ReferenceRemapSource } from '../../utils/graph.referenceRemapTargets';
 import { CONFIRM_POPUP_Z_INDEX } from './referenceRemap.constants';
+import { ReferenceRemapUsageList } from './ReferenceRemapUsageList';
 
 type Props = {
 	source: ReferenceRemapSource;
@@ -72,30 +73,13 @@ export function ReferenceRemapSourceRow({ source, current, connection,
 			    drawn as the reference that field *is* — same controls, disabled —
 			    or named where a value spliced into a URL or an operator condition
 			    has no field to name. */}
-			<td className='referenceRemapSourceHeld'
-				title={source.locations.map((location) => location.value).join(', ')}>
+			<td className='referenceRemapSourceHeld'>
 				{/* The flex box lives on this inner div, never on the <td> itself: a
 				    table cell with its own `display: flex` stops being a table cell in
 				    real layout — it blockifies and drops out of the row, dragging the
 				    next <td> down onto a line of its own. Wrapping keeps the cell a
 				    normal table-cell and confines the flex row to its content. */}
-				<div className='referenceRemapSourceHeldRow'>
-					{held?.kind === 'reference' ? (
-						<LegacyBodyReferenceGenerator
-							connection={connection}
-							currentMethod={current?.consumerMethod ?? generator?.consumerMethod
-								?? ({} as MethodWithId)}
-							showWebhookOption={false}
-							popupZIndex={CONFIRM_POPUP_Z_INDEX}
-							value={held.value}
-							readOnly
-							responsePartAsText
-							onApply={() => undefined}
-						/>
-					) : (
-						<span className='referenceRemapSourcePath'>{held?.value ?? ''}</span>
-					)}
-				</div>
+				<ReferenceRemapUsageList locations={source.locations} connection={connection} />
 			</td>
 			<td className='referenceRemapSourceValue'>
 				<div className='referenceRemapSourceValueRow'>

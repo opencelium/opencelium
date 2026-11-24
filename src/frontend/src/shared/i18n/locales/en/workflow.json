@@ -1,4 +1,15 @@
 {
+  "pasteCheck": {
+    "referencesIntro": "These copied steps reference methods outside the copied group. Choose target methods or clear the references.",
+    "title": "Check pasted steps",
+    "intro": "Review connectors and references before inserting the copied steps. Unmapped references will be cleared.",
+    "unavailable": "{{name}} cannot be pasted: its connector {{connector}} no longer exists.",
+    "connector": "Choose a connector for {{name}}",
+    "pasteRest": "Paste the rest",
+    "confirm": "Paste",
+    "copyFailed": "Could not store the copied steps in this browser.",
+    "nothingToPaste": "None of the copied steps can be pasted into this workflow."
+  },
   "loadError": {
     "title": "Could not load the workflow",
     "description": "The workflow or connector list could not be loaded. Try again or return to the workflow list.",
@@ -39,6 +50,8 @@
     "deleteReference": "Delete reference"
   },
   "referenceRemap": {
+    "details": "Details",
+    "query": "Query",
     "intro": "Some steps read the step you are deleting. Pick a replacement method for each, or clear the reference — then fine-tune individual fields below if needed:",
     "replaceWith": "Replace with:",
     "perFieldHint": "Optional — override only the fields that need to read from somewhere else. Anything you leave alone follows the method picked above, or is cleared if none was:",
@@ -151,8 +164,8 @@
     "loadTemplateFailed": "Failed to load template",
     "downloadTemplateFailed": "Failed to download template.",
     "copySnapshotIdSuccess": "Snapshot ID copied to clipboard",
-    "nodeCopied": "Nodes copied",
-    "nodeCopied_one": "Node copied",
+    "nodeCopied": "{{count}} steps copied",
+    "nodeCopied_one": "{{count}} step copied",
     "nodePasted": "Node pasted",
     "nodeDuplicated": "Node duplicated",
     "deleteVersionSuccess": "Version deleted",
@@ -496,7 +509,9 @@
     "request": "Request",
     "showResponse": "Show Response",
     "tryRequest": "Try Request…",
-    "newLabelPlaceholder": "New label"
+    "newLabelPlaceholder": "New label",
+    "copy": "Copy",
+    "paste": "Paste"
   },
   "comment": {
     "badge": "Comment",

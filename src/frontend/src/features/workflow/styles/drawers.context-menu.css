@@ -63,6 +63,14 @@
   color: var(--color-action-primary-hover);
 }
 
+.contextMenuItem:disabled,
+.contextMenuItem:disabled:hover {
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: default;
+  opacity: 0.5;
+}
+
 .contextMenuItemIndented {
   padding-left: 38px;
 }

@@ -45,6 +45,18 @@ const deleting = (before: { nodes: WorkflowNodeModel[]; edges: WorkflowEdgeModel
 };
 
 describe('buildReferenceRemapTargets', () => {
+	it('keeps distinct query parameters even when their reference values are identical', () => {
+		const before = chain();
+		const consumer = before.nodes.find((node) => node.id === 'm3')!;
+		consumer.data.methodConfig!.body = {};
+		consumer.data.methodConfig!.queryParams = ['userId', 'ownerId'].map((key) => ({
+			id: key, key, value: `${M2}.(response).body.$.id`, enabled: true,
+		}));
+		const [target] = deleting(before, 'm2');
+		expect(target.sources[0].locations).toHaveLength(2);
+		expect(target.sources[0].locations.map((location) =>
+			location.kind === 'label' ? location.url?.name : undefined)).toEqual(['userId', 'ownerId']);
+	});
 	it('offers nothing when the change breaks nothing', () => {
 		expect(deleting(chain(), 'm3')).toEqual([]);
 	});

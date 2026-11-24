@@ -5,7 +5,7 @@ import { collectReferenceColors, normalizeReferenceColor } from './graph.referen
 import { collectWorkflowJumpLinks, compareWorkflowIndexes, isWorkflowReferenceVisible } from './graph.referenceVisibility';
 
 const isMethodNode = (node: WorkflowNodeModel) =>
-  node.type === 'connector' || node.type === 'system';
+  node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
 
 const cloneValue = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 
@@ -100,13 +100,15 @@ export const cloneWorkflowFieldBindings = (
         )]));
     }
     if (typeof next?.enhancement?.expertVar === 'string') {
-      next.enhancement.expertVar = Object.entries(next.enhancement.args ?? {}).reduce(
-        (expertVar, [key, value]) => replaceColor(
-          expertVar,
-          sourceColorForArg(binding, key, binding?.enhancement?.args?.[key]),
-          [...collectReferenceColors(value)][0],
-        ) as string,
-        next.enhancement.expertVar,
+      const replacements = new Map<string, string>();
+      Object.entries(next.enhancement.args ?? {}).forEach(([key, value]) => {
+        const sourceColor = sourceColorForArg(binding, key, binding?.enhancement?.args?.[key]);
+        const nextColor = [...collectReferenceColors(value)][0];
+        if (sourceColor && nextColor) replacements.set(sourceColor, nextColor);
+      });
+      next.enhancement.expertVar = next.enhancement.expertVar.replace(
+        /#[A-Fa-f0-9]{6}(?=\.\((?:request|response)\))/g,
+        (color: string) => replacements.get(normalizeReferenceColor(color)) ?? color,
       );
     }
     (['to', 'from'] as const).forEach((key) => {
