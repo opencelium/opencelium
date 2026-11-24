@@ -6,13 +6,22 @@ import { SECRET_MASK } from '../../model/display'
 import { GlobalVariableKindBadge } from '../GlobalVariableKindBadge'
 import { useGlobalVariablePicker } from './globalPicker'
 
-// Scripts are left out until the field call editor exists: a script can't be referenced like a
-// value, it must be called with its parameters.
-const KIND_ORDER = ['CONSTANT', 'MUTABLE'] as const satisfies readonly GlobalVariableKind[]
+const VALUE_KINDS = ['CONSTANT', 'MUTABLE'] as const satisfies readonly GlobalVariableKind[]
+const ALL_KINDS = [...VALUE_KINDS, 'SCRIPT'] as const satisfies readonly GlobalVariableKind[]
 
-type ValueItem = Extract<PickerItem, { kind: (typeof KIND_ORDER)[number] }>
-
-const previewOf = (item: ValueItem) => (item.secret ? SECRET_MASK : item.valuePreview ?? '')
+const previewOf = (item: PickerItem) => {
+    switch (item.kind) {
+        case 'CONSTANT':
+        case 'MUTABLE':
+            return item.secret ? SECRET_MASK : item.valuePreview ?? ''
+        case 'SCRIPT':
+            return `(${item.parameters.map((parameter) => parameter.name).join(', ')})`
+        default: {
+            const _exhaustive: never = item
+            return _exhaustive
+        }
+    }
+}
 
 type Props = {
     value?: string
@@ -24,16 +33,22 @@ type Props = {
     size?: 'middle' | 'large'
     /** Narrows the offered variables, e.g. to the mutable ones a Set step may write. */
     filter?: (item: PickerItem) => boolean
+    /**
+     * Also offers script variables. Only where the reference becomes an enhancement arg, which a
+     * run binds as a function: a script can't stand in a text field such as the URL or a condition.
+     */
+    canPickScripts?: boolean
 }
 
-export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, className, testId, size, filter }: Props) {
+export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, className, testId, size, filter,
+    canPickScripts = false }: Props) {
     const { t } = useI18n('entities')
     const { items, isLoading } = useGlobalVariablePicker()
 
-    const options = useMemo(() => KIND_ORDER
+    const options = useMemo(() => (canPickScripts ? ALL_KINDS : VALUE_KINDS)
         .map((kind) => ({
             label: t(`global-variable.kind.${kind}.label`),
-            options: items.filter((item): item is ValueItem => item.kind === kind && (!filter || filter(item))).map((item) => ({
+            options: items.filter((item) => item.kind === kind && (!filter || filter(item))).map((item) => ({
                 value: item.name,
                 searchText: `${item.name} ${item.description}`,
                 label: (
@@ -47,7 +62,7 @@ export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, c
                 ),
             })),
         }))
-        .filter((group) => group.options.length > 0), [filter, items, t])
+        .filter((group) => group.options.length > 0), [canPickScripts, filter, items, t])
 
     return (
         <Select

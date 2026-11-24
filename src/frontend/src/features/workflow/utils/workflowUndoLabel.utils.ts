@@ -66,10 +66,6 @@ export const undoChangeLabel = (change: WorkflowUndoChange): {
 				return { key: 'undoHistory.change.enhancementDescription',
 					values: { name: change.name ?? '' } };
 			}
-			if (change.aspect === 'imports') {
-				return { key: 'undoHistory.change.enhancementImports',
-					values: { name: change.name ?? '' } };
-			}
 			if (change.aspect === 'removed') {
 				return { key: 'undoHistory.change.enhancementRemoved',
 					values: { name: change.name ?? '' } };

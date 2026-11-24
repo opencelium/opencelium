@@ -1,9 +1,11 @@
 import type { GlobalVariable, JsonValue, ScriptParameter } from '@entities/globalVariable/model/types';
-import type { InputValue } from './playgroundInputs';
+import { parseGlobalReference } from '@entities/globalVariable/lib/globalReference';
+import { emptyInput, type InputValue } from './playgroundInputs';
+import { resolveGlobalPath } from './playgroundScriptCalls';
 
-// What the playground needs of an imported global variable: a value it can stand in for, or the
-// script it defines as a function. A run resolves these on the backend; the playground only has
-// the stored definitions.
+// What the playground needs of a global variable an arg or a ref() points at: a value it can
+// stand in for, or the script it defines as a function. A run resolves these on the backend; the
+// playground only has the stored definitions.
 export type PlaygroundGlobal =
 	| { kind: 'value'; name: string; value: JsonValue; isSecret: boolean }
 	| { kind: 'script'; name: string; code: string; parameters: ScriptParameter[] }
@@ -25,24 +27,36 @@ export function toPlaygroundGlobal(name: string, variable: GlobalVariable | null
 	}
 }
 
-// The prefilled input of a value import: its current value as JSON, or nothing for a secret.
-export const initialGlobalInput = (global: Extract<PlaygroundGlobal, { kind: 'value' }>): InputValue =>
-	global.isSecret ? { mode: 'json', text: '' } : { mode: 'json', text: JSON.stringify(global.value, null, 2) };
+export const globalOfReference = (reference: string, globals: PlaygroundGlobal[]): PlaygroundGlobal | undefined => {
+	const parsed = parseGlobalReference(reference);
+	return parsed ? globals.find((candidate) => candidate.name === parsed.name) : undefined;
+};
+
+// The prefilled input of a reference: the current value at its path for a global, nothing for a
+// secret or a method reference, which has no value outside a run.
+export function initialReferenceInput(reference: string, globals: PlaygroundGlobal[]): InputValue {
+	const parsed = parseGlobalReference(reference);
+	const global = globalOfReference(reference, globals);
+	if (!parsed || global?.kind !== 'value' || global.isSecret) return emptyInput;
+	return { mode: 'json', text: JSON.stringify(resolveGlobalPath(global.value, parsed.path), null, 2) };
+}
 
 /**
- * A script import as a JavaScript function declaration, the way a run imports it: its parameters
- * in order, an optional one left out (or undefined) takes its default. Appended after the code, so
- * the line numbers of the user's own code stay right; a declaration is hoisted, so calls before it work.
+ * A script variable as a JavaScript function declaration under the arg's name, the way a run binds
+ * it: its parameters in order, an optional one left out (or undefined) takes its default. Appended
+ * after the code, so the line numbers of the user's own code stay right; a declaration is hoisted.
  */
-export function scriptFunctionSource(global: Extract<PlaygroundGlobal, { kind: 'script' }>): string {
+export function scriptFunctionSource(name: string, global: Extract<PlaygroundGlobal, { kind: 'script' }>): string {
 	const defaults = global.parameters
 		.filter((parameter) => !parameter.required)
 		.map((parameter) => `if (${parameter.name} === undefined) ${parameter.name} = ${JSON.stringify(parameter.default ?? null)};`);
 	const body = [...defaults, global.code].join('\n');
-	return `function ${global.name}(${global.parameters.map((parameter) => parameter.name).join(', ')}) {\n${body}\n}`;
+	return `function ${name}(${global.parameters.map((parameter) => parameter.name).join(', ')}) {\n${body}\n}`;
 }
 
-export const withScriptImports = (script: string, globals: PlaygroundGlobal[]): string => {
-	const functions = globals.flatMap((global) => (global.kind === 'script' ? [scriptFunctionSource(global)] : []));
-	return functions.length > 0 ? `${script}\n${functions.join('\n')}` : script;
-};
+export type ScriptArg = { name: string; global: Extract<PlaygroundGlobal, { kind: 'script' }> };
+
+export const withScriptArgs = (script: string, scriptArgs: ScriptArg[]): string =>
+	scriptArgs.length > 0
+		? `${script}\n${scriptArgs.map(({ name, global }) => scriptFunctionSource(name, global)).join('\n')}`
+		: script;

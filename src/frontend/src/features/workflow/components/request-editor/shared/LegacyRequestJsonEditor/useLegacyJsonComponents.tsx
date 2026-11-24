@@ -43,14 +43,21 @@ export function useLegacyJsonComponents({ messageProperty, source, readOnly,
 		});
 	}, [updateReferencedField]);
 	const pointerComponent = useMemo(() => ({ id: `${methodId}_${messageProperty}_pointer`,
-		getComponent: (params: Record<string, unknown>) => <BodyPointer
-			pointer={String(params.pointer || '')}
-			pointers={Array.isArray(params.pointers) ? params.pointers.filter(isString) : []}
-			submitEdit={params.submitEdit as (() => void) | undefined}
-			onClick={params.onClick as ((event?: unknown) => void) | undefined}
-			onRemove={removePointer} onEdit={readOnly ? undefined : editPointer}
-			connection={readOnly ? undefined : editor.connection ?? undefined}
-			currentMethod={readOnly ? undefined : editor.method} /> }),
+		getComponent: (params: Record<string, unknown>) => {
+			const pointer = String(params.pointer || '');
+			const pointers = Array.isArray(params.pointers) ? params.pointers.filter(isString) : [];
+			if (isGlobalReference(pointer)) return <BodyGlobalReference reference={pointer}
+				connection={readOnly ? undefined : editor.connection ?? undefined}
+				currentMethod={readOnly ? undefined : editor.method}
+				onEdit={readOnly ? undefined : (reference) => editPointer(pointer, pointers, reference)}
+				onRemove={readOnly ? undefined : () => removePointer(pointer, pointers)} />;
+			return <BodyPointer pointer={pointer} pointers={pointers}
+				submitEdit={params.submitEdit as (() => void) | undefined}
+				onClick={params.onClick as ((event?: unknown) => void) | undefined}
+				onRemove={removePointer} onEdit={readOnly ? undefined : editPointer}
+				connection={readOnly ? undefined : editor.connection ?? undefined}
+				currentMethod={readOnly ? undefined : editor.method} />;
+		} }),
 		[editor.connection, editor.method, editPointer, messageProperty, methodId, readOnly, removePointer]);
 	const replaceWebhook = useCallback((webhook: string, reference: string) => {
 		const snippet = webhookSnippet(webhook);

@@ -414,7 +414,6 @@
       "referenceEdited": "Edited {{section}} reference in {{name}}",
       "enhancement": "Edited {{section}} transformation of {{name}}",
       "enhancementLanguage": "Updated transformation language of {{name}}",
-      "enhancementImports": "Updated global variable imports of {{name}}",
       "enhancementDescription": "Updated transformation description of {{name}}",
       "enhancementRemoved": "Deleted transformation of {{name}}",
       "conditionConfig": "Edited condition of {{name}}",
@@ -773,21 +772,6 @@
     "empty": "Empty"
   },
   "enhancement": {
-    "imports": {
-      "label": "Imports (global variables)",
-      "placeholder": "Pick global variables to use in this script",
-      "info": "Imported global variables are available in the code under their own name:\n• a constant or mutable variable is a value: RESULT_VAR = url + VAR_0;\n• a script variable is a function: RESULT_VAR = formatDate(VAR_0, \"dd.MM\");\nOnly scripts written in this transformation's language can be imported. A value is read when the transformation runs: a constant stays the same, a mutable variable gives its current value.",
-      "emptyHint": "Pick a global variable above, then use it in the code by its name.",
-      "usage": "Use in the code:",
-      "usageInsert": "Click to insert into the code:",
-      "valueTooltip": "{{name}} holds the value of the global variable when this transformation runs.",
-      "scriptTooltip": "{{name}} is a script variable. Call it with the values to pass, for example {{call}}.",
-      "clickToInsert": "Click to insert at the cursor.",
-      "optionalParameter": "{{name}} (optional, default {{value}})",
-      "parametersHeading": "Its parameters, in order (the names it uses inside its own code):",
-      "requiredParameter": "{{name}} (required)",
-      "clickToInsertCall": "Click to insert the call at the cursor, then replace the selected argument with the value to pass."
-    },
     "title": "Transformation",
     "language": "Language",
     "script": "Script",
@@ -845,7 +829,9 @@
       "responseStatus": "response status",
       "responseBody": "response body",
       "responseHeader": "response header"
-    }
+    },
+    "takenFromGlobal": "is taken from the global variable <global>{{name}}</global>.",
+    "callsGlobalScript": "is the script variable <global>{{name}}</global>: call it as {{key}}(…)."
   },
   "references": {
     "responseStatus": "Response Status",
@@ -947,7 +933,8 @@
     "selectedValue": "Selected value",
     "mixedValueTitle": "Mixed value",
     "mixedValueDescription": "This field should contain either plain text or references only. Mixed values are not allowed.",
-    "help": "Select a simple value in the request tree to inspect it and attach references."
+    "help": "Select a simple value in the request tree to inspect it and attach references.",
+    "scriptNeedsMethodReference": "A script variable is a function: keep it in a field next to a method reference, and call it in that field's enhancement, e.g. VAR_1(VAR_0)."
   },
   "referenceInfo": {
     "title": "Reference Information",
@@ -1338,7 +1325,12 @@
       "failed": "The test run could not be started."
     },
     "consoleLog": "console does not exist on the server engine (Nashorn · ES5.1). Use print(...) instead of console.log; its text appears in the Output tab.",
-    "globalUnavailable": "Could not load the imported global variables {{names}}: they may have been renamed, deleted or not be visible to you."
+    "globalUnavailable": "Could not load the global variables {{names}}: they may have been renamed, deleted or not be visible to you.",
+    "refWithoutValue": "The playground has no test value for this ref(): ",
+    "globalWritesTitle": "Writes to global variables (not saved)",
+    "globalWritesHint": "A run writes these values once the enhancement has finished. The playground only shows them.",
+    "scriptArg": "{{name}} is the script variable {{global}}: call it as {{name}}(…).",
+    "setNotMutable": "set() can only write a mutable global variable, named by its whole reference such as {{example}} (no path). Not writable: "
   },
   "globalWrites": {
     "dialogTitle": "Write to global variables: {{method}}",

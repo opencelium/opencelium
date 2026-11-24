@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {useFormContext} from "react-hook-form";
-import {FormInput} from "@shared/ui/form/FormInput";
 import type {Invoker} from "@entities/invoker/model/types.ts";
 import {useGetInvokersQuery} from "@entities/invoker/api/invokerApi.ts";
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
@@ -11,7 +10,8 @@ import {MasterPasswordDialog, useCheckMasterPasswordExistsQuery, useMasterPasswo
 import type {Mode} from "@/engine/entity/EntityDefinition.ts";
 import {useGetConnectorMutation} from "@entities/connector/api/connectorApi.ts";
 import {useParams} from "react-router-dom";
-import {GlobalVariableInsertButton} from "@entities/globalVariable/ui/picker/GlobalVariableInsertButton";
+import {GlobalPickerScopeProvider} from "@entities/globalVariable/ui/picker/GlobalPickerScopeProvider";
+import {CredentialField} from "./CredentialField";
 interface CredentialEditorProps {
     name: string;
     mode: Mode;
@@ -71,7 +71,7 @@ export function formatLabel(value: string): string {
 }
 export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label, mode }) => {
     const { t: commonT } = useI18n('common');
-    const { watch, setValue, getValues } = useFormContext();
+    const { watch, setValue } = useFormContext();
     const {masterPassword} = useMasterPasswordStore();
     const { data: masterPasswordExists, isLoading: isCheckingMasterPasswordExists } = useCheckMasterPasswordExistsQuery();
     const { id: routeId } = useParams();
@@ -147,35 +147,26 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
         <div style={{position: 'relative'}}>
             {!hideCredentialInputs && (
                 <>
-                    <div style={{
-                        display: 'grid',
-                        filter: hasAccess ? 'none' : 'blur(6px)',
-                    }}>
-                        {Object.keys(requestData).map((fieldKey, key) => {
-                            const lower = fieldKey.toLowerCase();
-                            const isPassword = SENSITIVE_KEYS.some(keyword => lower.includes(keyword));
-                            return (
-                                <FormInput
-                                    key={key}
-                                    placeholder={hasAccess ? '' : '**************'}
-                                    error={error && !watch(`requestData.${fieldKey}`) ? commonT('field.required') : ''}
-                                    autoFocus={key === 0 && hasAccess}
-                                    name={`requestData.${fieldKey}`}
+                    <GlobalPickerScopeProvider scope={globalScope}>
+                        <div style={{
+                            display: 'grid',
+                            filter: hasAccess ? 'none' : 'blur(6px)',
+                        }}>
+                            {Object.keys(requestData).map((fieldKey, key) => (
+                                <CredentialField
+                                    key={fieldKey}
+                                    fieldKey={fieldKey}
                                     label={formatLabel(fieldKey)}
-                                    type={isPassword ? 'password' : 'text'}
-                                    disabled={!hasAccess}
-                                    rightSlot={hasAccess && mode !== 'view' ? (
-                                        <GlobalVariableInsertButton
-                                            scope={globalScope}
-                                            testId={`connector-request-data-global-${fieldKey}`}
-                                            onInsert={(reference) => setValue(`requestData.${fieldKey}`,
-                                                `${getValues(`requestData.${fieldKey}`) ?? ''}${reference}`, {shouldDirty: true})}
-                                        />
-                                    ) : undefined}
+                                    error={error && !watch(`requestData.${fieldKey}`) ? commonT('field.required') : ''}
+                                    isPassword={SENSITIVE_KEYS.some(keyword => fieldKey.toLowerCase().includes(keyword))}
+                                    hasAccess={hasAccess}
+                                    canInsertGlobals={hasAccess && mode !== 'view'}
+                                    autoFocus={key === 0 && hasAccess}
+                                    scope={globalScope}
                                 />
-                            )
-                        })}
-                    </div>
+                            ))}
+                        </div>
+                    </GlobalPickerScopeProvider>
                     {!hasAccess && <div style={{position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         <MasterPasswordDialog/>
                     </div>}

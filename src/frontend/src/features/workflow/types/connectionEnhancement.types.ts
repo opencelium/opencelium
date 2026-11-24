@@ -10,8 +10,6 @@ export interface Enhancement {
 	language: Language;
 	script: string;
 	args: Record<string, string>;
-	/** Global variables the script sees under their own name; saved as enhancement args. */
-	imports?: string[];
 }
 
 export const Language = {
