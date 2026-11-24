@@ -2,7 +2,7 @@
 
 Nov 23, 2026 · @Bob Mustaev
 
-The backend exposes global variables under `/global-variable` as plain JSON, following `/aggregator`. This is the agreed contract from [Global Variables — Spec](https://claude.ai/artifact/Y1SkReqUk3z7Fs5wA85gwm); built so far (2026-11-23): constants with secrets; mutable variables that users create, edit and reset, and that runs of the owner workflow write through a method's globalWrites or set() in a JavaScript enhancement, one run at a time; and script variables in JavaScript, Python 3 and Ruby, each imported and called by an enhancement of its own language. Section 12 walks through one example end to end, and section 13 gives TypeScript types for every request and response.
+The backend exposes global variables under `/global-variable` as plain JSON, following `/aggregator`. This is the agreed contract from [Global Variables — Spec](spec.md); built so far (2026-11-23): constants with secrets; mutable variables that users create, edit and reset, and that runs of the owner workflow write through a method's globalWrites or set() in a JavaScript enhancement, one run at a time; and script variables in JavaScript, Python 3 and Ruby, each imported and called by an enhancement of its own language. Section 12 walks through one example end to end, and section 13 gives TypeScript types for every request and response.
 
 ## Contents
 
