@@ -57,6 +57,8 @@ public interface ExceptionConstant {
     String CONNECTION_NOT_FOUND = "CONNECTION_NOT_FOUND";
     String CONCURRENT_TEST_IS_FORBIDDEN = "CONCURRENT_TEST_IS_FORBIDDEN";
     String OPERATOR_EXPRESSION_IS_EMPTY = "OPERATOR_EXPRESSION_IS_EMPTY";
+    // a workflow or category title in use; also the message, which older clients match on
+    String TITLE_HAS_ALREADY_TAKEN = "TITLE_HAS_ALREADY_TAKEN";
 
     // ----------------------------------------- Method test ----------------------------------------------- //
     String METHOD_TEST_METHOD_INVALID = "METHOD_TEST_METHOD_INVALID";

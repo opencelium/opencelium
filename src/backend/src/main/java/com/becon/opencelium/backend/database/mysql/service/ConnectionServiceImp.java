@@ -53,6 +53,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -159,7 +160,8 @@ public class ConnectionServiceImp implements ConnectionService {
      */
     private Long save(Connection connection, ConnectionMng connectionMng, boolean testCopy, Long origin) {
         if (existsByName(connection.getTitle())) {
-            throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
+            throw new GeneralServiceException(
+                    HttpStatus.CONFLICT, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN);
         }
 
         if (connection.getFromConnector() == null) {
@@ -223,7 +225,8 @@ public class ConnectionServiceImp implements ConnectionService {
 
         if (!Objects.equals(sCon.getTitle(), connection.getTitle())) {
             if (existsByName(connection.getTitle())) {
-                throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
+                throw new GeneralServiceException(
+                        HttpStatus.CONFLICT, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN);
             }
         }
 
