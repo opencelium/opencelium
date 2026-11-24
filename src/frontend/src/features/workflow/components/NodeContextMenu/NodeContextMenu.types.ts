@@ -1,10 +1,14 @@
 import type { WorkflowContextMenu, WorkflowNodeModel } from '../../types/workflow.types';
 import type { ConnectorEditorKind } from '../../types/request-config.types';
+import type { OpenNotificationEditor } from '../../notification/ui/NotificationEditorContext';
 
 export type NodeContextMenuProps = {
 	menu: WorkflowContextMenu | null;
 	node: WorkflowNodeModel | null;
 	onClose: () => void;
+	onCopyNodes: (nodeId: string) => void;
+	onPasteNodes: (nodeId: string) => void;
+	canPasteNodes: boolean;
 	onChangeLabel: (nodeId: string, label: string) => void;
 	onOpenRequestEditor: (nodeId: string, mode: 'url' | 'body' | 'header') => void;
 	onOpenConditionEditor: (nodeId: string) => void;
@@ -12,4 +16,5 @@ export type NodeContextMenuProps = {
 	onTryRequest: (nodeId: string) => void;
 	onOpenAggregatorEditor: (nodeId: string) => void;
 	onOpenConnectorEditor: (nodeId: string, kind: ConnectorEditorKind) => void;
+	onOpenNotificationEditor: OpenNotificationEditor;
 };

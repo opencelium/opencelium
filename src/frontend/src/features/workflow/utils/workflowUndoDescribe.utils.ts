@@ -23,6 +23,7 @@ const nameOf = workflowNodeLabel;
 const NODE_KIND_NAME_KEYS: Partial<Record<string, string>> = {
 	system: 'undoHistory.nodeKind.httpRequest',
 	'trigger-connection': 'undoHistory.nodeKind.webhook',
+	notification: 'undoHistory.nodeKind.notification',
 	if: 'undoHistory.nodeKind.if',
 	loop: 'undoHistory.nodeKind.loop',
 };
@@ -34,6 +35,7 @@ const iconOf = (node: WorkflowNodeModel): WorkflowUndoIcon | undefined => {
 			return { kind: 'connector', iconUrl: node.data.connector?.icon ?? null };
 		case 'system': return { kind: 'http-request' };
 		case 'trigger-connection': return { kind: 'webhook' };
+		case 'notification': return { kind: 'http-request' };
 		case 'if': return { kind: 'if' };
 		case 'loop': return { kind: 'loop' };
 		// The start node is never the subject of an entry.

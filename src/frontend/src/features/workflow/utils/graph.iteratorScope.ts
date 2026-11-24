@@ -3,11 +3,11 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.typ
 import type { InvalidReference } from './graph.dragDrop.types';
 import { collectFullReferences, collectReferenceColors, normalizeReferenceColor,
 	referenceColorOf } from './graph.referenceColors';
+import { isMethodNodeType } from './methodNodeTypes';
 
 const ITERATOR_RE = /\[([A-Za-z_]\w*)\]/g;
 
-const isConsumer = (node: WorkflowNodeModel) => node.type === 'connector'
-	|| node.type === 'system' || node.type === 'trigger-connection'
+const isConsumer = (node: WorkflowNodeModel) => isMethodNodeType(node.type)
 	|| node.type === 'if' || node.type === 'loop';
 
 const collectIteratorUses = (value: unknown, uses: Map<string, Set<string>>, skipEnhancement: boolean) =>

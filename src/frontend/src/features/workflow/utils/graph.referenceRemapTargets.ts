@@ -122,7 +122,10 @@ const collectSources = (
 				source.consumerNodeIds.push(consumerNodeId);
 			}
 			if (!source.locations.some((held) => held.kind === location.kind
-				&& held.value === location.value)) {
+				&& held.value === location.value
+				&& (held.kind !== 'label' || location.kind !== 'label' ||
+					(held.url?.nodeId === location.url?.nodeId && held.url?.part === location.url?.part
+						&& held.url?.name === location.url?.name)))) {
 				source.locations.push(location);
 			}
 			sources.set(key, source);

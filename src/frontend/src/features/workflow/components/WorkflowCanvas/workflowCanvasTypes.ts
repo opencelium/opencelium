@@ -7,17 +7,17 @@ import { CommentNode } from '../../nodes/CommentNode/CommentNode';
 import { ConnectorMethodNode } from '../../nodes/ConnectorMethodNode/ConnectorMethodNode';
 import { IfOperatorNode } from '../../nodes/IfOperatorNode/IfOperatorNode';
 import { LoopOperatorNode } from '../../nodes/LoopOperatorNode/LoopOperatorNode';
-import { NotificationNode } from '../../nodes/NotificationNode/NotificationNode';
 import { StartNode } from '../../nodes/StartNode/StartNode';
 import { SystemMethodNode } from '../../nodes/SystemMethodNode/SystemMethodNode';
 import { TriggerConnectionNode } from '../../nodes/TriggerConnectionNode/TriggerConnectionNode';
+import { NotificationNode } from '../../nodes/NotificationNode/NotificationNode';
 
 export const workflowNodeTypes = {
 	start: memo(StartNode),
 	connector: memo(ConnectorMethodNode),
 	system: memo(SystemMethodNode),
-	notification: memo(NotificationNode),
 	'trigger-connection': memo(TriggerConnectionNode),
+	notification: memo(NotificationNode),
 	if: memo(IfOperatorNode),
 	loop: memo(LoopOperatorNode),
 	comment: memo(CommentNode),

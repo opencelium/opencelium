@@ -2,6 +2,7 @@ import { ALL_COLORS } from '../../constants/colors';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { getOperatorBottomBranch, getOutgoingCount, isLeafNode } from '../../utils/graphUtils';
 import type { LeafInfo, WorkflowTopology } from './prepareWorkflowElements.types';
+import { isMethodNodeType } from '../../utils/methodNodeTypes';
 
 export const computeLeafInfo = (
 	node: WorkflowNodeModel,
@@ -36,7 +37,7 @@ const getMethodInstanceData = (nodes: WorkflowNodeModel[]) => {
 	const result = new Map<string, { index: number; color: string }>();
 	const groups = new Map<string, WorkflowNodeModel[]>();
 	for (const node of nodes) {
-		if (!['connector', 'system', 'trigger-connection'].includes(node.type)) continue;
+		if (!isMethodNodeType(node.type)) continue;
 		if (node.data.dragGhost || node.data.dropPlaceholder) continue;
 		const key = node.type === 'trigger-connection'
 			? `trigger-connection::${node.data.triggerConnection?.connectionId}::${node.data.triggerConnection?.schedulerId}`

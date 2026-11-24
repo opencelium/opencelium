@@ -370,7 +370,8 @@ public class OperationExMapper {
         List<String[]> pairs = PathAndReferenceUtility.getQueryVariables(query);
         //loop for storing all parameters to parametersMap
         for (String[] p : pairs) {
-            parametersMap.merge(p[0], p[1] == null ? "" : p[1], (oldV, newV) -> oldV + "&" + newV);
+            // a part without '=' (value null) keeps its text as value, so references in it are still collected
+            parametersMap.merge(p[0], p[1] == null ? p[0] : p[1], (oldV, newV) -> oldV + "&" + newV);
         }
 
         //main loop for making parameterDTO depending on param's style.

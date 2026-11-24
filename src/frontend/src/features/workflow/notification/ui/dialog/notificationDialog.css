@@ -1,0 +1,703 @@
+/* Notification step dialog. Theme tokens only — brand colours come from the tool registry as inline styles. */
+
+.notificationDialogHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 40px;
+  flex-wrap: wrap;
+}
+
+.notificationDialogLabel {
+  width: 280px;
+  max-width: 100%;
+}
+
+.notificationToolMark {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.notificationToolMark--empty {
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
+}
+
+.notificationIdChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.notificationIdChipDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+}
+
+.notificationDialog {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  min-height: 420px;
+}
+
+.notificationStepNav {
+  padding: 4px 0 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.notificationStepTitle {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.notificationStepTitle small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.notificationDialogBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  flex: 1;
+  min-height: 0;
+}
+
+.notificationDialogBody--full {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.notificationDialogMain {
+  overflow: auto;
+  padding: 16px 16px 16px 0;
+  min-width: 0;
+}
+
+.notificationDialogBody--full .notificationDialogMain {
+  padding-right: 0;
+}
+
+.notificationDialogAside {
+  overflow: auto;
+  padding: 16px;
+  border-left: 1px solid var(--color-border-subtle);
+  background: var(--color-background-hover);
+  min-width: 0;
+}
+
+.notificationDialogFooter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.notificationDialogFooterSpacer,
+.notificationSpacer {
+  flex: 1;
+}
+
+.notificationSectionTitle {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.notificationLead {
+  margin: 0 0 16px;
+  color: var(--color-text-secondary);
+}
+
+.notificationMuted,
+.notificationFieldHelp {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.notificationEyebrow {
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Tool picker */
+.notificationToolGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.notificationToolCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  align-items: start;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font: inherit;
+}
+
+.notificationToolCard:hover {
+  border-color: var(--color-action-primary);
+}
+
+.notificationToolCard:focus-visible {
+  outline: 2px solid var(--color-action-primary);
+  outline-offset: 2px;
+}
+
+.notificationToolCard--selected {
+  border-color: var(--color-action-primary);
+  background: var(--color-action-primary-subtle);
+}
+
+.notificationToolCard .notificationToolMark {
+  grid-row: span 2;
+}
+
+.notificationToolCardName {
+  font-weight: 600;
+}
+
+.notificationToolCard small {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.notificationToolTag,
+.notificationTag {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Help cards */
+.notificationHelpCard {
+  display: grid;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.notificationHelpCard h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.notificationHelpCard p,
+.notificationHelpCard ol {
+  margin: 0;
+}
+
+.notificationHelpCard ol {
+  display: grid;
+  gap: 8px;
+  padding-left: 20px;
+}
+
+.notificationHelpCard code,
+.notificationTable code {
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  background: var(--color-background-hover);
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.notificationFactList {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.notificationFactList > div {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.notificationFactList dt {
+  color: var(--color-text-secondary);
+}
+
+.notificationFactList dd {
+  margin: 0;
+}
+
+.notificationCallout {
+  padding: 8px 10px;
+  border-left: 3px solid var(--color-status-info-border);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--color-background-surface);
+}
+
+/* Fields */
+.notificationFieldGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.notificationFieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.notificationField {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  align-content: start;
+}
+
+.notificationFieldLabel {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.notificationFieldGroup {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.notificationFieldGroup legend {
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.notificationFacts {
+  display: grid;
+  gap: 6px;
+}
+
+.notificationFactRow {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.7fr) minmax(0, 1.3fr) auto;
+  gap: 6px;
+  align-items: start;
+}
+
+.notificationLocked {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.notificationBanner {
+  margin-bottom: 12px;
+}
+
+/* Reference-aware text field */
+.notificationRefFieldWrap {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.notificationRefField {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  background: var(--color-background-input);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+}
+
+.notificationRefField:focus-within {
+  border-color: var(--color-action-primary);
+}
+
+.notificationRefField--disabled {
+  background: var(--color-background-disabled);
+}
+
+.notificationRefFieldInput {
+  flex: 1;
+  min-width: 0;
+  min-height: 30px;
+  padding: 4px 11px;
+  line-height: 22px;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-text-primary);
+}
+
+.notificationRefFieldInput--multiline {
+  min-height: 76px;
+}
+
+.notificationRefFieldInput:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-disabled);
+}
+
+.notificationRefChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 1px;
+  padding: 0 4px 0 6px;
+  line-height: 20px;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border: 1px solid var(--color-status-info-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-status-info-bg);
+  color: var(--color-text-primary);
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  user-select: all;
+}
+
+.notificationRefChip--static {
+  padding-right: 6px;
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.notificationRefChip i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.notificationRefChipRemove {
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.notificationRefChipRemove:hover {
+  opacity: 1;
+}
+
+.notificationReferencePicker {
+  padding: 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-background-hover);
+}
+
+.notificationStatusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 12px;
+}
+
+.notificationStatusPill--success {
+  background: var(--color-status-success-bg);
+  border-color: var(--color-status-success-border);
+  color: var(--color-status-success-fg);
+}
+
+.notificationStatusPill--warning {
+  background: var(--color-status-warning-bg);
+  border-color: var(--color-status-warning-border);
+  color: var(--color-status-warning-fg);
+}
+
+.notificationStatusPill--error {
+  background: var(--color-status-error-bg);
+  border-color: var(--color-status-error-border);
+  color: var(--color-status-error-fg);
+}
+
+/* Message step */
+.notificationMessageBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.notificationJsonEditor {
+  display: grid;
+  gap: 6px;
+}
+
+.notificationJsonEditorBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.notificationJsonEditorFrame {
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+}
+
+/* Preview */
+.notificationChat {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-background-surface);
+}
+
+.notificationChatAvatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.notificationChatBody {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.notificationChatAuthor {
+  font-weight: 700;
+}
+
+.notificationChatTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.notificationChatTags > span {
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--color-background-hover);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.notificationPreText {
+  white-space: pre-wrap;
+}
+
+.notificationPreviewCard {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-default);
+  border-left: 4px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-hover);
+}
+
+.notificationPreviewCard--plain {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.notificationPreviewTitle {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.notificationPreviewTitle--good { color: var(--color-status-success-fg); }
+.notificationPreviewTitle--warning { color: var(--color-status-warning-fg); }
+.notificationPreviewTitle--attention { color: var(--color-status-error-fg); }
+.notificationPreviewTitle--accent { color: var(--color-action-primary); }
+
+.notificationPreviewFacts--grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
+}
+
+.notificationPreviewFacts--list {
+  display: grid;
+  gap: 4px;
+}
+
+.notificationPreviewFactLine {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+}
+
+.notificationPreviewButton {
+  justify-self: start;
+  padding: 4px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-surface);
+  font-weight: 600;
+}
+
+.notificationPreviewEmpty {
+  padding: 20px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.notificationPush {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.notificationPushMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.notificationPushIcon {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-sm);
+}
+
+.notificationPushTitle {
+  font-weight: 700;
+}
+
+.notificationCode {
+  margin: 0;
+  padding: 12px;
+  max-height: 340px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  background: var(--color-background-hover);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+}
+
+/* Request & Response */
+.notificationUrlBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-hover);
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+}
+
+.notificationUrlValue {
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.notificationMethod {
+  font-weight: 700;
+  color: var(--color-status-success-fg);
+}
+
+.notificationTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.notificationTable th,
+.notificationTable td {
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.notificationTable th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.notificationSectionHighlight {
+  outline: 2px solid var(--color-action-primary);
+  outline-offset: 6px;
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 860px) {
+  .notificationDialog {
+    height: auto;
+  }
+
+  .notificationDialogBody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .notificationDialogMain {
+    padding-right: 0;
+  }
+
+  .notificationDialogAside {
+    border-left: 0;
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
+  .notificationFieldRow,
+  .notificationFactRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,161 +1,14 @@
 {
-  "notification": {
-    "demoStart": "Start",
-    "demo": "Benachrichtigungsdemo",
-    "editUrl": "URL bearbeiten",
-    "editMessage": "Nachricht bearbeiten",
-    "options": {"default": "Standard", "accent": "Akzent", "good": "Erfolg", "warning": "Warnung", "attention": "Kritisch", "important": "Wichtig", "urgent": "Dringend", "markdown": "Markdown", "text": "Nur Text"},
-    "onError": "Bei Fehler",
-    "stop": "Workflow stoppen",
-    "continue": "Fortfahren",
-    "retry429": "Nach HTTP 429 erneut versuchen",
-    "copy": "Kopieren",
-    "copied": "Referenz kopiert",
-    "copyError": "Referenz konnte nicht kopiert werden",
-    "previewNote": "Vereinfachte Vorschau. Der Nachrichtendienst bestimmt das endgültige Aussehen.",
-    "emptyPreview": "Noch kein Nachrichteninhalt.",
-    "requestTab": { "request": "Anfrage", "response": "Antwort" },
-    "requestSections": {
-      "url": "URL",
-      "headers": "Header",
-      "body": "Anfrageinhalt",
-      "policy": "Fehlerbehandlung",
-      "response": "Erwartete Antwort",
-      "references": "Referenzparameter"
-    },
-    "label": "Benachrichtigung",
-    "ariaLabel": "Benachrichtigung {label}",
-    "generic": "Generischer Webhook",
-    "noTool": "Kein Tool ausgewählt",
-    "webhookSet": "Webhook eingerichtet",
-    "webhookMissing": "Webhook fehlt",
-    "name": "Name",
-    "value": "Wert",
-    "remove": "Entfernen",
-    "add": "Hinzufügen",
-    "default": "Standard",
-    "open": "Benachrichtigung öffnen",
-    "rename": "Beschriftung umbenennen",
-    "saved": "Benachrichtigung gespeichert",
-    "back": "Zurück",
-    "next": "Weiter",
-    "steps": "Einrichtungsschritte",
-    "webhookUrl": "Webhook-URL",
-    "setup": "Einrichtungsanleitung",
-    "referenceCount": "Referenzen: {count}",
-    "validJson": "Gültiges JSON",
-    "override": "Die JSON-Überschreibung sperrt den Nachrichteneditor.",
-    "reset": "JSON zurücksetzen",
-    "addHeader": "Header hinzufügen",
-    "stepsLabel": {
-      "tool": "Nachrichtendienst",
-      "webhook": "Eingehender Webhook",
-      "message": "Nachricht",
-      "request": "Anfrage und Antwort"
-    },
-    "mode": {
-      "editor": "Editor",
-      "json": "JSON",
-      "preview": "Vorschau"
-    },
-    "urlState": {
-      "empty": "Webhook-URL eingeben.",
-      "reference": "Die URL stammt aus einer Workflow-Referenz.",
-      "match": "Die URL entspricht diesem Dienst.",
-      "mismatch": "Die URL entspricht nicht dem üblichen Format dieses Dienstes."
-    },
-    "urlFormat": "URL-Format",
-    "documentation": "Dokumentation",
-    "guide": {
-      "slack": {
-        "first": "Öffne die Einstellungen der Slack-App und aktiviere Incoming Webhooks.",
-        "second": "Füge einen Webhook zum Workspace hinzu und wähle den Zielkanal.",
-        "third": "Erlaube den Zugriff und kopiere die Webhook-URL.",
-        "note": "Der Webhook ist an den ausgewählten Kanal gebunden. Verwende für einen anderen Kanal eine eigene URL."
-      },
-      "teams": {
-        "first": "Öffne die Workflows-App in Teams und wähle die Webhook-Vorlage.",
-        "second": "Melde dich an und wähle das Team und den Kanal oder Chat.",
-        "third": "Speichere den Workflow und kopiere die Trigger-URL.",
-        "note": "Status 202 bestätigt die Annahme. Die Zustellung siehst du im Ausführungsverlauf von Teams."
-      },
-      "gchat": {
-        "first": "Öffne Apps und Integrationen im Google-Chat-Space.",
-        "second": "Füge einen eingehenden Webhook hinzu und benenne ihn.",
-        "third": "Speichere den Webhook und kopiere seine URL.",
-        "note": "Für bestehende Threads setze einen Thread-Schlüssel und ergänze messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD in der URL."
-      },
-      "discord": {
-        "first": "Öffne die Einstellungen des Discord-Kanals.",
-        "second": "Erstelle unter Integrationen einen Webhook für den Zielkanal.",
-        "third": "Kopiere die Webhook-URL.",
-        "note": "Hänge ?wait=true an, um die Nachrichten-ID in der Antwort zu erhalten."
-      },
-      "mattermost": {
-        "first": "Öffne Integrationen im Mattermost-Hauptmenü.",
-        "second": "Füge einen eingehenden Webhook hinzu und wähle einen Kanal.",
-        "third": "Speichere den Webhook und kopiere die URL.",
-        "note": "Das Überschreiben von Name und Symbol muss in den Integrationseinstellungen erlaubt sein."
-      },
-      "rocket": {
-        "first": "Öffne Administration, Workspace und dann Integrationen.",
-        "second": "Erstelle eine eingehende Integration und wähle Kanal und Absender.",
-        "third": "Aktiviere und speichere die Integration und kopiere ihre URL.",
-        "note": "Wenn die Integration ein Skript nutzt, muss das JSON zur erwarteten Eingabe passen."
-      },
-      "webex": {
-        "first": "Öffne Incoming Webhooks im Webex App Hub.",
-        "second": "Verbinde die Integration, benenne sie und wähle den Ziel-Space.",
-        "third": "Füge die Integration hinzu und kopiere die URL.",
-        "note": "Webex veröffentlicht Nachrichten über den Incoming-Webhooks-Bot."
-      },
-      "ntfy": {
-        "first": "Öffne die ntfy-App oder die Weboberfläche.",
-        "second": "Abonniere ein Topic und trage seinen Namen in der Nachricht ein.",
-        "third": "Trage hier die Basis-URL des ntfy-Servers ein.",
-        "note": "Verwende für vertrauliche Inhalte einen Server oder ein Topic mit Zugriffsschutz."
-      },
-      "generic": {
-        "first": "Kopiere die Webhook-URL aus dem Zielsystem.",
-        "second": "Konfiguriere das JSON nach dem Schema des Zielsystems.",
-        "third": "Ergänze erforderliche Header unter Anfrage und Antwort.",
-        "note": "Das Zielsystem bestimmt die erwartete Antwort."
-      }
-    },
-    "fields": {
-      "text": "Text",
-      "header": "Überschrift",
-      "body": "Nachrichteninhalt",
-      "facts": "Felder",
-      "btnText": "Schaltflächentext",
-      "btnUrl": "Schaltflächen-URL",
-      "unfurl": "Linkvorschau aktivieren",
-      "title": "Titel",
-      "style": "Titelfarbe",
-      "mention": "Erwähnung",
-      "full": "Karte in voller Breite",
-      "subtitle": "Untertitel",
-      "threadKey": "Thread-Schlüssel",
-      "content": "Nachricht",
-      "username": "Anzeigename",
-      "avatar": "Avatar-URL",
-      "color": "Farbe",
-      "desc": "Beschreibung",
-      "url": "Titel-Link",
-      "channel": "Kanal",
-      "priority": "Priorität",
-      "icon": "Symbol-URL",
-      "attTitle": "Anhangstitel",
-      "alias": "Alias",
-      "emoji": "Emoji-Avatar",
-      "attText": "Anhangstext",
-      "format": "Format",
-      "topic": "Topic",
-      "message": "Nachricht",
-      "tags": "Tags",
-      "click": "Klick-URL",
-      "markdown": "Markdown rendern"
-    }
+  "pasteCheck": {
+    "referencesIntro": "Diese kopierten Schritte verweisen auf Methoden außerhalb der kopierten Gruppe. Wählen Sie Zielmethoden oder löschen Sie die Referenzen.",
+    "title": "Eingefügte Schritte prüfen",
+    "intro": "Prüfen Sie Konnektoren und Referenzen vor dem Einfügen. Nicht zugeordnete Referenzen werden gelöscht.",
+    "unavailable": "{{name}} kann nicht eingefügt werden: Der Konnektor {{connector}} existiert nicht mehr.",
+    "connector": "Konnektor für {{name}} auswählen",
+    "pasteRest": "Übrige Schritte einfügen",
+    "confirm": "Einfügen",
+    "copyFailed": "Die kopierten Schritte konnten nicht in diesem Browser gespeichert werden.",
+    "nothingToPaste": "Keiner der kopierten Schritte kann in diesen Workflow eingefügt werden."
   },
   "loadError": {
     "title": "Workflow konnte nicht geladen werden",
@@ -197,6 +50,8 @@
     "deleteReference": "Referenz löschen"
   },
   "referenceRemap": {
+    "details": "Details",
+    "query": "Abfrageparameter",
     "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie für jeden eine Ersatzmethode oder entfernen Sie die Referenz — einzelne Felder können Sie unten bei Bedarf noch anpassen:",
     "replaceWith": "Ersetzen durch:",
     "perFieldHint": "Optional — passen Sie nur die Felder an, die etwas anderes lesen sollen. Unverändert gelassene Felder folgen der oben gewählten Methode oder werden entfernt, falls keine gewählt wurde:",
@@ -309,8 +164,8 @@
     "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
     "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
-    "nodeCopied": "Knoten kopiert",
-    "nodeCopied_one": "Knoten kopiert",
+    "nodeCopied": "{{count}} Schritte kopiert",
+    "nodeCopied_one": "{{count}} Schritt kopiert",
     "nodePasted": "Knoten eingefügt",
     "nodeDuplicated": "Knoten dupliziert",
     "deleteVersionSuccess": "Version gelöscht",
@@ -547,7 +402,8 @@
       "httpRequest": "HTTP-Anfrage",
       "webhook": "Webhook",
       "if": "IF",
-      "loop": "LOOP"
+      "loop": "LOOP",
+      "notification": "Benachrichtigung"
     },
     "section": {
       "header": "Header",
@@ -654,7 +510,9 @@
     "request": "Anfrage",
     "showResponse": "Antwort anzeigen",
     "tryRequest": "Request ausprobieren…",
-    "newLabelPlaceholder": "Neue Bezeichnung"
+    "newLabelPlaceholder": "Neue Bezeichnung",
+    "copy": "Kopieren",
+    "paste": "Einfügen"
   },
   "comment": {
     "badge": "Kommentar",
@@ -1477,5 +1335,457 @@
       "failed": "Der Testlauf konnte nicht gestartet werden."
     },
     "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“."
+  },
+  "notification": {
+    "demo": "Benachrichtigungsdemo",
+    "demoStart": "Start",
+    "node": {
+      "chooseTool": "Tool wählen",
+      "ariaLabel": "Benachrichtigung {{label}}",
+      "ready": "Bereit: Tool und Webhook-URL sind gesetzt",
+      "incomplete": "Unvollständig: Tool wählen und Webhook-URL setzen"
+    },
+    "toolbar": {
+      "open": "Benachrichtigung öffnen"
+    },
+    "contextMenu": {
+      "open": "Benachrichtigung öffnen",
+      "tool": "Nachrichtentool wechseln",
+      "webhook": "Incoming Webhook",
+      "message": "Nachricht bearbeiten"
+    },
+    "dialog": {
+      "kind": "Benachrichtigung",
+      "labelPlaceholder": "Label des Schritts",
+      "back": "Zurück",
+      "next": "Weiter"
+    },
+    "steps": {
+      "ariaLabel": "Schritte der Benachrichtigung",
+      "tool": "Nachrichtentool",
+      "toolMissing": "nicht gewählt",
+      "webhook": "Incoming Webhook",
+      "webhookSet": "gesetzt",
+      "webhookMissing": "fehlt",
+      "message": "Nachricht",
+      "messageEditor": "Editor",
+      "messageJson": "JSON",
+      "messageOverridden": "JSON angepasst",
+      "request": "Request & Response"
+    },
+    "tool": {
+      "title": "Über welches Tool soll die Nachricht gehen?",
+      "lead": "Jedes Tool bringt einen eigenen Nachrichten-Editor mit. Du kannst später wechseln, Eingaben pro Tool bleiben erhalten."
+    },
+    "howItWorks": {
+      "eyebrow": "So funktioniert es",
+      "title": "Incoming Webhook",
+      "text": "Ein Incoming Webhook ist eine geheime URL, die das Chat-Tool für einen Kanal erzeugt. OpenCelium schickt per <code>POST</code> ein JSON an diese URL, das Tool postet daraus die Nachricht.",
+      "facts": {
+        "request": {
+          "label": "Request",
+          "value": "POST, <code>Content-Type: application/json</code>"
+        },
+        "references": {
+          "label": "Referenzen",
+          "value": "in der Webhook-URL und in allen Textfeldern der Nachricht"
+        },
+        "response": {
+          "label": "Response",
+          "value": "wie bei einem HTTP-Schritt für folgende Schritte verfügbar"
+        }
+      },
+      "secretWarning": "Die Webhook-URL ist ein Geheimnis. Wer sie kennt, kann in den Kanal posten."
+    },
+    "webhook": {
+      "title": "Incoming Webhook für {{tool}}",
+      "lead": "Füge die Webhook-URL ein oder setze sie mit Referenzen auf vorherige Schritte zusammen, z. B. um je nach Team in einen anderen Kanal zu posten.",
+      "urlLabel": "Webhook-URL",
+      "guideEyebrow": "Anleitung · {{tool}}",
+      "docsLink": "Offizielle Dokumentation öffnen",
+      "validation": {
+        "empty": "Noch keine URL. Die Anleitung rechts zeigt, wo du sie findest.",
+        "reference": "Wird zur Laufzeit aus Referenzen gebildet",
+        "match": "Format passt zu {{tool}}",
+        "mismatch": "Sieht nicht wie eine {{tool}}-Webhook-URL aus. Erwartet: {{example}}"
+      }
+    },
+    "guideFacts": {
+      "urlFormat": "URL-Format",
+      "response": "Antwort",
+      "errors": "Fehler",
+      "limit": "Limit",
+      "limits": "Limits",
+      "payload": "Payload",
+      "availability": "Verfügbar",
+      "requirement": "Voraussetzung",
+      "auth": "Auth",
+      "method": "Methode"
+    },
+    "message": {
+      "modeLabel": "Bearbeitungsmodus",
+      "modeEditor": "Editor",
+      "modeJson": "JSON",
+      "jsonOnlyHint": "Ein generischer Webhook wird nur als JSON konfiguriert.",
+      "editorHint": "Felder für {{tool}}. Das JSON wird automatisch erzeugt.",
+      "jsonHint": "Genau dieser Body wird gesendet. Referenzen sind in allen Strings erlaubt.",
+      "jsonReferenceHint": "Referenz an der Cursorposition einfügen.",
+      "validJson_one": "Gültiges JSON · {{count}} Referenz",
+      "validJson_other": "Gültiges JSON · {{count}} Referenzen",
+      "invalidJson": "Ungültiges JSON: {{error}}",
+      "invalidJsonOnApply": "Der Nachrichten-Body ist kein gültiges JSON. Bitte vor dem Übernehmen korrigieren.",
+      "lockedBanner": "Das JSON wurde manuell angepasst und hat Vorrang. Der Editor ist gesperrt.",
+      "discardOverride": "JSON verwerfen und Editor verwenden",
+      "overriddenBanner": "Manuell angepasst. Änderungen im Editor wirken erst wieder nach dem Zurücksetzen.",
+      "regenerate": "Aus Editor neu erzeugen"
+    },
+    "facts": {
+      "labelPlaceholder": "Bezeichnung",
+      "valuePlaceholder": "Wert",
+      "valueAria": "Wert {{index}}",
+      "remove": "Zeile entfernen",
+      "add": "Zeile hinzufügen"
+    },
+    "fields": {
+      "text": "Text",
+      "textMarkdown": "Text (Markdown)",
+      "title": "Titel",
+      "buttonText": "Button-Text",
+      "buttonUrl": "Button-Link",
+      "displayName": "Anzeigename",
+      "avatarUrl": "Avatar-URL",
+      "username": "Benutzername",
+      "iconUrl": "Icon-URL",
+      "color": "Farbe",
+      "priority": "Priorität",
+      "facts": "Felder",
+      "attachmentGroup": "Attachment"
+    },
+    "preview": {
+      "eyebrow": "Vorschau · {{tool}}",
+      "invalid": "Vorschau nicht möglich, solange das JSON ungültig ist.",
+      "empty": "Noch kein Inhalt.",
+      "priority": "Priorität {{priority}}",
+      "tags": "Tags: {{tags}}",
+      "disclaimer": "Vereinfachte Darstellung. Das tatsächliche Aussehen bestimmt {{tool}}."
+    },
+    "request": {
+      "tab": "Request",
+      "url": "URL",
+      "noUrl": "Keine Webhook-URL gesetzt",
+      "headers": "Header",
+      "headerName": "Name",
+      "headerValue": "Wert",
+      "headerActions": "Aktionen",
+      "fixed": "fest",
+      "addHeader": "Header hinzufügen",
+      "removeHeader": "Header entfernen",
+      "body": "Body",
+      "bodyGenerated": "aus Editor erzeugt",
+      "bodyOverridden": "manuell angepasst",
+      "editBody": "In „Nachricht“ bearbeiten",
+      "errorPolicy": "Bei Fehlerstatus (≥ 400)",
+      "errorPolicies": {
+        "stop": "Workflow abbrechen",
+        "continue": "Fehler loggen und fortfahren",
+        "retry": "3× wiederholen, dann abbrechen"
+      },
+      "rateLimits": "Rate-Limits",
+      "retryOn429": "Bei 429 „Retry-After“ abwarten und erneut senden"
+    },
+    "response": {
+      "tab": "Response",
+      "expectedStatus": "Erwarteter Status",
+      "sampleBody": "Beispiel-Body",
+      "emptyBody": "(leer)",
+      "parameters": "Response-Parameter für folgende Schritte",
+      "parametersHint": "Diese Referenzen stehen nachfolgenden Schritten zur Verfügung, genau wie bei einer HTTP-Methode.",
+      "parameter": "Parameter",
+      "reference": "Referenz",
+      "example": "Beispiel",
+      "copy": "Kopieren",
+      "copied": "Referenz kopiert",
+      "copyFailed": "Referenz konnte nicht kopiert werden",
+      "sentJson": "gesendetes JSON",
+      "params": {
+        "status": "HTTP-Status",
+        "text": "Antworttext",
+        "body": "Body (roh/JSON)",
+        "messageId": "Nachrichten-ID",
+        "threadId": "Thread-ID",
+        "timestamp": "Zeitstempel",
+        "channelId": "Kanal-ID",
+        "success": "Erfolg",
+        "unixTime": "Unix-Zeit",
+        "requestBody": "Request-Body"
+      }
+    },
+    "tools": {
+      "slack": {
+        "description": "Block Kit, Kanal ist an den Webhook gebunden",
+        "tag": "Block Kit",
+        "fields": {
+          "text": "Benachrichtigungstext",
+          "textHelp": "Erscheint in Push-Benachrichtigungen und als Fallback.",
+          "header": "Überschrift (Header-Block)",
+          "body": "Abschnitt (mrkdwn)",
+          "bodyHelp": "*fett*, _kursiv_, <URL|Linktext>, :emoji:",
+          "facts": "Felder (zweispaltig)",
+          "unfurl": "Link-Vorschau (unfurl_links) aktivieren"
+        },
+        "guide": {
+          "title": "Incoming Webhook in Slack anlegen",
+          "steps": {
+            "1": "Öffne <code>api.slack.com/apps</code> und wähle <b>Create New App → From scratch</b>. Workspace auswählen.",
+            "2": "Im Menü <b>Incoming Webhooks</b> den Schalter <b>Activate Incoming Webhooks</b> einschalten.",
+            "3": "Unten auf <b>Add New Webhook to Workspace</b> klicken, Ziel-Kanal wählen und mit <b>Allow</b> bestätigen.",
+            "4": "Die angezeigte Webhook-URL kopieren und hier einfügen."
+          },
+          "facts": {
+            "urlFormat": "<code>https://hooks.slack.com/services/T…/B…/…</code>",
+            "response": "<code>200</code> mit Text <code>ok</code>",
+            "errors": "<code>400 invalid_payload</code>, <code>403 action_prohibited</code>, <code>404 channel_not_found</code>, <code>410 channel_is_archived</code>",
+            "limit": "ca. 1 Nachricht pro Sekunde und Webhook"
+          },
+          "notes": {
+            "1": "Der Kanal ist fest an den Webhook gebunden. Für einen anderen Kanal brauchst du einen eigenen Webhook, oder du holst die URL per Referenz aus einem vorherigen Schritt."
+          }
+        }
+      },
+      "teams": {
+        "description": "Adaptive Card über die Workflows-App",
+        "tag": "Adaptive Card",
+        "fields": {
+          "style": "Titelfarbe",
+          "text": "Text (Markdown)",
+          "textHelp": "**fett**, _kursiv_, [Link](url), Listen mit „- “",
+          "facts": "Fakten (FactSet)",
+          "buttonText": "Button-Text (Action.OpenUrl)",
+          "mention": "Erwähnung (UPN/E-Mail, optional)",
+          "mentionPlaceholder": "z. B. max.muster@firma.de",
+          "fullWidth": "Karte in voller Breite anzeigen"
+        },
+        "styles": {
+          "default": "Standard",
+          "accent": "Akzent",
+          "good": "Erfolg (grün)",
+          "warning": "Warnung (gelb)",
+          "attention": "Kritisch (rot)"
+        },
+        "guide": {
+          "title": "Webhook in Teams über Workflows anlegen",
+          "steps": {
+            "1": "Im Ziel-Kanal auf <b>⋯ → Workflows</b> klicken.",
+            "2": "Die Vorlage <b>„Beim Empfang einer Webhookanforderung in einem Kanal posten“</b> wählen.",
+            "3": "Workflow benennen, Team und Kanal bestätigen und auf <b>Workflow hinzufügen</b> klicken.",
+            "4": "Die angezeigte HTTP-POST-URL kopieren und hier einfügen."
+          },
+          "facts": {
+            "urlFormat": "<code>https://…logic.azure.com:443/workflows/…/triggers/manual/paths/invoke?…&sig=…</code>",
+            "response": "<code>202 Accepted</code>, leerer Body",
+            "payload": "Nachricht mit Adaptive Card in <code>attachments</code>"
+          },
+          "notes": {
+            "1": "Die klassischen Office-365-Connectors („Incoming Webhook“-Connector) werden von Microsoft abgekündigt. Neue Webhooks bitte über die Workflows-App anlegen.",
+            "2": "202 bedeutet nur „angenommen“. Ob die Karte gepostet wurde, siehst du im Ausführungsverlauf des Workflows."
+          }
+        }
+      },
+      "google-chat": {
+        "description": "Text oder Card v2 in einen Space",
+        "tag": "Cards v2",
+        "fields": {
+          "textHelp": "*fett*, _kursiv_, <URL|Linktext>",
+          "cardGroup": "Card (optional)",
+          "cardTitle": "Card-Titel",
+          "subtitle": "Untertitel",
+          "facts": "Zeilen (decoratedText)",
+          "threadKey": "Thread-Key",
+          "threadKeyHelp": "Gleicher Key = gleicher Thread, z. B. die Bestellnummer."
+        },
+        "guide": {
+          "title": "Webhook in Google Chat anlegen",
+          "steps": {
+            "1": "Space in Google Chat öffnen und oben auf den Space-Namen klicken.",
+            "2": "<b>Apps & Integrationen</b> wählen, dann <b>Webhooks hinzufügen</b>.",
+            "3": "Namen und optional Avatar-URL eingeben, <b>Speichern</b>.",
+            "4": "Beim neuen Webhook auf <b>⋮ → Link kopieren</b> klicken und hier einfügen."
+          },
+          "facts": {
+            "urlFormat": "<code>https://chat.googleapis.com/v1/spaces/…/messages?key=…&token=…</code>",
+            "response": "<code>200</code> mit Message-JSON (<code>name</code>, <code>thread.name</code>)",
+            "availability": "nur Google-Workspace-Konten"
+          },
+          "notes": {
+            "1": "Für Antworten im selben Thread einen Thread-Key setzen und an die URL <code>&messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD</code> anhängen."
+          }
+        }
+      },
+      "discord": {
+        "description": "Content plus Embeds, Name und Avatar frei",
+        "tag": "Embeds",
+        "fields": {
+          "content": "Nachricht (content)",
+          "contentHelp": "Markdown: **fett**, *kursiv*, `code`, <@&rollenId>",
+          "embedGroup": "Embed",
+          "description": "Beschreibung",
+          "facts": "Felder (inline)",
+          "titleUrl": "Titel-Link"
+        },
+        "guide": {
+          "title": "Webhook in Discord anlegen",
+          "steps": {
+            "1": "<b>Servereinstellungen → Integrationen → Webhooks</b> öffnen (Recht „Webhooks verwalten“ nötig).",
+            "2": "<b>Neuer Webhook</b> klicken, Namen und Ziel-Kanal wählen.",
+            "3": "<b>Webhook-URL kopieren</b> und hier einfügen."
+          },
+          "facts": {
+            "urlFormat": "<code>https://discord.com/api/webhooks/{id}/{token}</code>",
+            "response": "<code>204 No Content</code>, mit <code>?wait=true</code> <code>200</code> + Message-JSON",
+            "limits": "<code>content</code> max. 2000 Zeichen, bis 10 Embeds"
+          },
+          "notes": {
+            "1": "Tipp: <code>?wait=true</code> an die URL hängen. Dann liefert Discord die Message-ID zurück, die spätere Schritte nutzen können (z. B. zum Bearbeiten)."
+          }
+        }
+      },
+      "mattermost": {
+        "description": "Markdown, Attachments, Priorität",
+        "tag": "Self-hosted",
+        "fields": {
+          "channel": "Kanal überschreiben",
+          "channelPlaceholder": "leer = Standardkanal"
+        },
+        "priorities": {
+          "standard": "Standard",
+          "important": "Wichtig",
+          "urgent": "Dringend"
+        },
+        "guide": {
+          "title": "Incoming Webhook in Mattermost anlegen",
+          "steps": {
+            "1": "Hauptmenü → <b>Integrationen → Eingehende Webhooks</b>.",
+            "2": "<b>Eingehenden Webhook hinzufügen</b>, Titel und Kanal wählen. Optional „Auf diesen Kanal beschränken“.",
+            "3": "<b>Speichern</b> und die URL kopieren."
+          },
+          "facts": {
+            "urlFormat": "<code>https://{server}/hooks/{id}</code>",
+            "response": "<code>200</code> mit Text <code>ok</code>",
+            "requirement": "System-Admin: „Enable Incoming Webhooks“ aktiv"
+          },
+          "notes": {
+            "1": "Benutzername und Icon lassen sich nur überschreiben, wenn der Admin das in den Integrationseinstellungen erlaubt."
+          }
+        }
+      },
+      "rocket-chat": {
+        "description": "Slack-kompatible Attachments",
+        "tag": "Self-hosted",
+        "fields": {
+          "alias": "Alias (Anzeigename)",
+          "emoji": "Emoji-Avatar",
+          "emojiPlaceholder": ":package:"
+        },
+        "guide": {
+          "title": "Eingehende Integration in Rocket.Chat anlegen",
+          "steps": {
+            "1": "<b>Administration → Workspace → Integrationen</b> öffnen.",
+            "2": "<b>Neu → Eingehend</b> wählen, aktivieren, Namen und Kanal (z. B. <code>#ops</code>) eintragen, „Posten als“ Benutzer wählen.",
+            "3": "<b>Speichern</b>, danach die Webhook-URL kopieren."
+          },
+          "facts": {
+            "urlFormat": "<code>https://{server}/hooks/{id}/{token}</code>",
+            "response": "<code>200</code> mit <code>{\"success\":true}</code>"
+          },
+          "notes": {
+            "1": "Optional kann in der Integration ein Skript die Nutzlast umformen. Dann muss das JSON hier zum Skript passen."
+          }
+        }
+      },
+      "webex": {
+        "description": "Text oder Markdown in einen Space",
+        "tag": "Markdown",
+        "fields": {
+          "format": "Format",
+          "body": "Nachricht",
+          "bodyHelp": "Markdown: **fett**, *kursiv*, [Link](url), > Zitat"
+        },
+        "formats": {
+          "markdown": "Markdown",
+          "text": "Nur Text"
+        },
+        "guide": {
+          "title": "Incoming Webhook in Webex anlegen",
+          "steps": {
+            "1": "Im Webex App Hub (<code>apphub.webex.com</code>) die Integration <b>Incoming Webhooks</b> öffnen und <b>Connect</b> klicken.",
+            "2": "Namen vergeben und den Ziel-Space auswählen.",
+            "3": "<b>Add</b> klicken und die erzeugte URL kopieren."
+          },
+          "facts": {
+            "urlFormat": "<code>https://webexapis.com/v1/webhooks/incoming/…</code>",
+            "response": "<code>204 No Content</code>",
+            "payload": "<code>{\"markdown\": \"…\"}</code> oder <code>{\"text\": \"…\"}</code>"
+          },
+          "notes": {
+            "1": "Der Webhook postet als Bot „Incoming Webhooks“. Eigene Namen oder Avatare sind nicht möglich."
+          }
+        }
+      },
+      "ntfy": {
+        "description": "Push aufs Smartphone, ohne Account",
+        "tag": "Push",
+        "fields": {
+          "topic": "Topic",
+          "message": "Nachricht",
+          "tags": "Tags / Emojis (kommagetrennt)",
+          "tagsPlaceholder": "package,moneybag",
+          "click": "Klick öffnet URL",
+          "markdown": "Markdown rendern"
+        },
+        "priorities": {
+          "1": "1 · minimal",
+          "2": "2 · niedrig",
+          "3": "3 · normal",
+          "4": "4 · hoch",
+          "5": "5 · dringend"
+        },
+        "guide": {
+          "title": "ntfy-Topic einrichten",
+          "steps": {
+            "1": "ntfy-App (Android/iOS) oder <code>ntfy.sh/app</code> öffnen.",
+            "2": "Einen schwer zu erratenden Topic-Namen abonnieren, z. B. <code>oc-alerts-7f3a</code>.",
+            "3": "Hier die Server-Basis-URL eintragen (<code>https://ntfy.sh</code> oder eigener Server). Das Topic steht in der Nachricht."
+          },
+          "facts": {
+            "urlFormat": "<code>https://ntfy.sh</code> (JSON-Publish an die Root-URL)",
+            "response": "<code>200</code> mit Event-JSON (<code>id</code>, <code>time</code>)",
+            "auth": "bei geschützten Topics Header <code>Authorization: Bearer tk_…</code>"
+          },
+          "notes": {
+            "1": "Topics auf ntfy.sh sind öffentlich lesbar, wenn man den Namen kennt. Für vertrauliche Daten einen eigenen Server mit Zugriffsschutz verwenden."
+          }
+        }
+      },
+      "generic": {
+        "name": "Generischer Webhook",
+        "description": "Beliebiger Dienst, JSON frei definierbar",
+        "tag": "Nur JSON",
+        "guide": {
+          "title": "Beliebigen Webhook verwenden",
+          "steps": {
+            "1": "Webhook-URL aus dem Zielsystem kopieren (z. B. Zammad, Jira Automation, PagerDuty Events, Zapier, n8n).",
+            "2": "Im Schritt „Nachricht“ das JSON nach der Dokumentation des Zielsystems aufbauen. Referenzen sind überall in Strings erlaubt.",
+            "3": "Zusätzliche Header wie <code>Authorization</code> im Schritt „Request & Response“ ergänzen."
+          },
+          "facts": {
+            "method": "POST",
+            "response": "abhängig vom Zielsystem"
+          },
+          "notes": {
+            "1": "Für Systeme mit eigenem Schema (z. B. PagerDuty) lohnt später ein eigenes Preset."
+          }
+        }
+      }
+    }
   }
 }

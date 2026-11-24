@@ -1,0 +1,54 @@
+.notificationNode:focus-visible {
+  outline: 2px solid var(--color-action-primary);
+  outline-offset: 2px;
+}
+
+.notificationToolBadge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 22px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-background-surface);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 7;
+  pointer-events: auto;
+}
+
+.notificationToolBadge--empty {
+  background: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.notificationNodeStatusDot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--color-border-strong);
+}
+
+.notificationNodeStatusDot--ready {
+  background: var(--color-status-success-fg);
+}
+
+.notificationNodeLabel > small {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.notificationNodeLabel--empty > small {
+  font-style: italic;
+}

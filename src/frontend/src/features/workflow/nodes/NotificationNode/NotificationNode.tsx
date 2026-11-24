@@ -1,45 +1,71 @@
-import { useContext } from 'react';
-import { NotificationOpenContext } from '../../notification/NotificationOpenContext';
+import type { KeyboardEvent } from 'react';
 import type { NodeProps } from '@xyflow/react';
-import { Bell } from 'lucide-react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { notificationTools } from './notificationTools';
+import { Icon } from '@shared/ui/primitives/Icon';
 import type { NotificationWorkflowNode } from '../../types/workflow.types';
+import { useOpenNotificationEditor } from '../../notification/ui/NotificationEditorContext';
+import { getNotificationTool } from '../../notification/tools/notificationTools';
+import { getActiveDraft } from '../../notification/model/notificationConfig';
+import { useNotificationToolName } from '../../notification/ui/useNotificationToolName';
+import { AggregatorBadge } from '../AggregatorBadge/AggregatorBadge';
 import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
-import './notificationNode.css';
+import { NotificationNodeBadges } from './NotificationNodeBadges';
 
-export function NotificationNode({ id, data, selected }: NodeProps<NotificationWorkflowNode>) {
-	const open = useContext(NotificationOpenContext);
+export function NotificationNode({ id, data, selected, dragging }: NodeProps<NotificationWorkflowNode>) {
 	const { t } = useI18n('workflow');
-	const toolId = data.notificationConfig?.tool;
-	const tool = toolId ? notificationTools[toolId] : undefined;
-	const toolName = tool ? tool.name ?? t('notification.generic') : t('notification.noTool');
-	const label = data.subtitle || data.title || t('notification.label');
-	const hasWebhook = !!(toolId && data.notificationConfig?.drafts?.[toolId]?.webhookUrl.trim());
+	const openEditor = useOpenNotificationEditor();
+	const toolName = useNotificationToolName();
+	const suppressTooltip = dragging || data.isAnyNodeDragging;
+	const config = data.notification;
+	const tool = config?.tool ? getNotificationTool(config.tool) : null;
+	const isReady = !!tool && !!config && !!getActiveDraft(config)?.webhookUrl.trim();
+	const label = data.subtitle || data.title;
+
+	const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+		if (event.target !== event.currentTarget) return;
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			openEditor?.(id);
+		}
+		if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+			event.preventDefault();
+			const rect = event.currentTarget.getBoundingClientRect();
+			data.onOpenContextMenu?.({ nodeId: id, x: rect.left, y: rect.bottom + 4, kind: data.kind });
+		}
+	};
 
 	return (
-		<NodeShell id={id} data={data} selected={selected} bottomLabel={label}
-			bottomExtra={<span className="notificationNodeTool">{toolName}</span>}
-			testId="workflow-notification-node">
-			<div className="circleNode notificationNode" tabIndex={0} role="button" aria-disabled={!open}
-				onDoubleClick={(event) => {
-					if (!open) return;
-					event.stopPropagation();
-					open({ id });
-				}}
-				onKeyDown={(event) => {
-					if (!open || (event.key !== 'Enter' && event.key !== ' ')) return;
-					event.preventDefault();
-					event.stopPropagation();
-					open({ id });
-				}}
-				aria-label={t('notification.ariaLabel').replace('{label}', label)}>
-				<Bell size={24} aria-hidden="true" />
-				{tool && <span className="notificationNodeBadge" style={{ backgroundColor: tool.color }}>{tool.badge}</span>}
-				<span className="notificationNodeStatus" data-configured={hasWebhook}
-					aria-label={t(hasWebhook ? 'notification.webhookSet' : 'notification.webhookMissing')} />
+		<NodeShell
+			id={id}
+			data={data}
+			selected={selected}
+			testId={`workflow-notification-node-${id}`}
+			bottomLabel={
+				<span className={`notificationNodeLabel ${tool ? '' : 'notificationNodeLabel--empty'}`}>
+					<span>{label}</span>
+					<small>{tool ? toolName(tool) : t('notification.node.chooseTool')}</small>
+				</span>
+			}
+			rightAdd={{
+				action: { sourceNodeId: id, direction: 'right' },
+				showAlways: !!data.isLeaf && !data.jump,
+				lineVisible: !!data.isLeaf && !data.jump,
+			}}
+		>
+			<div className='circleNode notificationNode' tabIndex={0} role='button'
+				aria-label={t('notification.node.ariaLabel', { label })} onKeyDown={onKeyDown}
+				data-testid={`workflow-notification-node-body-${id}`}>
+				<Icon name='notification' size={24} />
+				<NotificationNodeBadges nodeId={id} tool={tool} isReady={isReady} suppressTooltip={suppressTooltip} />
+				<AggregatorBadge
+					dataAggregator={data.dataAggregator}
+					testId={`workflow-node-aggregator-${id}`}
+					suppressTooltip={suppressTooltip}
+					onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
+				/>
 			</div>
+
 			<StandardNodeHandles />
 		</NodeShell>
 	);

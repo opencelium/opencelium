@@ -9,6 +9,7 @@ import { AddStepTrigger } from '../AddStepTrigger/AddStepTrigger';
 import { BindingBadge } from '../BindingBadge/BindingBadge';
 import { CommentBadge } from '../CommentBadge/CommentBadge';
 import type { NodeShellProps } from './NodeShell.types';
+import { useOpenNotificationEditor } from '../../notification/ui/NotificationEditorContext';
 
 // A failed test run can report a whole backend stack trace.
 const MAX_TOOLTIP_MESSAGE_LENGTH = 200;
@@ -29,7 +30,9 @@ export function NodeShell({
 	children,
 }: NodeShellProps) {
 	const onAddStep = data.onAddStep;
-	const isMethodNode = data.kind === 'connector' || data.kind === 'system';
+	const isMethodNode = data.kind === 'connector' || data.kind === 'system' || data.kind === 'notification';
+	const openNotificationEditor = useOpenNotificationEditor();
+	const canOpenNotification = data.kind === 'notification' && !!openNotificationEditor;
 	const bindingLens = useBindingLensNode();
 	const isMultiSelection = useIsMultiNodeSelection();
 	const hasNoJointTarget = useHasNoJointTarget(id);
@@ -55,7 +58,6 @@ export function NodeShell({
 			if (event.button !== 0) event.stopPropagation();
 			return;
 		}
-		if (data.kind === 'start') return;
 		event.preventDefault();
 		data.onOpenContextMenu?.({ nodeId: id, x: event.clientX, y: event.clientY, kind: data.kind });
 	};
@@ -111,6 +113,8 @@ export function NodeShell({
 		>
 			{selected && !isMultiSelection && (
 				<NodeToolbar
+					canOpen={canOpenNotification}
+					onOpen={() => openNotificationEditor?.(id)}
 					canDelete={data.kind !== 'start' && !!data.onDeleteNode}
 					/* Only offered while the node has no note: an existing one is shown or
 					   hidden from its own badge, so this action never no-ops. */

@@ -3,12 +3,10 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.typ
 import { buildWorkflowIndexes } from './connectionPayload.indexes';
 import { buildMethodPayload } from './connectionPayload.methods';
 import { buildOperatorPayload, getLoopIterator } from './connectionPayload.operators';
+import { isMethodNodeType } from '../utils/methodNodeTypes';
 
 const nodeKind = (node: WorkflowNodeModel) => node.type;
-const isMethodNode = (node: WorkflowNodeModel) => {
-	const kind = nodeKind(node);
-	return kind === 'connector' || kind === 'system' || kind === 'trigger-connection';
-};
+const isMethodNode = (node: WorkflowNodeModel) => isMethodNodeType(nodeKind(node));
 const isOperatorNode = (node: WorkflowNodeModel) => ['if', 'loop'].includes(nodeKind(node));
 const parseIndex = (value: unknown) => String(value ?? '')
 	.split('_')

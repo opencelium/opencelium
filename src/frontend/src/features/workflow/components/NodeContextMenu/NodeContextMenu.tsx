@@ -5,8 +5,9 @@ import { ContextMenuEditor } from '../context-menu/ContextMenuEditor/ContextMenu
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
 import { placeContextMenu } from './contextMenuPlacement';
 import { NodeContextMenuSections } from './NodeContextMenuSections';
+import { moveFocus } from './contextMenuKeyboard';
 
-export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor }: NodeContextMenuProps) {
+export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor, onOpenNotificationEditor, onCopyNodes, onPasteNodes, canPasteNodes }: NodeContextMenuProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
@@ -24,6 +25,11 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
     const observer = new ResizeObserver(place);
     observer.observe(element);
     return () => observer.disconnect();
+  }, [menu]);
+
+  // Focus the first entry so a menu opened from the keyboard can be driven by it.
+  useEffect(() => {
+    if (menu) ref.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
   }, [menu]);
 
   useEffect(() => {
@@ -52,7 +58,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
 
   if (!menu) return null;
   return createPortal(
-    <div ref={ref} className="contextMenu" data-testid="workflow-context-menu" style={position ?? { left: menu.x, top: menu.y, visibility: 'hidden' }}>
+    <div ref={ref} className="contextMenu" role="menu" data-testid="workflow-context-menu" onKeyDown={moveFocus} style={position ?? { left: menu.x, top: menu.y, visibility: 'hidden' }}>
       {isEditingLabel ? (
         <ContextMenuEditor
           inputRef={inputRef}
@@ -70,7 +76,9 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
         <NodeContextMenuSections menu={menu} node={node} onClose={onClose}
           onEditLabel={() => setIsEditingLabel(true)} onOpenRequestEditor={onOpenRequestEditor}
           onOpenConditionEditor={onOpenConditionEditor} onShowResponse={onShowResponse} onTryRequest={onTryRequest}
-          onOpenAggregatorEditor={onOpenAggregatorEditor} onOpenConnectorEditor={onOpenConnectorEditor} />
+          onOpenAggregatorEditor={onOpenAggregatorEditor} onOpenConnectorEditor={onOpenConnectorEditor}
+          onCopyNodes={onCopyNodes} onPasteNodes={onPasteNodes} canPasteNodes={canPasteNodes}
+          onOpenNotificationEditor={onOpenNotificationEditor} />
       )}
     </div>,
     document.body,
