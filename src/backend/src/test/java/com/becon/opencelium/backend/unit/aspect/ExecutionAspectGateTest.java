@@ -23,7 +23,6 @@ import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.exception.ExecutionTerminatedException;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
-import com.becon.opencelium.backend.execution.logger.service.LogDataService;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.service.GlobalVariableSnapshotService;
@@ -93,7 +92,7 @@ class ExecutionAspectGateTest {
                 100, Duration.ofMinutes(60), Clock.systemUTC());
         aspect = new ExecutionAspect(schedulerService, mock(UserService.class), mock(ExecutionService.class),
                 mock(LastExecutionService.class), mock(SubscriptionService.class), mock(DataAggregatorService.class),
-                mock(LogDataService.class), mock(IncomingWebhookService.class), mock(EmailServiceImpl.class),
+                mock(IncomingWebhookService.class), mock(EmailServiceImpl.class),
                 mock(Environment.class), mock(WebSocketNotificationService.class), mock(ConnectionService.class),
                 mock(LanguageService.class), mock(GlobalVariableSnapshotService.class), gate);
     }
