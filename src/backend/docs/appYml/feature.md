@@ -232,7 +232,25 @@ This is deliberate: an HTTP restore endpoint would let a stolen Admin token undo
 
 | Key | Default | Purpose |
 | --- | --- | --- |
-| `opencelium.config.file-path` | `./application.yml` | Path to the YAML file the endpoint reads/writes. Service falls back to the classpath copy on read if the configured file doesn't exist, but writes always require an on-disk file. |
+| `opencelium.config.file-path` | `./application.yml` | Path to the YAML file the endpoint reads/writes. Service falls back to the classpath copy on read if the configured file doesn't exist, but writes always require an on-disk file. Prefer setting it through the `OPENCELIUM_CONFIG_FILEPATH` environment variable (see below). |
+
+### Moving `application.yml` out of `src/main/resources`
+
+Set the environment variable `OPENCELIUM_CONFIG_FILEPATH` (or the system property `-Dopencelium.config.file-path`) to the file's location. A relative path is resolved against the working directory. That single value is used by:
+
+- the **YAML migrator**, which patches the file at startup before Spring reads it,
+- **Spring** itself, as the default `spring.config.location`, so no `--spring.config.location` argument is needed,
+- the **config editor**, through Spring's relaxed binding of `opencelium.config.file-path`.
+
+Unset, everything falls back to `src/main/resources/application.yml`. The migrator's temporary rollback copy (`application_copy.yml`) is created next to the target file, so its directory must be writable.
+
+```yaml
+# docker compose
+environment:
+  OPENCELIUM_CONFIG_FILEPATH: /opt/opencelium/config/application.yml
+```
+
+An explicit `--spring.config.location` still controls what Spring loads, but the migrator does not read it — keep both pointing at the same file, or use only the environment variable.
 | `opencelium.config.backup.directory` | `runtime/backup/application` | Where pre-write backups go. Created on first write. |
 | `opencelium.config.backup.keep` | `10` | Max backups retained per target file; older ones are pruned best-effort. |
 

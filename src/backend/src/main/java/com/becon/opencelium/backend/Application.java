@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend;
 
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,7 +24,6 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.nio.file.Paths;
 import java.util.Properties;
 
 @EnableAsync
@@ -41,7 +41,7 @@ public class Application {
 	private static void prepare(SpringApplication application) {
 		YAMLMigrator.run();
 
-		String configLocation = Paths.get(System.getProperty("user.dir")).resolve("src/main/resources/application.yml").toString();
+		String configLocation = PathConstant.appYmlPath().toString();
 		Properties properties = new Properties();
 		properties.put("spring.config.location", configLocation);
 		application.setDefaultProperties(properties);

@@ -6,10 +6,23 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.referencePath;
 
 public class PathAndReferenceUtility {
+    /**
+     * Every reference that can appear inside text, matched as short as possible so that two
+     * references in one text are never merged: wrapped direct reference, enhancement, webhook,
+     * page reference and request data.
+     */
+    private static final Pattern REFERENCE_SPAN = Pattern.compile(
+            "\\{%#[a-zA-Z0-9]{6}\\.\\((?:response|request)\\)\\..+?%\\}"
+                    + "|#\\{%[0-9a-fA-F]{24}%\\}"
+                    + "|\\$\\{[^}]*\\}"
+                    + "|@\\{[^}]+\\}"
+                    + "|\\{(?!%)[^{}]*(?<!%)\\}");
     private static final String PRE_DIRECT_REF = "{%#";
     private static final String SUF_DIRECT_REF = "%}";
     private static final String PRE_WEBHOOK = "${";
@@ -86,13 +99,8 @@ public class PathAndReferenceUtility {
     }
 
     /**
-     * Parses a query string into a list of key-value pairs(guaranteed to be present both key and value), with support for special
-     * placeholders such as:
-     * <ul>
-     *     <li>{@code {%# ... %}} → Direct reference syntax</li>
-     *     <li>{@code ${ ... }} → Webhook reference syntax</li>
-     *     <li>{@code [' ... ']} → Bracket reference syntax (not currently parsed in this method, but constants defined)</li>
-     * </ul>
+     * Parses a query string into a list of key-value pairs. A {@code '&'} or {@code '='} inside a
+     * reference ({@link #findReferenceSpans(String)}) does not split the query.
      *
      * <p>Example:</p>
      * <pre>
@@ -100,103 +108,44 @@ public class PathAndReferenceUtility {
      * query = "name=Obidjon&role=admin"
      * result = [["name", "Obidjon"], ["role", "admin"]]
      *
-     * query = "name={%#username%}&password=${random=&$}"
-     * result = [["name", "{%#username%}"], ["password", "${random=&$}"]]
+     * query = "name={%#ffffff.(response).name%}&password=${random=&$}&flag&q="
+     * result = [["name", "{%#ffffff.(response).name%}"], ["password", "${random=&$}"], ["flag", null], ["q", ""]]
      * </pre>
      *
-     * <p>
-     * The parser ensures that nested values containing special placeholder patterns
-     * are not prematurely split by `=` or `&`. It uses a stack to track when the parser
-     * is inside a placeholder block, preventing incorrect tokenization.
-     * </p>
-     *
-     * @param query the query string to parse (may contain placeholders or plain key-value pairs).
+     * @param query the query string to parse (may contain references or plain key-value pairs).
      * @return a list of string arrays, where each array has exactly two elements: key and value.
+     *         The value is {@code null} for a part without {@code '='}, and an empty value is
+     *         handled by the empty query value policy.
      */
     public static List<String[]> getQueryVariables(String query) {
         if (query == null || query.isEmpty()) {
             return Collections.emptyList();
         }
 
-        int pre1 = query.indexOf(PRE_DIRECT_REF);
-        int pre2 = query.indexOf(PRE_WEBHOOK);
+        List<String[]> result = new ArrayList<>();
 
-        if (pre1 == -1 && pre2 == -1) {
-
-            List<String[]> result = new ArrayList<>();
-
-            for (String part : query.split("&")) {
-                String[] pair = part.split("=");
-
-                if (pair.length == 1 || StringUtils.isBlank(pair[0])) {
-                    throw new RuntimeException("Invalid query parameter: " + part);
-                }
-
-                if (StringUtils.isBlank(pair[1])) {
-                    pair[1] = EMPTY_QUERY_VALUE_POLICY.apply(pair[0]);
-                }
-
-                result.add(pair);
+        for (String part : splitOutsideReferences(query, '&')) {
+            if (part.isEmpty()) {
+                continue;
             }
 
-            return result;
-        }
-
-        // holder for storing result pairs
-        List<String[]> res = new ArrayList<>();
-
-        // stack for permanently saving reference prefixes
-        Stack<String> stack = new Stack<>();
-
-        int pointer = -1;
-        int n = query.length();
-        int start = 0;
-        for (int i = 0; i < n; i++) {
-            if (stack.empty() && query.charAt(i) == '=') {
-                // when '=' appears, it means it separates query param's key and value pair
-                // In this state, we track it's key with certain pointer to bind its value later
-
-                String[] pair = new String[2];
-                pair[0] = query.substring(start, i);
-                res.add(pair);
-                pointer++;
-                start = i + 1;
-            } else if (stack.empty() && query.charAt(i) == '&') {
-                // '&' separates query params
-                // In this state, we get prev query's value
-
-                String[] pair = res.get(pointer);
-                String queryValue = query.substring(start, i);
-
-                pair[1] = StringUtils.isBlank(queryValue) ? EMPTY_QUERY_VALUE_POLICY.apply(pair[0]) : queryValue;
-
-                start = i + 1;
-            } else if (i + PRE_DIRECT_REF.length() < n && query.startsWith(PRE_DIRECT_REF, i)) {
-                stack.push(SUF_DIRECT_REF);
-                i += PRE_DIRECT_REF.length() - 1;
-            } else if (i + PRE_WEBHOOK.length() < n && query.startsWith(PRE_WEBHOOK, i)) {
-                stack.push(SUF_WEBHOOK);
-                i += PRE_WEBHOOK.length() - 1;
-            } else if (i + SUF_DIRECT_REF.length() < n && query.startsWith(SUF_DIRECT_REF, i)) {
-                if (!stack.empty() && stack.peek().equals(SUF_DIRECT_REF)) {
-                    stack.pop();
-                    i += SUF_DIRECT_REF.length() - 1;
-                }
-            } else if (i + SUF_WEBHOOK.length() < n && query.startsWith(SUF_WEBHOOK, i)) {
-                if (!stack.empty() && stack.peek().equals(SUF_WEBHOOK)) {
-                    stack.pop();
-                    i += SUF_WEBHOOK.length() - 1;
-                }
-            } else if (i == n - 1) {
-                String[] pair = res.get(pointer);
-                String queryValue = query.substring(start);
-
-                pair[1] = StringUtils.isBlank(queryValue) ? EMPTY_QUERY_VALUE_POLICY.apply(pair[0]) : queryValue;
-
-                return res;
+            int separator = indexOfOutsideReferences(part, '=');
+            if (separator == -1) {
+                // a part without '=', such as 'flag'
+                result.add(new String[]{part, null});
+                continue;
             }
+
+            String key = part.substring(0, separator);
+            if (StringUtils.isBlank(key)) {
+                throw new RuntimeException("Invalid query parameter: " + part);
+            }
+
+            String value = part.substring(separator + 1);
+            result.add(new String[]{key, StringUtils.isBlank(value) ? EMPTY_QUERY_VALUE_POLICY.apply(key) : value});
         }
-        return res;
+
+        return result;
     }
 
     public static String bindExactlyPlace(String str, List<String> refs, String id) {
@@ -349,6 +298,80 @@ public class PathAndReferenceUtility {
         return returnOpenedBracket
                 ? openWrappedBrackets(res)
                 : res;
+    }
+
+    /**
+     * Finds every reference in the given text, in order of appearance.
+     *
+     * <p>Example:</p>
+     * <pre>
+     * text = "{url}/users/{%#ffffff.(response).id%}"
+     * result = [[0, 5], [12, 37]]
+     * </pre>
+     *
+     * @return start (inclusive) and end (exclusive) index of each reference, never null
+     */
+    public static List<int[]> findReferenceSpans(String text) {
+        if (text == null || text.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<int[]> spans = new ArrayList<>();
+        Matcher matcher = REFERENCE_SPAN.matcher(text);
+        while (matcher.find()) {
+            spans.add(new int[]{matcher.start(), matcher.end()});
+        }
+
+        return spans;
+    }
+
+    /**
+     * Returns the index of the first {@code ch} that is not inside a reference, or -1.
+     */
+    public static int indexOfOutsideReferences(String text, char ch) {
+        if (text == null) {
+            return -1;
+        }
+
+        List<int[]> spans = findReferenceSpans(text);
+        int spanIndex = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (spanIndex < spans.size() && i == spans.get(spanIndex)[0]) {
+                i = spans.get(spanIndex)[1] - 1;
+                spanIndex++;
+            } else if (text.charAt(i) == ch) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Splits the given text on every {@code delimiter} that is not inside a reference. Empty
+     * parts are kept, so joining the parts with the delimiter gives back the text.
+     */
+    public static List<String> splitOutsideReferences(String text, char delimiter) {
+        if (text == null) {
+            return Collections.emptyList();
+        }
+
+        List<int[]> spans = findReferenceSpans(text);
+        List<String> parts = new ArrayList<>();
+        int spanIndex = 0;
+        int start = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (spanIndex < spans.size() && i == spans.get(spanIndex)[0]) {
+                i = spans.get(spanIndex)[1] - 1;
+                spanIndex++;
+            } else if (text.charAt(i) == delimiter) {
+                parts.add(text.substring(start, i));
+                start = i + 1;
+            }
+        }
+        parts.add(text.substring(start));
+
+        return parts;
     }
 
     /**
