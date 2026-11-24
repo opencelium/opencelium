@@ -1,6 +1,7 @@
 package io.opencelium.core.authz;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 import io.opencelium.core.config.DeploymentMode;
 
@@ -11,13 +12,20 @@ import io.opencelium.core.config.DeploymentMode;
  */
 public final class InstallationAdmin {
 
+	/** The authority that the authentication gives a user with the role {@code ADMIN}. */
+	static final String ADMIN_AUTHORITY = Roles.authorityOf(Roles.ADMIN);
+
+	private final DeploymentMode deploymentMode;
+
 	public InstallationAdmin(DeploymentMode deploymentMode) {
-		throw new UnsupportedOperationException("not implemented yet");
+		this.deploymentMode = deploymentMode;
 	}
 
 	/** @return {@code true} when the login of the request passes the rule */
 	public boolean check(Authentication authentication) {
-		throw new UnsupportedOperationException("not implemented yet");
+		return deploymentMode == DeploymentMode.SELF_HOST && authentication != null
+				&& authentication.isAuthenticated() && authentication.getAuthorities().stream()
+					.map(GrantedAuthority::getAuthority).anyMatch(ADMIN_AUTHORITY::equals);
 	}
 
 }

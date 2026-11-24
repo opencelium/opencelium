@@ -77,6 +77,21 @@ class SettingsEndpointTest {
 	}
 
 	@Test
+	void getGivesTheDatabaseValueWhenTheDatabaseHasOne() {
+		mongo.getCollection("settings").insertOne(new Document("_id", "installation").append("broker",
+				new Document("port", 5673).append("virtual-host", "/oc")));
+
+		MvcTestResult read = SettingsRequests.read(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc));
+
+		assertThat(read).hasStatusOk();
+		assertThat(read).bodyJson().extractingPath(field("broker.port", "value")).isEqualTo(5673);
+		assertThat(read).bodyJson().extractingPath(field("broker.port", "default")).isEqualTo(false);
+		assertThat(read).bodyJson().extractingPath(field("broker.virtual-host", "value")).isEqualTo("/oc");
+		assertThat(read).bodyJson().extractingPath(field("broker.virtual-host", "default")).isEqualTo(false);
+		assertThat(read).bodyJson().extractingPath(field("broker.host", "default")).isEqualTo(true);
+	}
+
+	@Test
 	void getKeepsTheSettingsCollectionEmptyWhenAnAdminReadsTheSettings() {
 		MvcTestResult read = SettingsRequests.read(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc));
 
@@ -93,6 +108,7 @@ class SettingsEndpointTest {
 		MvcTestResult read = SettingsRequests.read(mvc, LoginRequests.sessionJwtOf(login));
 
 		LoginRequests.assertProblem(read, HttpStatus.FORBIDDEN, "access-denied");
+		assertThat(read).bodyJson().extractingPath("$.instance").isEqualTo(SettingsRequests.PATH);
 		assertThat(read).bodyText().doesNotContain("broker.");
 	}
 
