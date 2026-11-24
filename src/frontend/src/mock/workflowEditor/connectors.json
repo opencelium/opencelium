@@ -1,0 +1,1086 @@
+[
+  {
+    "connectorId": 1,
+    "title": "fake",
+    "description": "",
+    "invoker": {
+      "name": "fake_api",
+      "description": "Fake api description",
+      "hint": "Any hints here",
+      "authType": "basic",
+      "requiredData": {
+        "url": "",
+        "username": "",
+        "password": ""
+      },
+      "operations": [
+        {
+          "name": "Query",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}",
+            "method": "POST",
+            "header": {
+              "Authorization": "{token}"
+            },
+            "body": {
+              "type": "object",
+              "format": "json",
+              "data": "graphql",
+              "fields": {
+                "query": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": null,
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "graphql",
+                "fields": {
+                  "data": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "Mock",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/v3/e448d957-cd4e-48e4-9dbb-713cac3d4f3b",
+            "method": "GET",
+            "header": {
+              "Authorization": "{token}"
+            },
+            "body": null
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": null,
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "body": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "SimpleArray",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/simple/array/string=",
+            "method": "POST",
+            "header": {
+              "Authorization": "{token}"
+            },
+            "body": {
+              "type": "object",
+              "format": "json",
+              "data": "raw",
+              "fields": {
+                "arrs": []
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": null,
+              "body": null
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "AddUser",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/user",
+            "method": "POST",
+            "header": {
+              "Authorization": "{token}",
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            "body": {
+              "type": "object",
+              "format": "x-www-form-urlencoded",
+              "data": "raw",
+              "fields": {
+                "@odata.id": "",
+                "role": "",
+                "test_prop": "",
+                "name": "",
+                "id": "",
+                "units": [],
+                "department": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": null,
+              "body": null
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "GetUser",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/user?id=${}",
+            "method": "GET",
+            "header": {
+              "Authorization": "{token}",
+              "Test": "{token}{username}texts{password}"
+            },
+            "body": null
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": null,
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "@odata.id": "",
+                  "addresses": [],
+                  "role": "",
+                  "test_prop": "",
+                  "name": "",
+                  "id": "",
+                  "units": [],
+                  "department": "",
+                  "arr1": []
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "GetAllUser",
+          "type": "test",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/user/all",
+            "method": "GET",
+            "header": {
+              "Authorization": "{token}"
+            },
+            "body": null
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "type": "array",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "@odata.id": "",
+                  "addresses": [],
+                  "role": "",
+                  "test_prop": "",
+                  "name": "",
+                  "id": "",
+                  "units": [],
+                  "department": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "GetUnit",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/unit/#unit_id#",
+            "method": "GET",
+            "header": {
+              "Authorization": "{token}",
+              "Content-Type": "application/json"
+            },
+            "body": null
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "monitorSerialnumber2": "",
+                  "monitorSerialnumber1": "",
+                  "monitorSize1": "",
+                  "addresses": [],
+                  "networkName": "",
+                  "lastBoottime": "",
+                  "configChanges": "",
+                  "flashSize": "",
+                  "objectType": "",
+                  "movedToBin": "",
+                  "networkSpeed": "",
+                  "monitor1YearOfManufacture": "",
+                  "totalUptime": "",
+                  "links": [],
+                  "id": "",
+                  "totalUsagetime": "",
+                  "deviceType": "",
+                  "serialNumber": "",
+                  "inserviceDate": "",
+                  "productId": "",
+                  "costCenter": "",
+                  "monitorVendor1": "",
+                  "monitor2YearOfManufacture": "",
+                  "firmwareID": "",
+                  "deviceSerialNumber": "",
+                  "lastContact": "",
+                  "monitorModel1": "",
+                  "monitorModel2": "",
+                  "monitor1WeekOfManufacture": "",
+                  "name": "",
+                  "monitorVendor2": "",
+                  "biosDate": "",
+                  "deviceAttributes": [],
+                  "biosVersion": "",
+                  "cpuType": "",
+                  "monitor2WeekOfManufacture": "",
+                  "cpuSpeed": "",
+                  "mac": "",
+                  "parentID": "",
+                  "monitorNativeResolution2": "",
+                  "biosVendor": "",
+                  "monitorNativeResolution1": "",
+                  "osType": "",
+                  "department": "",
+                  "batteryLevel": "",
+                  "graphicsChipset1": "",
+                  "lastIP": "",
+                  "graphicsChipset0": "",
+                  "site": "",
+                  "memorySize": "",
+                  "assetID": "",
+                  "unitID": "",
+                  "comment": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "AddUnit",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/unit",
+            "method": "POST",
+            "header": {
+              "Authorization": "{token}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "type": "object",
+              "format": "json",
+              "data": "raw",
+              "fields": {
+                "monitorSerialnumber2": "",
+                "monitorSerialnumber1": "",
+                "monitorSize1": "",
+                "addresses": [],
+                "networkName": "",
+                "lastBoottime": "",
+                "configChanges": "",
+                "flashSize": "",
+                "objectType": "",
+                "movedToBin": "",
+                "networkSpeed": "",
+                "monitor1YearOfManufacture": "",
+                "totalUptime": "",
+                "links": [],
+                "id": "",
+                "totalUsagetime": "",
+                "deviceType": "",
+                "serialNumber": "",
+                "inserviceDate": "",
+                "productId": "",
+                "costCenter": "",
+                "monitorVendor1": "",
+                "monitor2YearOfManufacture": "",
+                "firmwareID": "",
+                "deviceSerialNumber": "",
+                "lastContact": "",
+                "monitorModel1": "",
+                "monitorModel2": "",
+                "monitor1WeekOfManufacture": "",
+                "name": "",
+                "monitorVendor2": "",
+                "biosDate": "",
+                "deviceAttributes": [],
+                "biosVersion": "",
+                "cpuType": "",
+                "monitor2WeekOfManufacture": "",
+                "cpuSpeed": "",
+                "mac": "",
+                "parentID": "",
+                "monitorNativeResolution2": "",
+                "biosVendor": "",
+                "monitorNativeResolution1": "",
+                "osType": "",
+                "department": "",
+                "batteryLevel": "",
+                "graphicsChipset1": "",
+                "lastIP": "",
+                "graphicsChipset0": "",
+                "site": "",
+                "memorySize": "",
+                "assetID": "",
+                "unitID": "",
+                "comment": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "id": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "GetAllUnit",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/unit/all",
+            "method": "GET",
+            "header": {
+              "Authorization": "{token}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "type": "object",
+              "format": "json",
+              "data": "raw",
+              "fields": {
+                "version": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "type": "array",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "monitorSerialnumber2": "",
+                  "monitorSerialnumber1": "",
+                  "monitorSize1": "",
+                  "addresses": [],
+                  "networkName": "",
+                  "lastBoottime": "",
+                  "configChanges": "",
+                  "flashSize": "",
+                  "objectType": "",
+                  "movedToBin": "",
+                  "networkSpeed": "",
+                  "monitor1YearOfManufacture": "",
+                  "totalUptime": "",
+                  "links": [],
+                  "id": "",
+                  "totalUsagetime": "",
+                  "deviceType": "",
+                  "serialNumber": "",
+                  "inserviceDate": "",
+                  "productId": "",
+                  "costCenter": "",
+                  "monitorVendor1": "",
+                  "monitor2YearOfManufacture": "",
+                  "firmwareID": "",
+                  "deviceSerialNumber": "",
+                  "lastContact": "",
+                  "monitorModel1": "",
+                  "monitorModel2": "",
+                  "monitor1WeekOfManufacture": "",
+                  "name": "",
+                  "monitorVendor2": "",
+                  "biosDate": "",
+                  "deviceAttributes": [],
+                  "biosVersion": "",
+                  "cpuType": "",
+                  "monitor2WeekOfManufacture": "",
+                  "cpuSpeed": "",
+                  "mac": "",
+                  "parentID": "",
+                  "monitorNativeResolution2": "",
+                  "biosVendor": "",
+                  "monitorNativeResolution1": "",
+                  "osType": "",
+                  "department": "",
+                  "batteryLevel": "",
+                  "graphicsChipset1": "",
+                  "lastIP": "",
+                  "graphicsChipset0": "",
+                  "site": "",
+                  "memorySize": "",
+                  "assetID": "",
+                  "unitID": "",
+                  "comment": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "AddUnitList",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/unit",
+            "method": "POST",
+            "header": {
+              "Authorization": "{token}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "type": "array",
+              "format": "json",
+              "data": "raw",
+              "fields": {
+                "monitorSerialnumber2": "",
+                "monitorSerialnumber1": "",
+                "monitorSize1": "",
+                "addresses": [],
+                "networkName": "",
+                "lastBoottime": "",
+                "configChanges": "",
+                "flashSize": "",
+                "objectType": "",
+                "movedToBin": "",
+                "networkSpeed": "",
+                "monitor1YearOfManufacture": "",
+                "totalUptime": "",
+                "links": [],
+                "id": "",
+                "totalUsagetime": "",
+                "deviceType": "",
+                "serialNumber": "",
+                "inserviceDate": "",
+                "productId": "",
+                "costCenter": "",
+                "monitorVendor1": "",
+                "monitor2YearOfManufacture": "",
+                "firmwareID": "",
+                "deviceSerialNumber": "",
+                "lastContact": "",
+                "monitorModel1": "",
+                "monitorModel2": "",
+                "monitor1WeekOfManufacture": "",
+                "name": "",
+                "monitorVendor2": "",
+                "biosDate": "",
+                "deviceAttributes": [],
+                "biosVersion": "",
+                "cpuType": "",
+                "monitor2WeekOfManufacture": "",
+                "cpuSpeed": "",
+                "mac": "",
+                "parentID": "",
+                "monitorNativeResolution2": "",
+                "biosVendor": "",
+                "monitorNativeResolution1": "",
+                "osType": "",
+                "department": "",
+                "batteryLevel": "",
+                "graphicsChipset1": "",
+                "lastIP": "",
+                "graphicsChipset0": "",
+                "site": "",
+                "memorySize": "",
+                "assetID": "",
+                "unitID": "",
+                "comment": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "id": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "GetComplexUnit",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/complex/unit",
+            "method": "GET",
+            "header": {
+              "Authorization": "{token}",
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            "body": {
+              "type": "object",
+              "format": "x-www-form-urlencoded",
+              "data": "raw",
+              "fields": {
+                "networkName": "",
+                "unitID": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "biosVersion": "",
+                  "cpuType": "",
+                  "addresses": [],
+                  "cpuSpeed": "",
+                  "networkName": "",
+                  "lastBoottime": "",
+                  "configChanges": "",
+                  "flashSize": "",
+                  "mac": "",
+                  "parentID": "",
+                  "objectType": "",
+                  "movedToBin": "",
+                  "networkSpeed": "",
+                  "biosVendor": "",
+                  "totalUptime": "",
+                  "osType": "",
+                  "links": [],
+                  "id": "",
+                  "department": "",
+                  "totalUsagetime": "",
+                  "batteryLevel": "",
+                  "deviceType": "",
+                  "serialNumber": "",
+                  "inserviceDate": "",
+                  "productId": "",
+                  "graphicsChipset1": "",
+                  "lastIP": "",
+                  "costCenter": "",
+                  "graphicsChipset0": "",
+                  "firmwareID": "",
+                  "monitor": "",
+                  "deviceSerialNumber": "",
+                  "lastContact": "",
+                  "site": "",
+                  "memorySize": "",
+                  "assetID": "",
+                  "name": "",
+                  "unitID": "",
+                  "biosDate": "",
+                  "comment": "",
+                  "deviceAttributes": []
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "date": "",
+                  "code": "",
+                  "message": ""
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GetAllComplexUnits",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/complex/unit/all",
+            "method": "GET",
+            "header": {
+              "Authorization": "{token}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "type": "object",
+              "format": "json",
+              "data": "raw",
+              "fields": {
+                "version": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "type": "array",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "biosVersion": "",
+                  "cpuType": "",
+                  "addresses": [],
+                  "cpuSpeed": "",
+                  "networkName": "",
+                  "lastBoottime": "",
+                  "configChanges": "",
+                  "flashSize": "",
+                  "mac": "",
+                  "parentID": "",
+                  "objectType": "",
+                  "movedToBin": "",
+                  "networkSpeed": "",
+                  "biosVendor": "",
+                  "totalUptime": "",
+                  "osType": "",
+                  "links": [],
+                  "id": "",
+                  "department": "",
+                  "totalUsagetime": "",
+                  "batteryLevel": "",
+                  "deviceType": "",
+                  "serialNumber": "",
+                  "inserviceDate": "",
+                  "productId": "",
+                  "graphicsChipset1": "",
+                  "lastIP": "",
+                  "costCenter": "",
+                  "graphicsChipset0": "",
+                  "firmwareID": "",
+                  "monitor": "",
+                  "deviceSerialNumber": "",
+                  "lastContact": "",
+                  "site": "",
+                  "memorySize": "",
+                  "assetID": "",
+                  "name": "",
+                  "unitID": "",
+                  "biosDate": "",
+                  "comment": "",
+                  "deviceAttributes": []
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "AddComplexUnit",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}",
+            "method": "POST",
+            "header": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "type": "object",
+              "format": "json",
+              "data": "raw",
+              "fields": {
+                "biosVersion": "",
+                "cpuType": "",
+                "addresses": [],
+                "cpuSpeed": "",
+                "networkName": "",
+                "lastBoottime": "",
+                "configChanges": "",
+                "flashSize": "",
+                "mac": "",
+                "parentID": "",
+                "objectType": "",
+                "movedToBin": "",
+                "networkSpeed": "",
+                "biosVendor": "",
+                "totalUptime": "",
+                "osType": "",
+                "id": "",
+                "department": "",
+                "totalUsagetime": "",
+                "batteryLevel": "",
+                "deviceType": "",
+                "serialNumber": "",
+                "inserviceDate": "",
+                "productId": "",
+                "graphicsChipset1": "",
+                "lastIP": "",
+                "costCenter": "",
+                "graphicsChipset0": "",
+                "firmwareID": "",
+                "monitor": "",
+                "deviceSerialNumber": "",
+                "lastContact": "",
+                "site": "",
+                "memorySize": "",
+                "assetID": "",
+                "name": "",
+                "unitID": "",
+                "biosDate": "",
+                "ids": [],
+                "comment": "",
+                "deviceAttributes": []
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "id": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "ConfigItemCreateOrUpdate",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/api/v1/configItems",
+            "method": "POST",
+            "header": {
+              "Authorization": "Bearer {token}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "type": "object",
+              "format": "json",
+              "data": "application/json",
+              "fields": {
+                "ConfigItem": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": null,
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "updated_at": "",
+                  "Version": "",
+                  "created_at": "",
+                  "ClassID": "",
+                  "ConfigItemID": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "GetDeviceDetails",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/idoit/category",
+            "method": "POST",
+            "header": {
+              "Authorization": "Bearer {token}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "type": "object",
+              "format": "json",
+              "data": "raw",
+              "fields": {
+                "id": "",
+                "jsonrpc": ""
+              }
+            }
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": null,
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "result": [],
+                  "id": "",
+                  "jsonrpc": ""
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        },
+        {
+          "name": "WildcardNodes",
+          "type": "",
+          "request": {
+            "id": null,
+            "endpoint": "{url}/wildcard/nodes",
+            "method": "GET",
+            "header": {
+              "Authorization": "{token}"
+            },
+            "body": null
+          },
+          "response": {
+            "id": null,
+            "name": "response",
+            "success": {
+              "id": null,
+              "status": "200",
+              "header": null,
+              "body": {
+                "type": "object",
+                "format": "json",
+                "data": "raw",
+                "fields": {
+                  "node": {
+                    "object2": {
+                      "path": "",
+                      "hostname": {
+                        "net": {
+                          "test": ""
+                        }
+                      },
+                      "value": ""
+                    },
+                    "object1": {
+                      "hostname": {
+                        "ip": ""
+                      },
+                      "title": ""
+                    },
+                    "object3": {
+                      "owner": {
+                        "email": ""
+                      },
+                      "title": ""
+                    },
+                    "name": ""
+                  }
+                }
+              }
+            },
+            "fail": {
+              "id": null,
+              "status": "401",
+              "header": null,
+              "body": null
+            }
+          }
+        }
+      ],
+      "hasManualSync": false
+    },
+    "sslCert": false,
+    "timeout": 1000,
+    "requestData": {
+      "password": "",
+      "url": "",
+      "username": ""
+    },
+    "status": "UP",
+    "lastCheckedAt": 1795162502000,
+    "modifiedBy": 1,
+    "modifiedAt": 1794405342000
+  }
+]

@@ -1,5 +1,5 @@
 import type { Connection } from '../../../types/connection';
-import { buildRequestResultField, getParsedReferences } from './bodyReference';
+import { buildRequestResultField, formatBindingArgument, getBindingArguments } from './bodyReference';
 import type { RequestMessageProperty } from './bodyBinding.types';
 
 export const findRequestEnhancement = (
@@ -16,10 +16,9 @@ export const findRequestEnhancement = (
   )?.enhancement;
   if (exact) return exact;
 
-  const refs = getParsedReferences(typeof value === 'string' ? value : '');
-  if (refs.length === 0) return undefined;
-  const refValues = refs.map((reference) =>
-    `${reference.color}.(${reference.type}).${reference.field}`);
+  const refValues = getBindingArguments(typeof value === 'string' ? value : '')
+    .map(formatBindingArgument);
+  if (refValues.length === 0) return undefined;
   const resultVarPrefix = `${methodColor}.(request).${messageProperty}.$`;
   return connection?.fieldBindings.find((binding) => {
     const args = binding.enhancement?.args || {};

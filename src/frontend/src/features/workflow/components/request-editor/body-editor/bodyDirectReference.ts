@@ -1,6 +1,6 @@
 import { createShortId } from '@shared/lib/createId';
 import type { Connection } from '../../../types/connection';
-import { buildBodyEnhancement, buildRequestResultField, getParsedReferences } from './bodyReference';
+import { buildBodyEnhancement, buildRequestResultField, getBindingArguments, getParsedReferences } from './bodyReference';
 import type { DirectReferenceInfo, RequestMessageProperty } from './bodyBinding.types';
 
 export const getDirectReferenceInfo = (
@@ -26,7 +26,8 @@ export const createDirectReferenceEnhancement = (
   if (!direct) return null;
   const resultVar = `${methodColor}.(request).${direct.leftField}`;
   const enhanceId = createShortId();
-  const enhancement = buildBodyEnhancement(enhanceId, resultVar, direct.refs);
+  const enhancement = buildBodyEnhancement(enhanceId, resultVar,
+    getBindingArguments(typeof value === 'string' ? value : ''));
   return {
     connection: {
       ...connection,

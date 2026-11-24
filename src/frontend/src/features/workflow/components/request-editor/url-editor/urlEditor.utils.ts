@@ -1,6 +1,7 @@
 import type { EndpointArg } from '../../../types/connection';
 import { getReferenceDisplayLabel } from '../shared/referenceDisplay';
 import { createId as createStableId } from '@shared/lib/createId';
+import { buildInlineHtml as buildInlineHtmlWithClass } from './urlInlineTokens';
 
 export const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
 // Only control characters and `<>` (which the contenteditable field cannot hold as
@@ -8,7 +9,6 @@ export const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
 // URL cannot carry, so `filter[age]=5`, `a|b` or `Müller` are valid input.
 export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F<>]/g;
 const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F<>]/;
-const CARET_BOUNDARY = '\u200B';
 
 export const ARG_TOKEN_RE = /(#{%\s*([A-Za-z0-9_-]+)\s*%})/g;
 // Class stamped on every rendered reference pill's <span> (see buildTokenSpanHtml) —
@@ -82,145 +82,22 @@ export function unwrapBackendReferences(value: unknown): unknown {
 	return value;
 }
 
-export type InlinePart = { value: string; kind: 'text' | 'arg'; argId?: string };
-
-export function buildInlineParts(raw: string): InlinePart[] {
-	const s = raw || '';
-	const out: InlinePart[] = [];
-	let i = 0;
-
-	while (i < s.length) {
-		ARG_TOKEN_RE.lastIndex = i;
-		const m = ARG_TOKEN_RE.exec(s);
-		if (!m) {
-			out.push({ value: s.slice(i), kind: 'text' });
-			break;
-		}
-		if (m.index > i) out.push({ value: s.slice(i, m.index), kind: 'text' });
-		out.push({ value: m[1], kind: 'arg', argId: m[2] });
-		i = m.index + m[0].length;
-	}
-	return out;
-}
-
-export function getInlineVisualLength(raw: string, endpointArgs?: Record<string, EndpointArg>): number {
-	let v = 0;
-	for (const p of buildInlineParts(raw || '')) {
-		if (p.kind === 'text') v += p.value.length;
-		else {
-			const id = p.argId || '';
-			const src = endpointArgs?.[id]?.source;
-			v += (src ? visibleFromSourceRef(src) : id).length;
-		}
-	}
-	return v;
-}
-
-export function buildTokenSpanHtml(opts: {
-	className: string;
-	dataMain: string;
-	refIndex: number;
-	color: string;
-	label: string;
-	cursorPointer?: boolean;
-}): string {
-	const { className, dataMain, refIndex, color, label, cursorPointer } = opts;
-	return `<span class="${className}" data-main="${escapeHtml(dataMain)}" data-ref-index="${refIndex}" contenteditable="false" style="display:inline-block;margin:0 2px;padding:0 6px;border-radius:4px;background:${color};color:var(--color-text-on-action);font-size:12px;line-height:1.6;vertical-align:middle;user-select:none;${cursorPointer ? 'cursor:pointer;' : ''}">${escapeHtml(label)}</span>`;
-}
+export {
+	buildInlineParts,
+	buildTokenSpanHtml,
+	computeRawInsertAtFromVisualCaret,
+	getInlineVisualLength,
+	parseHtmlToRaw,
+	removeInlineTokenByIndex,
+	type InlinePart,
+} from './urlInlineTokens';
 
 export function buildInlineHtml(
 	raw: string,
 	endpointArgs?: Record<string, EndpointArg>,
 	opts?: { className?: string; cursorPointer?: boolean }
 ): string {
-	const s = raw || '';
-	if (!s) return '';
-
-	const className = opts?.className || ENDPOINT_REF_CLASS;
-	const cursorPointer = !!opts?.cursorPointer;
-
-	let idx = 0;
-	const out: string[] = [];
-
-	for (const p of buildInlineParts(s)) {
-		if (p.kind === 'text') {
-			out.push(escapeHtml(p.value));
-			continue;
-		}
-		const id = p.argId || '';
-		const src = endpointArgs?.[id]?.source;
-		out.push(
-			`${CARET_BOUNDARY}${buildTokenSpanHtml({
-				className,
-				dataMain: p.value,
-				refIndex: idx++,
-				color: extractColorFromSourceRef(src) ?? 'var(--color-action-primary)',
-				label: src ? visibleFromSourceRef(src) : id,
-				cursorPointer,
-			})}${CARET_BOUNDARY}`
-		);
-	}
-	return out.join('');
-}
-
-export function parseHtmlToRaw(html: string, tokenClass: string): string {
-	if (!html) return '';
-	const container = document.createElement('div');
-	container.innerHTML = html;
-
-	const walk = (n: ChildNode): string => {
-		if (n.nodeType === Node.TEXT_NODE) {
-			return (n.textContent || '').replace(/\u200B/g, '').replace(/\u00a0/g, ' ');
-		}
-		if (n.nodeType !== Node.ELEMENT_NODE) return '';
-
-		const el = n as HTMLElement;
-		if (el.classList.contains(tokenClass)) return el.getAttribute('data-main') || '';
-
-		let acc = '';
-		el.childNodes.forEach((c) => (acc += walk(c)));
-		return acc;
-	};
-
-	let res = '';
-	container.childNodes.forEach((c) => (res += walk(c)));
-	return res;
-}
-
-export function computeRawInsertAtFromVisualCaret(
-	raw: string,
-	caretVis: number,
-	endpointArgs?: Record<string, EndpointArg>
-): number {
-	const parts = buildInlineParts(raw || '');
-	let acc = 0;
-	let rawPos = 0;
-
-	for (const p of parts) {
-		const segVis =
-			p.kind === 'text'
-				? p.value.length
-				: (endpointArgs?.[p.argId || '']?.source
-						? visibleFromSourceRef(endpointArgs![p.argId || ''].source!)
-						: p.argId || ''
-				  ).length;
-
-		if (caretVis <= acc + segVis) return p.kind === 'text' ? rawPos + (caretVis - acc) : rawPos + p.value.length;
-
-		acc += segVis;
-		rawPos += p.value.length;
-	}
-	return (raw || '').length;
-}
-
-export function removeInlineTokenByIndex(raw: string, tokenIndex: number): string {
-	let idx = 0;
-	const out: string[] = [];
-	for (const p of buildInlineParts(raw || '')) {
-		if (p.kind === 'text') out.push(p.value);
-		else if (idx++ !== tokenIndex) out.push(p.value);
-	}
-	return out.join('');
+	return buildInlineHtmlWithClass(raw, endpointArgs, { ...opts, className: opts?.className || ENDPOINT_REF_CLASS });
 }
 
 export {

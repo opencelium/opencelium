@@ -6,7 +6,7 @@ import type { NodeContextMenuProps } from './NodeContextMenu.types';
 import { placeContextMenu } from './contextMenuPlacement';
 import { NodeContextMenuSections } from './NodeContextMenuSections';
 
-export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor, onCopyNodes, onPasteNodes, canPasteNodes }: NodeContextMenuProps) {
+export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor, onOpenGlobalWritesEditor, onCopyNodes, onPasteNodes, canPasteNodes }: NodeContextMenuProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
@@ -71,6 +71,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
           onEditLabel={() => setIsEditingLabel(true)} onOpenRequestEditor={onOpenRequestEditor}
           onOpenConditionEditor={onOpenConditionEditor} onShowResponse={onShowResponse} onTryRequest={onTryRequest}
           onOpenAggregatorEditor={onOpenAggregatorEditor} onOpenConnectorEditor={onOpenConnectorEditor}
+          onOpenGlobalWritesEditor={onOpenGlobalWritesEditor}
           onCopyNodes={onCopyNodes} onPasteNodes={onPasteNodes} canPasteNodes={canPasteNodes} />
       )}
     </div>,

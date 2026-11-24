@@ -1,3 +1,4 @@
+import { GLOBAL_REFERENCE_TOKEN } from '@entities/globalVariable/lib/globalReference';
 import { createId } from './urlInlineTokens';
 
 export type ParsedEndpoint = { base: string; queryRaw: string; hasQuestion: boolean };
@@ -35,10 +36,12 @@ const parseQueryToPairs = (query: string): QueryPair[] => (query ? query.split('
 const formatPair = ({ key, value, isFlag }: { key: string; value: string; isFlag?: boolean }) =>
 	isFlag && !value ? key : `${key}=${value}`;
 
-// Editor reference tokens, wrapped references, webhook `${…}`, pagination `@{…}` and
-// connector `{field}` / `{#id.field}`: the backend resolves and encodes them, so
-// their text must reach it untouched.
-const PLACEHOLDER_RE = /(#\{%\s*[A-Za-z0-9_-]+\s*%\}|\{%[\s\S]*?%\}|\$\{[^{}]*\}|@\{[^{}]*\}|\{#?[A-Za-z0-9_.-]+\})/;
+// Editor reference tokens, wrapped references, webhook `${…}`, pagination `@{…}`,
+// global variables `{{global.x}}` and connector `{field}` / `{#id.field}`: the backend
+// resolves and encodes them, so their text must reach it untouched.
+const PLACEHOLDER_RE = new RegExp(
+	String.raw`(#\{%\s*[A-Za-z0-9_-]+\s*%\}|\{%[\s\S]*?%\}|\$\{[^{}]*\}|@\{[^{}]*\}|${GLOBAL_REFERENCE_TOKEN}|\{#?[A-Za-z0-9_.-]+\})`,
+);
 
 const escapeOutsidePlaceholders = (text: string, characters: RegExp) => text
 	.split(PLACEHOLDER_RE)

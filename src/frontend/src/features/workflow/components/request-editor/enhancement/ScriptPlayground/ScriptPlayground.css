@@ -444,3 +444,9 @@ div.scriptPlaygroundPanel {
 	flex-direction: column;
 	gap: 8px;
 }
+
+.scriptPlaygroundWrites {
+	margin: 6px 0 0;
+	padding-left: 18px;
+	word-break: break-word;
+}

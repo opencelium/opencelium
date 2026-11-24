@@ -1,3 +1,5 @@
+import { GlobalVariableGlyph } from './custom/GlobalVariableGlyph';
+import { TbVariable } from 'react-icons/tb';
 import React from 'react';
 import {
     Check,
@@ -147,6 +149,8 @@ const iconMap = {
     circle: RadioButtonUnchecked,
     git: GitHub,
     globe: Public,
+    variable: TbVariable,
+    'global-variable': GlobalVariableGlyph,
     portal: Apps,
     'drag-handle': DragIndicator,
     minus: Remove,
