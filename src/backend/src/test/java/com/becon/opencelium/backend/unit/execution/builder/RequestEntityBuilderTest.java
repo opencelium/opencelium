@@ -40,7 +40,9 @@ class RequestEntityBuilderTest {
             anEntry("tenant", "\"acme corp?x=1\""),
             anEntry("tenants", "[\"acme\",\"globex\"]"),
             anEntry("limit", "50"),
-            anEntry("meta", "{\"env\":\"prod\",\"tier\":1}")));
+            anEntry("meta", "{\"env\":\"prod\",\"tier\":1}"),
+            anEntry("empty", "\"\""),
+            anEntry("nothing", "null")));
 
     @Test
     @DisplayName("createRequest — a global list in the query is one value of JSON text, not a repeated parameter")
@@ -62,6 +64,19 @@ class RequestEntityBuilderTest {
         RequestEntity<Object> request = build(operation);
 
         assertThat(request.getHeaders().get("X-Meta")).containsExactly("{\"env\":\"prod\",\"tier\":1}");
+    }
+
+    @Test
+    @DisplayName("createRequest — a header that is only a global holding \"\" or null is sent empty, not refused")
+    void createRequestSendsEmptyHeaderWhenGlobalIsEmptyOrNull() {
+        OperationDTO operation = OperationDTOFixture.anHttpOperation(
+                "GET", "https://api.example.test/sync",
+                Map.of("X-Empty", "{{global.empty}}", "X-Nothing", "{{global.nothing}}"), null);
+
+        RequestEntity<Object> request = build(operation);
+
+        assertThat(request.getHeaders().get("X-Empty")).containsExactly("");
+        assertThat(request.getHeaders().get("X-Nothing")).containsExactly("");
     }
 
     @Test
