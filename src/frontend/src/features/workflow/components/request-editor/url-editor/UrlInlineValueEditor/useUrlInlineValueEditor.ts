@@ -8,7 +8,7 @@ import { getCaretPositionOfDivEditable, getRawCaretPositionOfDivEditable,
 import type { UrlInlineValueEditorProps } from './UrlInlineValueEditor.types';
 import { getContentRightEdge, INLINE_REFERENCE_CLASS } from './urlInlineValueEditor.utils';
 import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
-import '../../../reference-chip/referenceChip.css';
+import '@shared/ui/reference-chip/referenceChip.css';
 
 export function useUrlInlineValueEditor({ value, endpointArgs, readOnly,
 	onChange, onCaretChange }: UrlInlineValueEditorProps) {

@@ -5,7 +5,7 @@ import { setFocusByCaretPositionInDivEditable } from '../utils/contentEditable';
 import type { UrlEndpointFieldProps } from './UrlEndpointField.types';
 import { ENDPOINT_REFERENCE_CLASS } from './urlEndpointField.utils';
 import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
-import '../../../reference-chip/referenceChip.css';
+import '@shared/ui/reference-chip/referenceChip.css';
 
 export function useUrlEndpointRender(props: UrlEndpointFieldProps,
 	lastRendered: RefObject<string>, typing: RefObject<boolean>) {

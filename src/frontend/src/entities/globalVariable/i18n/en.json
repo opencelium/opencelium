@@ -263,7 +263,8 @@
     "placeholder": "Choose a global variable",
     "empty": "No global variables you may use here",
     "unknown": "Unknown global variable, or one you may not use",
-    "insert": "Insert a global variable"
+    "insert": "Insert a global variable",
+    "chipSource": "Global"
   },
   "referenceErrors": {
     "UNKNOWN_VARIABLE": "Global variable \"{{variable}}\" does not exist.",

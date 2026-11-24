@@ -1,6 +1,6 @@
 import { ANY_REFERENCE_TOKEN_RE } from '../../model/notificationBody';
 import type { ReferenceDescription } from './referenceDescription';
-import '../../../components/reference-chip/referenceChip.css';
+import '@shared/ui/reference-chip/referenceChip.css';
 
 // The shared reference chip (components/reference-chip): one look for references everywhere.
 export const CHIP_CLASS = 'wfReferenceChip';

@@ -1,7 +1,7 @@
 import { useGlobalReferenceInfo } from '@entities/globalVariable/ui/picker/useGlobalReferenceInfo';
 import type { Connection, MethodWithId } from '../../../../types/connection';
 import { BodyReferenceMenu } from './BodyReferenceMenu';
-import { ReferenceChip } from '../../../reference-chip/ReferenceChip';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
 import { GLOBAL_CHIP_COLOR } from '../../../reference-chip/referenceChip.utils';
 import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
 

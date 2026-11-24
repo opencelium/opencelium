@@ -1,4 +1,4 @@
-import { ReferenceChip } from '../../../reference-chip/ReferenceChip';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
 import { WEBHOOK_CHIP_COLOR } from '../../../reference-chip/referenceChip.utils';
 import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
 import { parseWebhookValue, webhookSnippet } from '../bodyWebhook';

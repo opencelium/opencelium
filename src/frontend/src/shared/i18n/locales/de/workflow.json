@@ -845,9 +845,9 @@
   },
   "args": {
     "sectionTitle": "Variableninformationen",
-    "fromResponseStatus": "wird aus dem Antwort-Status der Methode <method>{{method}}</method> übernommen.",
-    "usedAsField": "wird als Wert des Felds <field>{{field}}</field> ({{location}}) der Methode <method>{{method}}</method> verwendet.",
-    "takenFromField": "wird aus dem Wert des Felds <field>{{field}}</field> ({{location}}) der Methode <method>{{method}}</method> übernommen.",
+    "fromResponseStatus": "wird aus <ref/> übernommen.",
+    "usedAsField": "wird als Wert von <ref/> ({{location}}) verwendet.",
+    "takenFromField": "wird aus <ref/> ({{location}}) übernommen.",
     "locations": {
       "requestBody": "Anfrage-Body",
       "requestHeader": "Anfrage-Header",

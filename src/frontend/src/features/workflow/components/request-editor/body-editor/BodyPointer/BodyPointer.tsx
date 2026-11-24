@@ -10,7 +10,7 @@ import { LegacyBodyReferenceGenerator } from '../LegacyBodyReferenceGenerator/Le
 import { useTestRun } from '../../../../test-run/useTestRun';
 import { LiveReferenceValuePreview } from '../../utils/LiveReferenceValuePreview';
 import type { BodyPointerProps } from './BodyPointer.types';
-import { ReferenceChip } from '../../../reference-chip/ReferenceChip';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
 import { formatStepReferencePath } from '../../../reference-chip/referenceChip.utils';
 import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
 import './BodyPointer.css';

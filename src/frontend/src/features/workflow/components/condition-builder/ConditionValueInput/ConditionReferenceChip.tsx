@@ -3,7 +3,7 @@ import { parseGlobalReference } from '@entities/globalVariable/lib/globalReferen
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { MethodWithId } from '../../../types/connection';
 import { extractWebhookValue } from '../../request-editor/body-editor/bodyWebhook';
-import { ReferenceChip } from '../../reference-chip/ReferenceChip';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
 import { ReferenceChipActions } from '../../reference-chip/ReferenceChipActions';
 import { formatStepReferencePath, GLOBAL_CHIP_COLOR, WEBHOOK_CHIP_COLOR } from '../../reference-chip/referenceChip.utils';
 import { useReferenceSourceLabels } from '../../reference-chip/ReferenceSourceContext';

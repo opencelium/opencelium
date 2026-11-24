@@ -2,7 +2,7 @@ import { Trans } from 'react-i18next';
 import { parseGlobalReference } from '@entities/globalVariable/lib/globalReference';
 import { useGlobalVariablePicker } from '@entities/globalVariable/ui/picker/globalPicker';
 import { useGlobalReferenceInfo } from '@entities/globalVariable/ui/picker/useGlobalReferenceInfo';
-import { ReferenceChip } from '../../../reference-chip/ReferenceChip';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
 import { GLOBAL_CHIP_COLOR } from '../../../reference-chip/referenceChip.utils';
 import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
 import type { GlobalArgEntry } from './EnhancementArgs.types';

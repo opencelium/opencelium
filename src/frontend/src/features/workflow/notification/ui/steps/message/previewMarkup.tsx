@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { ANY_REFERENCE_TOKEN_RE } from '../../../model/notificationBody';
 import type { ReferenceDescription } from '../../references/referenceDescription';
-import { ReferenceChip } from '../../../../components/reference-chip/ReferenceChip';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
 
 type Markup = 'slack' | 'markdown';
 

@@ -32,6 +32,7 @@ export function GlobalVariableInsertButton({ scope, onInsert, disabled, testId }
                     <div style={{ width: 320 }}>
                         <GlobalVariableSelect
                             popupZIndex={1100}
+                            isFullWidth
                             testId={`${testId}-select`}
                             onChange={(name) => {
                                 onInsert(buildGlobalReference(name))
