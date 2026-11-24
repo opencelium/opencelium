@@ -39,7 +39,7 @@ export const buildNotificationMethodConfig = (
 	]);
 	return {
 		name: previous?.name ?? 'POST',
-		url: draft?.webhookUrl ?? '',
+		url: draft?.webhookUrl.trim() ?? '',
 		method: 'POST',
 		headers,
 		queryParams: [],

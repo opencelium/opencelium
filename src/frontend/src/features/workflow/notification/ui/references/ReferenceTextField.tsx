@@ -45,7 +45,9 @@ export function ReferenceTextField({ id, value, onChange, isMultiline, placehold
 
 	const emit = () => {
 		if (!rootRef.current) return;
-		const next = readReferenceValue(rootRef.current);
+		const raw = readReferenceValue(rootRef.current);
+		// Browsers add a <br> after a trailing chip; a one-line field must never carry it.
+		const next = isMultiline ? raw : raw.replace(/\n/g, '');
 		paintedRef.current = next;
 		onChange(next);
 	};

@@ -151,3 +151,19 @@ describe('hasMessageContent', () => {
 		expect(hasMessageContent(edit('{"event":"order.created"}'))).toBe(true);
 	});
 });
+
+describe('editor values', () => {
+	it('drops the spacer a reference chip leaves at the end of a value', () => {
+		const config = withMessage(selectTool(createNotificationConfig(), 'slack'), {
+			text: 'Hi {{global.name}} ', buttonText: 'Open', buttonUrl: '{{global.url}} ',
+			facts: [{ id: 'f', label: ' Token ', value: '321 ' }],
+		});
+		expect(parseBody(getBodyText(config))).toMatchObject({ ok: true, value: {
+			text: 'Hi {{global.name}}',
+			blocks: [
+				{ type: 'section', fields: [{ text: '*Token*\n321' }] },
+				{ type: 'actions', elements: [{ url: '{{global.url}}' }] },
+			],
+		} });
+	});
+});
