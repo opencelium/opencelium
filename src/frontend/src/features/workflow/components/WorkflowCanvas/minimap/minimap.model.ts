@@ -73,6 +73,7 @@ const toDot = (node: WorkflowNodeModel): MinimapDot => {
 		case 'trigger-connection': return { id: node.id, x, y, shape: 'circle', groupKey: 'trigger' };
 		case 'if':
 		case 'loop': return { id: node.id, x, y, shape: 'diamond', groupKey: 'operator' };
+		case 'notification':
 		case 'comment': return { id: node.id, x, y, shape: 'circle', groupKey: null };
 		default: {
 			const _exhaustive: never = node.data.kind;

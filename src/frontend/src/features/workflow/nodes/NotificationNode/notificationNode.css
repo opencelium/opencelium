@@ -1,0 +1,54 @@
+.notificationNode {
+	color: light-dark(#9b5600, #f5a623);
+	border-color: currentColor;
+	position: relative;
+}
+
+.notificationNodeBadge,
+.notificationNodeStatus {
+	position: absolute;
+	border-radius: 999px;
+}
+
+.notificationNodeBadge {
+	top: -5px;
+	right: -7px;
+	padding: 2px 5px;
+	color: white;
+	font-size: 10px;
+	line-height: 1.2;
+}
+
+.notificationNodeStatus {
+	bottom: 1px;
+	right: 3px;
+	width: 8px;
+	height: 8px;
+	background: #85858c;
+}
+
+.notificationNodeStatus[data-configured='true'] {
+	background: #2b9e62;
+}
+
+.notificationNodeTool {
+	position: absolute;
+	inset-inline: -24px;
+	top: 100%;
+	margin-top: 2px;
+	color: var(--color-text-primary);
+	text-align: center;
+	font-size: 11px;
+	line-height: 1.3;
+	pointer-events: none;
+}
+
+.notificationNode:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+.notificationNode[aria-disabled='false'] {
+	pointer-events: auto;
+	cursor: pointer;
+}

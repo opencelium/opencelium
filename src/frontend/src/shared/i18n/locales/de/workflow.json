@@ -1,4 +1,162 @@
 {
+  "notification": {
+    "demoStart": "Start",
+    "demo": "Benachrichtigungsdemo",
+    "editUrl": "URL bearbeiten",
+    "editMessage": "Nachricht bearbeiten",
+    "options": {"default": "Standard", "accent": "Akzent", "good": "Erfolg", "warning": "Warnung", "attention": "Kritisch", "important": "Wichtig", "urgent": "Dringend", "markdown": "Markdown", "text": "Nur Text"},
+    "onError": "Bei Fehler",
+    "stop": "Workflow stoppen",
+    "continue": "Fortfahren",
+    "retry429": "Nach HTTP 429 erneut versuchen",
+    "copy": "Kopieren",
+    "copied": "Referenz kopiert",
+    "copyError": "Referenz konnte nicht kopiert werden",
+    "previewNote": "Vereinfachte Vorschau. Der Nachrichtendienst bestimmt das endgültige Aussehen.",
+    "emptyPreview": "Noch kein Nachrichteninhalt.",
+    "requestTab": { "request": "Anfrage", "response": "Antwort" },
+    "requestSections": {
+      "url": "URL",
+      "headers": "Header",
+      "body": "Anfrageinhalt",
+      "policy": "Fehlerbehandlung",
+      "response": "Erwartete Antwort",
+      "references": "Referenzparameter"
+    },
+    "label": "Benachrichtigung",
+    "ariaLabel": "Benachrichtigung {label}",
+    "generic": "Generischer Webhook",
+    "noTool": "Kein Tool ausgewählt",
+    "webhookSet": "Webhook eingerichtet",
+    "webhookMissing": "Webhook fehlt",
+    "name": "Name",
+    "value": "Wert",
+    "remove": "Entfernen",
+    "add": "Hinzufügen",
+    "default": "Standard",
+    "open": "Benachrichtigung öffnen",
+    "rename": "Beschriftung umbenennen",
+    "saved": "Benachrichtigung gespeichert",
+    "back": "Zurück",
+    "next": "Weiter",
+    "steps": "Einrichtungsschritte",
+    "webhookUrl": "Webhook-URL",
+    "setup": "Einrichtungsanleitung",
+    "referenceCount": "Referenzen: {count}",
+    "validJson": "Gültiges JSON",
+    "override": "Die JSON-Überschreibung sperrt den Nachrichteneditor.",
+    "reset": "JSON zurücksetzen",
+    "addHeader": "Header hinzufügen",
+    "stepsLabel": {
+      "tool": "Nachrichtendienst",
+      "webhook": "Eingehender Webhook",
+      "message": "Nachricht",
+      "request": "Anfrage und Antwort"
+    },
+    "mode": {
+      "editor": "Editor",
+      "json": "JSON",
+      "preview": "Vorschau"
+    },
+    "urlState": {
+      "empty": "Webhook-URL eingeben.",
+      "reference": "Die URL stammt aus einer Workflow-Referenz.",
+      "match": "Die URL entspricht diesem Dienst.",
+      "mismatch": "Die URL entspricht nicht dem üblichen Format dieses Dienstes."
+    },
+    "urlFormat": "URL-Format",
+    "documentation": "Dokumentation",
+    "guide": {
+      "slack": {
+        "first": "Öffne die Einstellungen der Slack-App und aktiviere Incoming Webhooks.",
+        "second": "Füge einen Webhook zum Workspace hinzu und wähle den Zielkanal.",
+        "third": "Erlaube den Zugriff und kopiere die Webhook-URL.",
+        "note": "Der Webhook ist an den ausgewählten Kanal gebunden. Verwende für einen anderen Kanal eine eigene URL."
+      },
+      "teams": {
+        "first": "Öffne die Workflows-App in Teams und wähle die Webhook-Vorlage.",
+        "second": "Melde dich an und wähle das Team und den Kanal oder Chat.",
+        "third": "Speichere den Workflow und kopiere die Trigger-URL.",
+        "note": "Status 202 bestätigt die Annahme. Die Zustellung siehst du im Ausführungsverlauf von Teams."
+      },
+      "gchat": {
+        "first": "Öffne Apps und Integrationen im Google-Chat-Space.",
+        "second": "Füge einen eingehenden Webhook hinzu und benenne ihn.",
+        "third": "Speichere den Webhook und kopiere seine URL.",
+        "note": "Für bestehende Threads setze einen Thread-Schlüssel und ergänze messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD in der URL."
+      },
+      "discord": {
+        "first": "Öffne die Einstellungen des Discord-Kanals.",
+        "second": "Erstelle unter Integrationen einen Webhook für den Zielkanal.",
+        "third": "Kopiere die Webhook-URL.",
+        "note": "Hänge ?wait=true an, um die Nachrichten-ID in der Antwort zu erhalten."
+      },
+      "mattermost": {
+        "first": "Öffne Integrationen im Mattermost-Hauptmenü.",
+        "second": "Füge einen eingehenden Webhook hinzu und wähle einen Kanal.",
+        "third": "Speichere den Webhook und kopiere die URL.",
+        "note": "Das Überschreiben von Name und Symbol muss in den Integrationseinstellungen erlaubt sein."
+      },
+      "rocket": {
+        "first": "Öffne Administration, Workspace und dann Integrationen.",
+        "second": "Erstelle eine eingehende Integration und wähle Kanal und Absender.",
+        "third": "Aktiviere und speichere die Integration und kopiere ihre URL.",
+        "note": "Wenn die Integration ein Skript nutzt, muss das JSON zur erwarteten Eingabe passen."
+      },
+      "webex": {
+        "first": "Öffne Incoming Webhooks im Webex App Hub.",
+        "second": "Verbinde die Integration, benenne sie und wähle den Ziel-Space.",
+        "third": "Füge die Integration hinzu und kopiere die URL.",
+        "note": "Webex veröffentlicht Nachrichten über den Incoming-Webhooks-Bot."
+      },
+      "ntfy": {
+        "first": "Öffne die ntfy-App oder die Weboberfläche.",
+        "second": "Abonniere ein Topic und trage seinen Namen in der Nachricht ein.",
+        "third": "Trage hier die Basis-URL des ntfy-Servers ein.",
+        "note": "Verwende für vertrauliche Inhalte einen Server oder ein Topic mit Zugriffsschutz."
+      },
+      "generic": {
+        "first": "Kopiere die Webhook-URL aus dem Zielsystem.",
+        "second": "Konfiguriere das JSON nach dem Schema des Zielsystems.",
+        "third": "Ergänze erforderliche Header unter Anfrage und Antwort.",
+        "note": "Das Zielsystem bestimmt die erwartete Antwort."
+      }
+    },
+    "fields": {
+      "text": "Text",
+      "header": "Überschrift",
+      "body": "Nachrichteninhalt",
+      "facts": "Felder",
+      "btnText": "Schaltflächentext",
+      "btnUrl": "Schaltflächen-URL",
+      "unfurl": "Linkvorschau aktivieren",
+      "title": "Titel",
+      "style": "Titelfarbe",
+      "mention": "Erwähnung",
+      "full": "Karte in voller Breite",
+      "subtitle": "Untertitel",
+      "threadKey": "Thread-Schlüssel",
+      "content": "Nachricht",
+      "username": "Anzeigename",
+      "avatar": "Avatar-URL",
+      "color": "Farbe",
+      "desc": "Beschreibung",
+      "url": "Titel-Link",
+      "channel": "Kanal",
+      "priority": "Priorität",
+      "icon": "Symbol-URL",
+      "attTitle": "Anhangstitel",
+      "alias": "Alias",
+      "emoji": "Emoji-Avatar",
+      "attText": "Anhangstext",
+      "format": "Format",
+      "topic": "Topic",
+      "message": "Nachricht",
+      "tags": "Tags",
+      "click": "Klick-URL",
+      "markdown": "Markdown rendern"
+    }
+  },
   "loadError": {
     "title": "Workflow konnte nicht geladen werden",
     "description": "Der Workflow oder die Konnektorliste konnte nicht geladen werden. Versuchen Sie es erneut oder kehren Sie zur Workflow-Liste zurück.",
@@ -833,7 +991,7 @@
     "rootObject": "Das Wurzelobjekt",
     "rootObjectHint": "Der gesamte Antworttext, unverändert.",
     "firstArrayElement": "Erstes Element des Arrays",
-    "firstArrayElementHint": "Das erste Element des Arrays als einzelner Wert. Mit einem Feldnamen fortfahren, um ein Feld daraus zu nehmen.",
+    "firstArrayElementHint": "Das erste Element des Arrays als einzelner Wert. Mit einem Fieldname fortfahren, um ein Feld daraus zu nehmen.",
     "lastArrayElement": "Letztes Element des Arrays",
     "lastArrayElementHint": "Das letzte Element des Arrays als einzelner Wert. Mit einem Feldnamen fortfahren, um ein Feld daraus zu nehmen.",
     "wholeArray": "Das gesamte Array",
@@ -1233,7 +1391,7 @@
       "failed": "Der Test konnte nicht ausgeführt werden",
       "connectorError": "Die Daten von Konnektor {{connector}} konnten nicht gelesen werden – es wurde nichts gesendet",
       "sentHint": "Der Request, wie er gesendet wurde. Verborgene Konnektorwerte (Passwörter, Secrets, Tokens) werden als **** angezeigt.",
-      "binary": "Binäre Antwort ({{type}})",
+      "binary": "Binary Antwort ({{type}})",
       "download": "Herunterladen",
       "downloadFailed": "Die Antwort konnte nicht heruntergeladen werden."
     },

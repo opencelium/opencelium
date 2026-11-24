@@ -1,0 +1,221 @@
+.notificationWizard nav,
+.notificationActions,
+.notificationPair {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.notificationWizard nav {
+	margin-bottom: 16px;
+}
+
+.notificationTools,
+.notificationWebhook {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 12px;
+}
+
+.notificationTools button {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px;
+	text-align: start;
+}
+
+.notificationTools span {
+	color: white;
+	padding: 4px 6px;
+	border-radius: 5px;
+}
+
+.notificationWizard [aria-pressed='true'],
+.notificationWizard [aria-current='step'] {
+	outline: 2px solid #f5a623;
+}
+
+.notificationWizard label,
+.notificationWizard fieldset {
+	display: grid;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.notificationWizard input,
+.notificationWizard textarea,
+.notificationWizard select {
+	color: inherit;
+	background: transparent;
+}
+
+.notificationJson,
+.notificationWizard pre {
+	width: 100%;
+	min-height: 160px;
+	font-family: monospace;
+	overflow: auto;
+}
+
+.notificationMenu {
+	display: grid;
+	gap: 4px;
+}
+
+.notificationMenu button {
+	text-align: start;
+}
+
+.notificationMenuSubentry {
+	margin-inline-start: 16px;
+}
+
+.notificationRequest section {
+	padding: 8px;
+	margin-bottom: 8px;
+	border: 1px solid transparent;
+}
+
+.notificationRequest section[data-highlighted='true'] {
+	border-color: #f5a623;
+}
+
+.notificationReferenceField {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+
+.notificationReferenceField > input,
+.notificationReferenceField > textarea {
+	flex: 1 1 14rem;
+}
+
+.notificationReferenceChips {
+	display: flex;
+	flex: 1 0 100%;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.notificationReferenceChips > span {
+	padding: 2px 6px;
+	border: 1px solid #a56b19;
+	border-radius: 6px;
+	overflow-wrap: anywhere;
+}
+
+.notificationPreview {
+	display: flex;
+	gap: 12px;
+	padding: 12px;
+	border: 1px solid currentColor;
+	border-radius: 8px;
+}
+
+.notificationPreview p {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.notificationPreviewBadge {
+	align-self: start;
+	color: white;
+	border-radius: 6px;
+	padding: 4px 6px;
+}
+
+.notificationPreviewContent {
+	flex: 1;
+	min-width: 0;
+}
+
+.notificationPreviewCard {
+	margin-block: 8px;
+	padding: 10px 12px;
+	border-inline-start: 3px solid;
+	background: color-mix(in srgb, currentColor 6%, transparent);
+	border-radius: 4px;
+}
+
+.notificationPreviewCard dl {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+	gap: 8px;
+	margin-block: 8px;
+}
+
+.notificationPreviewCard dt {
+	font-weight: 600;
+}
+
+.notificationPreviewCard dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.notificationPreviewButton,
+.notificationPreviewReference {
+	display: inline-block;
+	padding: 2px 6px;
+	border: 1px solid currentColor;
+	border-radius: 4px;
+	overflow-wrap: anywhere;
+}
+
+.notificationPreviewReference {
+	color: light-dark(#8a5000, #ffbe64);
+}
+
+.notificationPreviewNote {
+	font-size: 0.85em;
+}
+
+.notificationMessageLayout {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+	align-items: start;
+	gap: 16px;
+}
+
+.notificationMessageLayout .notificationReferenceField {
+	min-width: 0;
+}
+
+.notificationWebhookGuide {
+	padding: 14px;
+	border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+	border-radius: 8px;
+}
+
+.notificationWebhookGuide h3 {
+	margin-top: 0;
+}
+
+.notificationWebhookGuide li {
+	margin-block: 5px;
+}
+
+.notificationWebhookGuide dd {
+	margin-inline-start: 0;
+	overflow-wrap: anywhere;
+}
+
+.notificationUrlStatus[data-state='match'],
+.notificationUrlStatus[data-state='reference'] {
+	color: light-dark(#20643e, #77d8a0);
+}
+
+.notificationUrlStatus[data-state='mismatch'] {
+	color: light-dark(#925600, #ffca80);
+}
+
+.notificationJsonStatus[data-invalid='true'] {
+	color: light-dark(#a12424, #ff9696);
+}
+
+.notificationJson .rpJsonValue {
+	width: 100%;
+}

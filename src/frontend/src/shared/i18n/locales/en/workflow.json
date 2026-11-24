@@ -1,4 +1,162 @@
 {
+  "notification": {
+    "demoStart": "Start",
+    "demo": "Notification demo",
+    "editUrl": "Edit URL",
+    "editMessage": "Edit message",
+    "options": {"default": "Standard", "accent": "Accent", "good": "Success", "warning": "Warning", "attention": "Critical", "important": "Important", "urgent": "Urgent", "markdown": "Markdown", "text": "Plain text"},
+    "onError": "On error",
+    "stop": "Stop workflow",
+    "continue": "Continue",
+    "retry429": "Retry after HTTP 429",
+    "copy": "Copy",
+    "copied": "Reference copied",
+    "copyError": "Could not copy the reference",
+    "previewNote": "Simplified preview. The messaging tool controls the final appearance.",
+    "emptyPreview": "No message content yet.",
+    "requestTab": { "request": "Request", "response": "Response" },
+    "requestSections": {
+      "url": "URL",
+      "headers": "Headers",
+      "body": "Request body",
+      "policy": "Error policy",
+      "response": "Expected response",
+      "references": "Reference parameters"
+    },
+    "label": "Notification",
+    "ariaLabel": "Notification {label}",
+    "generic": "Generic webhook",
+    "noTool": "No tool selected",
+    "webhookSet": "Webhook configured",
+    "webhookMissing": "Webhook missing",
+    "name": "Name",
+    "value": "Value",
+    "remove": "Remove",
+    "add": "Add",
+    "default": "Default",
+    "open": "Open notification",
+    "rename": "Rename label",
+    "saved": "Notification saved",
+    "back": "Back",
+    "next": "Next",
+    "steps": "Notification setup steps",
+    "webhookUrl": "Webhook URL",
+    "setup": "Setup guide",
+    "referenceCount": "References: {count}",
+    "validJson": "Valid JSON",
+    "override": "The JSON override locks the message editor.",
+    "reset": "Reset JSON",
+    "addHeader": "Add header",
+    "stepsLabel": {
+      "tool": "Messaging tool",
+      "webhook": "Incoming Webhook",
+      "message": "Message",
+      "request": "Request & Response"
+    },
+    "mode": {
+      "editor": "Editor",
+      "json": "JSON",
+      "preview": "Preview"
+    },
+    "urlState": {
+      "empty": "Enter a webhook URL.",
+      "reference": "The URL comes from a workflow reference.",
+      "match": "The URL matches this tool.",
+      "mismatch": "The URL does not match this tool’s usual format."
+    },
+    "urlFormat": "URL format",
+    "documentation": "Documentation",
+    "guide": {
+      "slack": {
+        "first": "Open your Slack app settings and enable Incoming Webhooks.",
+        "second": "Add a webhook to your workspace and select the target channel.",
+        "third": "Allow access and copy the webhook URL.",
+        "note": "The webhook is tied to the selected channel. Use a separate URL for another channel."
+      },
+      "teams": {
+        "first": "Open the Workflows app in Teams and choose the webhook request template.",
+        "second": "Sign in and choose the destination team and channel or chat.",
+        "third": "Save the workflow and copy the trigger URL.",
+        "note": "A 202 response confirms acceptance. Check the Teams workflow run history for delivery."
+      },
+      "gchat": {
+        "first": "Open Apps and integrations in the Google Chat space.",
+        "second": "Add an incoming webhook and give it a name.",
+        "third": "Save the webhook and copy its URL.",
+        "note": "To reuse threads, set a thread key and add messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD to the URL."
+      },
+      "discord": {
+        "first": "Open the Discord channel settings.",
+        "second": "Under Integrations, create a webhook for the destination channel.",
+        "third": "Copy the webhook URL.",
+        "note": "Append ?wait=true to receive the message ID in the response."
+      },
+      "mattermost": {
+        "first": "Open Integrations in the Mattermost main menu.",
+        "second": "Add an incoming webhook and select a channel.",
+        "third": "Save the webhook and copy the URL.",
+        "note": "Username and icon overrides require permission in the server integration settings."
+      },
+      "rocket": {
+        "first": "Open Administration, Workspace, then Integrations.",
+        "second": "Create an incoming integration and select its channel and posting user.",
+        "third": "Enable it, save, and copy the webhook URL.",
+        "note": "If the integration uses a script, the JSON needs to match its expected input."
+      },
+      "webex": {
+        "first": "Open the Incoming Webhooks integration in Webex App Hub.",
+        "second": "Connect it, give it a name and select the destination space.",
+        "third": "Add the integration and copy the URL.",
+        "note": "Webex posts using the Incoming Webhooks bot."
+      },
+      "ntfy": {
+        "first": "Open the ntfy app or web interface.",
+        "second": "Subscribe to a topic and enter its name in the message configuration.",
+        "third": "Enter the base URL of the ntfy server here.",
+        "note": "Use an access-controlled server or topic for confidential content."
+      },
+      "generic": {
+        "first": "Copy the webhook URL from the destination tool.",
+        "second": "Configure the JSON body according to the destination schema.",
+        "third": "Add any required extra headers under Request & Response.",
+        "note": "The destination determines the expected response."
+      }
+    },
+    "fields": {
+      "text": "Text",
+      "header": "Heading",
+      "body": "Message body",
+      "facts": "Fields",
+      "btnText": "Button text",
+      "btnUrl": "Button URL",
+      "unfurl": "Enable link preview",
+      "title": "Title",
+      "style": "Title colour",
+      "mention": "Mention",
+      "full": "Full-width card",
+      "subtitle": "Subtitle",
+      "threadKey": "Thread key",
+      "content": "Message",
+      "username": "Display name",
+      "avatar": "Avatar URL",
+      "color": "Colour",
+      "desc": "Description",
+      "url": "Title link",
+      "channel": "Channel",
+      "priority": "Priority",
+      "icon": "Icon URL",
+      "attTitle": "Attachment title",
+      "alias": "Alias",
+      "emoji": "Emoji avatar",
+      "attText": "Attachment text",
+      "format": "Format",
+      "topic": "Topic",
+      "message": "Message",
+      "tags": "Tags",
+      "click": "Click URL",
+      "markdown": "Render Markdown"
+    }
+  },
   "loadError": {
     "title": "Could not load the workflow",
     "description": "The workflow or connector list could not be loaded. Try again or return to the workflow list.",
