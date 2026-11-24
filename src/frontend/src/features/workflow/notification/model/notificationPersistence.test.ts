@@ -40,6 +40,8 @@ describe('notification step persistence', () => {
 		expect(method.methodType).toBe('HTTP_REQUEST');
 		expect(method.request.method).toBe('POST');
 		expect(method.request.endpoint).toBe('https://hooks.slack.com/services/T/B/x');
+		// Mid-sentence references only resolve in their wrapped form (see buildMethodPayload).
+		expect((method.request.body as { fields: { text: string } }).fields.text).toBe('Hello {%#3fa9f5.(response).body.$.name%}');
 
 		const reloaded = mapConnectionToWorkflowState(payload);
 		const restored = reloaded.nodes.find((item) => item.id === node.id)!;

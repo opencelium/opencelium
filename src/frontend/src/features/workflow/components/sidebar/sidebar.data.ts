@@ -21,6 +21,11 @@ export const sidebarItems: {
     textKey: 'sidebar.addHttpRequest.description',
   },
   {
+    key: 'notification',
+    titleKey: 'sidebar.addNotification.title',
+    textKey: 'sidebar.addNotification.description',
+  },
+  {
     key: 'trigger-connection',
     titleKey: 'sidebar.triggerConnection.title',
     textKey: 'sidebar.triggerConnection.description',

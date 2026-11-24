@@ -4,7 +4,7 @@ import { Input } from '@shared/ui/primitives/Input';
 import { Icon } from '@shared/ui/primitives/Icon';
 import type { NotificationToolId } from '../../model/notification.types';
 import { getNotificationTool } from '../../tools/notificationTools';
-import { readableTextColor } from '../../../utils/methodColor';
+import { NotificationToolMark } from '../NotificationToolMark';
 
 type Props = {
 	color?: string;
@@ -20,19 +20,20 @@ export function NotificationDialogHeader({ color, toolId, label, inputRef, isRea
 	const tool = toolId ? getNotificationTool(toolId) : null;
 	return (
 		<div className='notificationDialogHeader'>
-			<span className={`notificationToolMark ${tool ? '' : 'notificationToolMark--empty'}`}
-				style={tool ? { background: tool.brandColor, color: readableTextColor(tool.brandColor) } : undefined}>
-				{tool ? tool.abbreviation : <Icon name='notification' size={16} color='inherit' />}
-			</span>
+			{tool ? <NotificationToolMark tool={tool} className='notificationToolMark' /> : (
+				<span className='notificationToolMark notificationToolMark--empty'>
+					<Icon name='notification' size={16} color='inherit' />
+				</span>
+			)}
 			<div className='notificationDialogLabel'>
 				<Input value={label} inputRef={inputRef} readOnly={isReadOnly} testId='notification-dialog-label'
 					placeholder={t('notification.dialog.labelPlaceholder')}
 					onChange={(event) => onLabelChange(event.target.value)} />
 			</div>
 			{color && (
-				<span className='notificationIdChip' data-testid='notification-dialog-reference-id'>
+				<span className='notificationIdChip' data-testid='notification-dialog-kind'>
 					<span className='notificationIdChipDot' style={{ background: color }} />
-					{color} · {t('notification.dialog.kind')}
+					{t('notification.dialog.kind')}
 				</span>
 			)}
 		</div>

@@ -210,6 +210,10 @@
       "title": "HTTP-Anfrage hinzufügen",
       "description": "Fügen Sie eine einfache HTTP-Anfrage an eine beliebige URL hinzu."
     },
+    "addNotification": {
+      "title": "Benachrichtigung senden",
+      "description": "Sendet eine Nachricht an Slack, Microsoft Teams oder einen beliebigen anderen Incoming Webhook."
+    },
     "operatorOption": {
       "if": {
         "title": "If",
@@ -1413,11 +1417,7 @@
       "response": "Antwort",
       "errors": "Fehler",
       "limit": "Limit",
-      "limits": "Limits",
       "payload": "Payload",
-      "availability": "Verfügbar",
-      "requirement": "Voraussetzung",
-      "auth": "Auth",
       "method": "Methode"
     },
     "message": {
@@ -1445,26 +1445,14 @@
       "add": "Zeile hinzufügen"
     },
     "fields": {
-      "text": "Text",
-      "textMarkdown": "Text (Markdown)",
       "title": "Titel",
       "buttonText": "Button-Text",
-      "buttonUrl": "Button-Link",
-      "displayName": "Anzeigename",
-      "avatarUrl": "Avatar-URL",
-      "username": "Benutzername",
-      "iconUrl": "Icon-URL",
-      "color": "Farbe",
-      "priority": "Priorität",
-      "facts": "Felder",
-      "attachmentGroup": "Attachment"
+      "buttonUrl": "Button-Link"
     },
     "preview": {
       "eyebrow": "Vorschau · {{tool}}",
       "invalid": "Vorschau nicht möglich, solange das JSON ungültig ist.",
       "empty": "Noch kein Inhalt.",
-      "priority": "Priorität {{priority}}",
-      "tags": "Tags: {{tags}}",
       "disclaimer": "Vereinfachte Darstellung. Das tatsächliche Aussehen bestimmt {{tool}}."
     },
     "request": {
@@ -1509,12 +1497,6 @@
         "status": "HTTP-Status",
         "text": "Antworttext",
         "body": "Body (roh/JSON)",
-        "messageId": "Nachrichten-ID",
-        "threadId": "Thread-ID",
-        "timestamp": "Zeitstempel",
-        "channelId": "Kanal-ID",
-        "success": "Erfolg",
-        "unixTime": "Unix-Zeit",
         "requestBody": "Request-Body"
       }
     },
@@ -1589,181 +1571,6 @@
           }
         }
       },
-      "google-chat": {
-        "description": "Text oder Card v2 in einen Space",
-        "tag": "Cards v2",
-        "fields": {
-          "textHelp": "*fett*, _kursiv_, <URL|Linktext>",
-          "cardGroup": "Card (optional)",
-          "cardTitle": "Card-Titel",
-          "subtitle": "Untertitel",
-          "facts": "Zeilen (decoratedText)",
-          "threadKey": "Thread-Key",
-          "threadKeyHelp": "Gleicher Key = gleicher Thread, z. B. die Bestellnummer."
-        },
-        "guide": {
-          "title": "Webhook in Google Chat anlegen",
-          "steps": {
-            "1": "Space in Google Chat öffnen und oben auf den Space-Namen klicken.",
-            "2": "<b>Apps & Integrationen</b> wählen, dann <b>Webhooks hinzufügen</b>.",
-            "3": "Namen und optional Avatar-URL eingeben, <b>Speichern</b>.",
-            "4": "Beim neuen Webhook auf <b>⋮ → Link kopieren</b> klicken und hier einfügen."
-          },
-          "facts": {
-            "urlFormat": "<code>https://chat.googleapis.com/v1/spaces/…/messages?key=…&token=…</code>",
-            "response": "<code>200</code> mit Message-JSON (<code>name</code>, <code>thread.name</code>)",
-            "availability": "nur Google-Workspace-Konten"
-          },
-          "notes": {
-            "1": "Für Antworten im selben Thread einen Thread-Key setzen und an die URL <code>&messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD</code> anhängen."
-          }
-        }
-      },
-      "discord": {
-        "description": "Content plus Embeds, Name und Avatar frei",
-        "tag": "Embeds",
-        "fields": {
-          "content": "Nachricht (content)",
-          "contentHelp": "Markdown: **fett**, *kursiv*, `code`, <@&rollenId>",
-          "embedGroup": "Embed",
-          "description": "Beschreibung",
-          "facts": "Felder (inline)",
-          "titleUrl": "Titel-Link"
-        },
-        "guide": {
-          "title": "Webhook in Discord anlegen",
-          "steps": {
-            "1": "<b>Servereinstellungen → Integrationen → Webhooks</b> öffnen (Recht „Webhooks verwalten“ nötig).",
-            "2": "<b>Neuer Webhook</b> klicken, Namen und Ziel-Kanal wählen.",
-            "3": "<b>Webhook-URL kopieren</b> und hier einfügen."
-          },
-          "facts": {
-            "urlFormat": "<code>https://discord.com/api/webhooks/{id}/{token}</code>",
-            "response": "<code>204 No Content</code>, mit <code>?wait=true</code> <code>200</code> + Message-JSON",
-            "limits": "<code>content</code> max. 2000 Zeichen, bis 10 Embeds"
-          },
-          "notes": {
-            "1": "Tipp: <code>?wait=true</code> an die URL hängen. Dann liefert Discord die Message-ID zurück, die spätere Schritte nutzen können (z. B. zum Bearbeiten)."
-          }
-        }
-      },
-      "mattermost": {
-        "description": "Markdown, Attachments, Priorität",
-        "tag": "Self-hosted",
-        "fields": {
-          "channel": "Kanal überschreiben",
-          "channelPlaceholder": "leer = Standardkanal"
-        },
-        "priorities": {
-          "standard": "Standard",
-          "important": "Wichtig",
-          "urgent": "Dringend"
-        },
-        "guide": {
-          "title": "Incoming Webhook in Mattermost anlegen",
-          "steps": {
-            "1": "Hauptmenü → <b>Integrationen → Eingehende Webhooks</b>.",
-            "2": "<b>Eingehenden Webhook hinzufügen</b>, Titel und Kanal wählen. Optional „Auf diesen Kanal beschränken“.",
-            "3": "<b>Speichern</b> und die URL kopieren."
-          },
-          "facts": {
-            "urlFormat": "<code>https://{server}/hooks/{id}</code>",
-            "response": "<code>200</code> mit Text <code>ok</code>",
-            "requirement": "System-Admin: „Enable Incoming Webhooks“ aktiv"
-          },
-          "notes": {
-            "1": "Benutzername und Icon lassen sich nur überschreiben, wenn der Admin das in den Integrationseinstellungen erlaubt."
-          }
-        }
-      },
-      "rocket-chat": {
-        "description": "Slack-kompatible Attachments",
-        "tag": "Self-hosted",
-        "fields": {
-          "alias": "Alias (Anzeigename)",
-          "emoji": "Emoji-Avatar",
-          "emojiPlaceholder": ":package:"
-        },
-        "guide": {
-          "title": "Eingehende Integration in Rocket.Chat anlegen",
-          "steps": {
-            "1": "<b>Administration → Workspace → Integrationen</b> öffnen.",
-            "2": "<b>Neu → Eingehend</b> wählen, aktivieren, Namen und Kanal (z. B. <code>#ops</code>) eintragen, „Posten als“ Benutzer wählen.",
-            "3": "<b>Speichern</b>, danach die Webhook-URL kopieren."
-          },
-          "facts": {
-            "urlFormat": "<code>https://{server}/hooks/{id}/{token}</code>",
-            "response": "<code>200</code> mit <code>{\"success\":true}</code>"
-          },
-          "notes": {
-            "1": "Optional kann in der Integration ein Skript die Nutzlast umformen. Dann muss das JSON hier zum Skript passen."
-          }
-        }
-      },
-      "webex": {
-        "description": "Text oder Markdown in einen Space",
-        "tag": "Markdown",
-        "fields": {
-          "format": "Format",
-          "body": "Nachricht",
-          "bodyHelp": "Markdown: **fett**, *kursiv*, [Link](url), > Zitat"
-        },
-        "formats": {
-          "markdown": "Markdown",
-          "text": "Nur Text"
-        },
-        "guide": {
-          "title": "Incoming Webhook in Webex anlegen",
-          "steps": {
-            "1": "Im Webex App Hub (<code>apphub.webex.com</code>) die Integration <b>Incoming Webhooks</b> öffnen und <b>Connect</b> klicken.",
-            "2": "Namen vergeben und den Ziel-Space auswählen.",
-            "3": "<b>Add</b> klicken und die erzeugte URL kopieren."
-          },
-          "facts": {
-            "urlFormat": "<code>https://webexapis.com/v1/webhooks/incoming/…</code>",
-            "response": "<code>204 No Content</code>",
-            "payload": "<code>{\"markdown\": \"…\"}</code> oder <code>{\"text\": \"…\"}</code>"
-          },
-          "notes": {
-            "1": "Der Webhook postet als Bot „Incoming Webhooks“. Eigene Namen oder Avatare sind nicht möglich."
-          }
-        }
-      },
-      "ntfy": {
-        "description": "Push aufs Smartphone, ohne Account",
-        "tag": "Push",
-        "fields": {
-          "topic": "Topic",
-          "message": "Nachricht",
-          "tags": "Tags / Emojis (kommagetrennt)",
-          "tagsPlaceholder": "package,moneybag",
-          "click": "Klick öffnet URL",
-          "markdown": "Markdown rendern"
-        },
-        "priorities": {
-          "1": "1 · minimal",
-          "2": "2 · niedrig",
-          "3": "3 · normal",
-          "4": "4 · hoch",
-          "5": "5 · dringend"
-        },
-        "guide": {
-          "title": "ntfy-Topic einrichten",
-          "steps": {
-            "1": "ntfy-App (Android/iOS) oder <code>ntfy.sh/app</code> öffnen.",
-            "2": "Einen schwer zu erratenden Topic-Namen abonnieren, z. B. <code>oc-alerts-7f3a</code>.",
-            "3": "Hier die Server-Basis-URL eintragen (<code>https://ntfy.sh</code> oder eigener Server). Das Topic steht in der Nachricht."
-          },
-          "facts": {
-            "urlFormat": "<code>https://ntfy.sh</code> (JSON-Publish an die Root-URL)",
-            "response": "<code>200</code> mit Event-JSON (<code>id</code>, <code>time</code>)",
-            "auth": "bei geschützten Topics Header <code>Authorization: Bearer tk_…</code>"
-          },
-          "notes": {
-            "1": "Topics auf ntfy.sh sind öffentlich lesbar, wenn man den Namen kennt. Für vertrauliche Daten einen eigenen Server mit Zugriffsschutz verwenden."
-          }
-        }
-      },
       "generic": {
         "name": "Generischer Webhook",
         "description": "Beliebiger Dienst, JSON frei definierbar",
@@ -1784,6 +1591,15 @@
           }
         }
       }
+    },
+    "test": {
+      "button": "Testnachricht senden",
+      "hint": "Sendet die aktuelle Nachricht einmal. Referenzen auf vorherige Schritte werden durch Platzhalter wie [customer.name] ersetzt.",
+      "noUrl": "Zuerst die Webhook-URL setzen.",
+      "invalidJson": "Zuerst das JSON der Nachricht korrigieren.",
+      "sent": "Testnachricht gesendet ({{status}})",
+      "failed": "Die Testnachricht konnte nicht gesendet werden.",
+      "result": "HTTP {{status}} · {{duration}} ms"
     }
   }
 }

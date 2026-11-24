@@ -13,14 +13,12 @@ export type NotificationField =
 	| NotificationReferenceField
 	| { kind: 'text'; key: string; labelKey: string; placeholderKey?: string }
 	| { kind: 'select'; key: string; labelKey: string; options: { value: string; labelKey: string }[] }
-	| { kind: 'color'; key: string; labelKey: string }
 	| { kind: 'toggle'; key: string; labelKey: string }
 	| { kind: 'facts'; key: string; labelKey: string };
 
 export type NotificationFieldLayout =
 	| NotificationField
-	| { kind: 'row'; id: string; fields: NotificationField[] }
-	| { kind: 'group'; id: string; titleKey: string; items: NotificationFieldLayout[] };
+	| { kind: 'row'; id: string; fields: NotificationField[] };
 
 export type NotificationPreviewTone = 'good' | 'warning' | 'attention' | 'accent';
 
@@ -37,8 +35,7 @@ export type NotificationPreviewCard = {
 };
 
 export type NotificationPreview =
-	| { kind: 'chat'; author?: string; lead: string; tags: string[]; card: NotificationPreviewCard | null }
-	| { kind: 'push'; topic: string; title: string; message: string; priority: number; tags: string[] }
+	| { kind: 'chat'; lead: string; card: NotificationPreviewCard | null }
 	| { kind: 'raw'; json: string };
 
 export type NotificationResponseParam = { path: string; labelKey: string; example: string };
@@ -66,10 +63,11 @@ export type NotificationTool = {
 	/** Set when the name is not a product name and has to be translated. */
 	nameKey?: string;
 	abbreviation: string;
+	/** Product logo; tools without one show `abbreviation` on `brandColor`. */
+	logo?: string;
 	brandColor: string;
 	markup: 'slack' | 'markdown';
 	isJsonOnly: boolean;
-	isPush: boolean;
 	webhook: { placeholder: string; pattern: RegExp };
 	guide: NotificationToolGuide;
 	response: NotificationResponseSpec;

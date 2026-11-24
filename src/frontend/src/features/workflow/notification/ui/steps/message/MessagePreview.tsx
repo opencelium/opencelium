@@ -22,28 +22,13 @@ export function MessagePreview({ tool, bodyText }: Props) {
 		switch (preview.kind) {
 			case 'raw':
 				return <pre className='notificationCode'>{render(preview.json)}</pre>;
-			case 'push':
-				return (
-					<div className='notificationPush'>
-						<div className='notificationPushMeta'>
-							<span className='notificationPushIcon' style={{ background: tool.brandColor }} />{toolName} · {render(preview.topic)}
-						</div>
-						<div className='notificationPushTitle'>{render(preview.title)}</div>
-						<div>{render(preview.message)}</div>
-						<div className='notificationPushMeta'>
-							{t('notification.preview.priority', { priority: preview.priority })}
-							{preview.tags.length ? ` · ${t('notification.preview.tags', { tags: preview.tags.join(', ') })}` : ''}
-						</div>
-					</div>
-				);
 			case 'chat': {
-				const hasContent = preview.lead || preview.card || preview.tags.length;
+				const hasContent = preview.lead || preview.card;
 				return (
 					<div className='notificationChat'>
 						<span className='notificationChatAvatar' style={{ background: tool.brandColor, color: readableTextColor(tool.brandColor) }}>OC</span>
 						<div className='notificationChatBody'>
-							<div className='notificationChatAuthor'>{preview.author ?? 'OpenCelium'}</div>
-							{preview.tags.length > 0 && <div className='notificationChatTags'>{preview.tags.map((tag) => <span key={tag}>{render(tag)}</span>)}</div>}
+							<div className='notificationChatAuthor'>OpenCelium</div>
 							{preview.lead && <div className='notificationPreText'>{render(preview.lead)}</div>}
 							{preview.card && <PreviewCard card={preview.card} render={render} />}
 							{!hasContent && <div className='notificationPreviewEmpty'>{t('notification.preview.empty')}</div>}

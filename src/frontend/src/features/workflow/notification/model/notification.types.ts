@@ -1,13 +1,4 @@
-export type NotificationToolId =
-	| 'slack'
-	| 'teams'
-	| 'google-chat'
-	| 'discord'
-	| 'mattermost'
-	| 'rocket-chat'
-	| 'webex'
-	| 'ntfy'
-	| 'generic';
+export type NotificationToolId = 'slack' | 'teams' | 'generic';
 
 export type NotificationFact = { id: string; label: string; value: string };
 

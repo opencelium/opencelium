@@ -7,25 +7,41 @@
   position: absolute;
   top: -6px;
   right: -8px;
-  min-width: 22px;
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-background-surface);
+  line-height: 1;
+  z-index: 7;
+  pointer-events: auto;
+}
+
+.notificationToolBadgeMark {
+  min-width: 18px;
   height: 18px;
   padding: 0 4px;
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm);
-  border: 2px solid var(--color-background-surface);
   font-size: 10px;
   font-weight: 700;
-  line-height: 1;
-  z-index: 7;
-  pointer-events: auto;
 }
 
-.notificationToolBadge--empty {
+.notificationToolBadge--empty .notificationToolBadgeMark {
   background: var(--color-border-strong);
   color: var(--color-text-primary);
+}
+
+.notificationToolBadgeMark.notificationToolLogo {
+  padding: 2px;
+  background: var(--color-background-surface);
+}
+
+.notificationToolBadgeMark.notificationToolLogo img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
 }
 
 .notificationNodeStatusDot {

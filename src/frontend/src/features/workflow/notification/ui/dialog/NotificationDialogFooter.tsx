@@ -8,17 +8,17 @@ type Props = {
 	isReadOnly?: boolean;
 	onBack: () => void;
 	onNext: () => void;
-	onCancel: () => void;
 	onApply: () => void;
 };
 
-export function NotificationDialogFooter({ step, hasTool, isReadOnly, onBack, onNext, onCancel, onApply }: Props) {
+export function NotificationDialogFooter({ step, hasTool, isReadOnly, onBack, onNext, onApply }: Props) {
 	const { t } = useI18n('workflow');
 	return (
 		<div className='notificationDialogFooter'>
-			<Button onClick={onBack} disabled={step === 1} testId='notification-dialog-back'>{t('notification.dialog.back')}</Button>
+			{step > 1 && (
+				<Button onClick={onBack} testId='notification-dialog-back'>{t('notification.dialog.back')}</Button>
+			)}
 			<span className='notificationDialogFooterSpacer' />
-			<Button onClick={onCancel} testId='notification-dialog-cancel'>{t('actions.cancel')}</Button>
 			{step < 4 && (
 				<Button type='primary' onClick={onNext} disabled={!hasTool} testId='notification-dialog-next'>
 					{t('notification.dialog.next')}

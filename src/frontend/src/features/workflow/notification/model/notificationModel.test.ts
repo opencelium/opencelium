@@ -14,9 +14,8 @@ const withMessage = (config: NotificationConfig, message: Record<string, unknown
 	updateActiveDraft(config, (draft) => ({ ...draft, message: { ...draft.message, ...message } as typeof draft.message }));
 
 describe('notification tool registry', () => {
-	it('offers the nine v1 tools in display order', () => {
-		expect(NOTIFICATION_TOOLS.map((tool) => tool.id)).toEqual(
-			['slack', 'teams', 'google-chat', 'discord', 'mattermost', 'rocket-chat', 'webex', 'ntfy', 'generic']);
+	it('offers Slack, Teams and the generic webhook in display order', () => {
+		expect(NOTIFICATION_TOOLS.map((tool) => tool.id)).toEqual(['slack', 'teams', 'generic']);
 	});
 
 	it.each(NOTIFICATION_TOOLS.filter((tool) => !tool.isJsonOnly))('$id builds valid JSON from its defaults and previews it', (tool) => {
@@ -45,15 +44,23 @@ describe('notification body', () => {
 		expect(countReferences(getBodyText(config))).toBe(2);
 	});
 
-	it('serializes Discord colours as integers and ntfy tags as a list', () => {
-		const discord = getNotificationTool('discord').buildBody({ title: 'T', color: '#5865f2', facts: [] });
-		expect(discord).toEqual({ embeds: [{ title: 'T', color: 0x5865f2 }] });
-		const ntfy = getNotificationTool('ntfy').buildBody({ topic: 't', title: '', message: 'm', priority: '4', tags: 'a, b,', click: '' });
-		expect(ntfy).toEqual({ topic: 't', title: '', message: 'm', priority: 4, tags: ['a', 'b'] });
+	it('builds a Teams Adaptive Card with facts, button and mention', () => {
+		const body = getNotificationTool('teams').buildBody({ title: 'T', style: 'good', text: '', mention: 'a@b.c', fullWidth: true,
+			facts: [{ id: 'f', label: 'L', value: 'V' }], buttonText: 'Open', buttonUrl: 'https://x' });
+		expect(body).toMatchObject({ type: 'message', attachments: [{ contentType: 'application/vnd.microsoft.card.adaptive', content: {
+			type: 'AdaptiveCard',
+			body: [
+				{ type: 'TextBlock', weight: 'Bolder', text: 'T', color: 'good' },
+				{ type: 'FactSet', facts: [{ title: 'L', value: 'V' }] },
+				{ type: 'TextBlock', text: '<at>a@b.c</at>' },
+			],
+			actions: [{ type: 'Action.OpenUrl', title: 'Open', url: 'https://x' }],
+			msteams: { width: 'Full', entities: [{ type: 'mention', mentioned: { id: 'a@b.c' } }] },
+		} }] });
 	});
 
 	it('lets a hand-edited JSON win until it is reset', () => {
-		const config = selectTool(createNotificationConfig(), 'webex');
+		const config = selectTool(createNotificationConfig(), 'teams');
 		const edited = updateActiveDraft(config, (draft) => ({ ...draft, jsonOverride: '{"text":"x"}' }));
 		expect(isBodyOverridden(edited)).toBe(true);
 		expect(getBodyText(edited)).toBe('{"text":"x"}');
@@ -96,16 +103,15 @@ describe('webhook validation', () => {
 
 describe('derived HTTP request', () => {
 	it('is a JSON POST to the webhook with the fixed content type and extra headers', () => {
-		let config = selectTool(createNotificationConfig(), 'google-chat');
-		config = updateActiveDraft(config, (draft) => ({ ...draft, webhookUrl: 'https://chat.googleapis.com/v1/spaces/a' }));
+		let config = selectTool(createNotificationConfig(), 'slack');
+		config = updateActiveDraft(config, (draft) => ({ ...draft, webhookUrl: 'https://hooks.slack.com/services/a' }));
 		config = { ...config, extraHeaders: [{ id: 'h', name: 'X-Trace', value: REF }, { id: 'e', name: ' ', value: 'ignored' }] };
 		const methodConfig = buildNotificationMethodConfig('n1', config);
 		expect(methodConfig).toMatchObject({
-			method: 'POST', url: 'https://chat.googleapis.com/v1/spaces/a', bodyFormat: 'json',
+			method: 'POST', url: 'https://hooks.slack.com/services/a', bodyFormat: 'json',
 			headers: { 'Content-Type': NOTIFICATION_CONTENT_TYPE, 'X-Trace': REF },
 		});
-		// The documented response seeds the reference picker of later steps.
-		expect(methodConfig.response?.success.body.fields).toMatchObject({ thread: { name: expect.any(String) } });
+		expect(methodConfig.response?.success.status).toBe('200');
 	});
 });
 

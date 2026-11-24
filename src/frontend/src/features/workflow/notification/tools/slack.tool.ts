@@ -1,3 +1,4 @@
+import slackLogo from '@assets/images/notification/slack.png';
 import type { NotificationPreviewCard, NotificationTool } from './notificationTool.types';
 import { filledFacts, flagValue, readArray, readRecord, readString, textValue } from './toolValues';
 
@@ -7,10 +8,10 @@ export const slackTool: NotificationTool = {
 	id: 'slack',
 	name: 'Slack',
 	abbreviation: 'Sl',
+	logo: slackLogo,
 	brandColor: '#5b2a64',
 	markup: 'slack',
 	isJsonOnly: false,
-	isPush: false,
 	webhook: { placeholder: 'https://hooks.slack.com/services/T…/B…/…', pattern: /^https:\/\/hooks\.slack\.com\/services\// },
 	guide: { stepCount: 4, facts: ['urlFormat', 'response', 'errors', 'limit'], noteCount: 1,
 		docsUrl: 'https://api.slack.com/messaging/webhooks' },
@@ -49,7 +50,7 @@ export const slackTool: NotificationTool = {
 	},
 	toPreview: (body) => {
 		const blocks = readArray(body, 'blocks');
-		if (!blocks.length) return { kind: 'chat', lead: readString(body, 'text'), tags: [], card: null };
+		if (!blocks.length) return { kind: 'chat', lead: readString(body, 'text'), card: null };
 		const card: NotificationPreviewCard = { facts: [], factsLayout: 'grid', isPlain: true };
 		blocks.forEach((block) => {
 			const type = readString(block, 'type');
@@ -63,6 +64,6 @@ export const slackTool: NotificationTool = {
 			}
 			if (type === 'actions') card.button = readString(readRecord(readArray(block, 'elements')[0], 'text'), 'text');
 		});
-		return { kind: 'chat', lead: '', tags: [], card };
+		return { kind: 'chat', lead: '', card };
 	},
 };

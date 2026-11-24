@@ -34,6 +34,10 @@ export const buildMethodPayload = (
 	const kind = nodeKind(node);
 	const isHttpRequest = isHttpRequestNodeType(kind);
 	const connectorData = isHttpRequest ? null : node.data.connector;
+	// Notification text embeds references mid-sentence ("Order {%…%} shipped"). The backend
+	// finds those only in their wrapped form; unwrapped, it reads the whole string as one
+	// reference. So unlike other methods, header values and body keep the `{%…%}` wrapper.
+	const keepsWrappedReferences = kind === 'notification';
 	const response = config?.response ?? (isHttpRequest
 		? {
 			responseId: `response-${node.id}`,
@@ -70,8 +74,10 @@ export const buildMethodPayload = (
 		request: {
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
 			method: config?.method ?? 'GET',
-			header: serializeHeaderReferences(config?.headers ?? {}, endpointArgs),
-			body: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat, config?.bodyData),
+			header: keepsWrappedReferences ? config?.headers ?? {}
+				: serializeHeaderReferences(config?.headers ?? {}, endpointArgs),
+			body: keepsWrappedReferences ? buildPayloadData(config?.body ?? {}, 'json', 'raw')
+				: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat, config?.bodyData),
 		},
 		...(response ? { response } : {}),
 	};

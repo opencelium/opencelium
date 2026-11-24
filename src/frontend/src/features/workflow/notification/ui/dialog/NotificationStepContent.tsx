@@ -8,10 +8,11 @@ import { MessageStep } from '../steps/message/MessageStep';
 import { MessagePreview } from '../steps/message/MessagePreview';
 import { RequestResponseStep } from '../steps/request/RequestResponseStep';
 import type { NotificationDialogState } from './useNotificationDialog';
+import type { NotificationTestSend } from '../test/useNotificationTestSend';
 
-type Props = { state: NotificationDialogState; nodeColor?: string };
+type Props = { state: NotificationDialogState; nodeColor?: string; testSend: NotificationTestSend };
 
-export function NotificationStepContent({ state, nodeColor }: Props) {
+export function NotificationStepContent({ state, nodeColor, testSend }: Props) {
 	const tool = state.config.tool ? getNotificationTool(state.config.tool) : null;
 	let main: ReactNode;
 	let aside: ReactNode = null;
@@ -19,7 +20,7 @@ export function NotificationStepContent({ state, nodeColor }: Props) {
 		main = <ToolStep selected={state.config.tool} onSelect={state.selectTool} />;
 		aside = <ToolStepAside />;
 	} else if (state.step === 2) {
-		main = <WebhookStep state={state} tool={tool} />;
+		main = <WebhookStep state={state} tool={tool} testSend={testSend} />;
 		aside = <WebhookGuide tool={tool} />;
 	} else if (state.step === 3) {
 		main = <MessageStep state={state} tool={tool} />;

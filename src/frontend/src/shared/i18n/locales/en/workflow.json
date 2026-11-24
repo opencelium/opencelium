@@ -210,6 +210,10 @@
       "title": "Add HTTP Request",
       "description": "Add a plain HTTP request to any URL."
     },
+    "addNotification": {
+      "title": "Send Notification",
+      "description": "Post a message to Slack, Microsoft Teams or any other incoming webhook."
+    },
     "operatorOption": {
       "if": {
         "title": "If",
@@ -1413,11 +1417,7 @@
       "response": "Response",
       "errors": "Errors",
       "limit": "Limit",
-      "limits": "Limits",
       "payload": "Payload",
-      "availability": "Available",
-      "requirement": "Requirement",
-      "auth": "Auth",
       "method": "Method"
     },
     "message": {
@@ -1445,26 +1445,14 @@
       "add": "Add row"
     },
     "fields": {
-      "text": "Text",
-      "textMarkdown": "Text (Markdown)",
       "title": "Title",
       "buttonText": "Button text",
-      "buttonUrl": "Button link",
-      "displayName": "Display name",
-      "avatarUrl": "Avatar URL",
-      "username": "User name",
-      "iconUrl": "Icon URL",
-      "color": "Colour",
-      "priority": "Priority",
-      "facts": "Fields",
-      "attachmentGroup": "Attachment"
+      "buttonUrl": "Button link"
     },
     "preview": {
       "eyebrow": "Preview · {{tool}}",
       "invalid": "No preview while the JSON is invalid.",
       "empty": "No content yet.",
-      "priority": "Priority {{priority}}",
-      "tags": "Tags: {{tags}}",
       "disclaimer": "Simplified rendering. The actual look is decided by {{tool}}."
     },
     "request": {
@@ -1509,12 +1497,6 @@
         "status": "HTTP status",
         "text": "Response text",
         "body": "Body (raw/JSON)",
-        "messageId": "Message ID",
-        "threadId": "Thread ID",
-        "timestamp": "Timestamp",
-        "channelId": "Channel ID",
-        "success": "Success",
-        "unixTime": "Unix time",
         "requestBody": "Request body"
       }
     },
@@ -1589,181 +1571,6 @@
           }
         }
       },
-      "google-chat": {
-        "description": "Text or Card v2 into a space",
-        "tag": "Cards v2",
-        "fields": {
-          "textHelp": "*bold*, _italic_, <URL|link text>",
-          "cardGroup": "Card (optional)",
-          "cardTitle": "Card title",
-          "subtitle": "Subtitle",
-          "facts": "Rows (decoratedText)",
-          "threadKey": "Thread key",
-          "threadKeyHelp": "Same key = same thread, e.g. the order number."
-        },
-        "guide": {
-          "title": "Create a webhook in Google Chat",
-          "steps": {
-            "1": "Open the space in Google Chat and click the space name at the top.",
-            "2": "Choose <b>Apps & integrations</b>, then <b>Add webhooks</b>.",
-            "3": "Enter a name and optionally an avatar URL, then <b>Save</b>.",
-            "4": "On the new webhook, click <b>⋮ → Copy link</b> and paste it here."
-          },
-          "facts": {
-            "urlFormat": "<code>https://chat.googleapis.com/v1/spaces/…/messages?key=…&token=…</code>",
-            "response": "<code>200</code> with the message JSON (<code>name</code>, <code>thread.name</code>)",
-            "availability": "Google Workspace accounts only"
-          },
-          "notes": {
-            "1": "To reply in the same thread, set a thread key and append <code>&messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD</code> to the URL."
-          }
-        }
-      },
-      "discord": {
-        "description": "Content plus embeds; name and avatar are free",
-        "tag": "Embeds",
-        "fields": {
-          "content": "Message (content)",
-          "contentHelp": "Markdown: **bold**, *italic*, `code`, <@&roleId>",
-          "embedGroup": "Embed",
-          "description": "Description",
-          "facts": "Fields (inline)",
-          "titleUrl": "Title link"
-        },
-        "guide": {
-          "title": "Create a webhook in Discord",
-          "steps": {
-            "1": "Open <b>Server Settings → Integrations → Webhooks</b> (requires the \"Manage Webhooks\" permission).",
-            "2": "Click <b>New Webhook</b>, choose a name and the target channel.",
-            "3": "Click <b>Copy Webhook URL</b> and paste it here."
-          },
-          "facts": {
-            "urlFormat": "<code>https://discord.com/api/webhooks/{id}/{token}</code>",
-            "response": "<code>204 No Content</code>; with <code>?wait=true</code> <code>200</code> + message JSON",
-            "limits": "<code>content</code> max. 2000 characters, up to 10 embeds"
-          },
-          "notes": {
-            "1": "Tip: append <code>?wait=true</code> to the URL. Discord then returns the message ID, which later steps can use (e.g. to edit the message)."
-          }
-        }
-      },
-      "mattermost": {
-        "description": "Markdown, attachments, priority",
-        "tag": "Self-hosted",
-        "fields": {
-          "channel": "Override channel",
-          "channelPlaceholder": "empty = default channel"
-        },
-        "priorities": {
-          "standard": "Standard",
-          "important": "Important",
-          "urgent": "Urgent"
-        },
-        "guide": {
-          "title": "Create an incoming webhook in Mattermost",
-          "steps": {
-            "1": "Main menu → <b>Integrations → Incoming Webhooks</b>.",
-            "2": "<b>Add Incoming Webhook</b>, choose a title and channel. Optionally \"Lock to this channel\".",
-            "3": "<b>Save</b> and copy the URL."
-          },
-          "facts": {
-            "urlFormat": "<code>https://{server}/hooks/{id}</code>",
-            "response": "<code>200</code> with the text <code>ok</code>",
-            "requirement": "System admin: \"Enable Incoming Webhooks\" is on"
-          },
-          "notes": {
-            "1": "User name and icon can only be overridden if an admin allows it in the integration settings."
-          }
-        }
-      },
-      "rocket-chat": {
-        "description": "Slack-compatible attachments",
-        "tag": "Self-hosted",
-        "fields": {
-          "alias": "Alias (display name)",
-          "emoji": "Emoji avatar",
-          "emojiPlaceholder": ":package:"
-        },
-        "guide": {
-          "title": "Create an incoming integration in Rocket.Chat",
-          "steps": {
-            "1": "Open <b>Administration → Workspace → Integrations</b>.",
-            "2": "Choose <b>New → Incoming</b>, enable it, enter a name and channel (e.g. <code>#ops</code>) and choose the \"Post as\" user.",
-            "3": "<b>Save</b>, then copy the webhook URL."
-          },
-          "facts": {
-            "urlFormat": "<code>https://{server}/hooks/{id}/{token}</code>",
-            "response": "<code>200</code> with <code>{\"success\":true}</code>"
-          },
-          "notes": {
-            "1": "The integration can optionally reshape the payload with a script. The JSON here must then match that script."
-          }
-        }
-      },
-      "webex": {
-        "description": "Text or Markdown into a space",
-        "tag": "Markdown",
-        "fields": {
-          "format": "Format",
-          "body": "Message",
-          "bodyHelp": "Markdown: **bold**, *italic*, [link](url), > quote"
-        },
-        "formats": {
-          "markdown": "Markdown",
-          "text": "Text only"
-        },
-        "guide": {
-          "title": "Create an incoming webhook in Webex",
-          "steps": {
-            "1": "In the Webex App Hub (<code>apphub.webex.com</code>), open the <b>Incoming Webhooks</b> integration and click <b>Connect</b>.",
-            "2": "Enter a name and choose the target space.",
-            "3": "Click <b>Add</b> and copy the generated URL."
-          },
-          "facts": {
-            "urlFormat": "<code>https://webexapis.com/v1/webhooks/incoming/…</code>",
-            "response": "<code>204 No Content</code>",
-            "payload": "<code>{\"markdown\": \"…\"}</code> or <code>{\"text\": \"…\"}</code>"
-          },
-          "notes": {
-            "1": "The webhook posts as the bot \"Incoming Webhooks\". Custom names or avatars are not possible."
-          }
-        }
-      },
-      "ntfy": {
-        "description": "Push to a phone, no account needed",
-        "tag": "Push",
-        "fields": {
-          "topic": "Topic",
-          "message": "Message",
-          "tags": "Tags / emojis (comma-separated)",
-          "tagsPlaceholder": "package,moneybag",
-          "click": "Click opens URL",
-          "markdown": "Render Markdown"
-        },
-        "priorities": {
-          "1": "1 · min",
-          "2": "2 · low",
-          "3": "3 · default",
-          "4": "4 · high",
-          "5": "5 · urgent"
-        },
-        "guide": {
-          "title": "Set up an ntfy topic",
-          "steps": {
-            "1": "Open the ntfy app (Android/iOS) or <code>ntfy.sh/app</code>.",
-            "2": "Subscribe to a hard-to-guess topic name, e.g. <code>oc-alerts-7f3a</code>.",
-            "3": "Enter the server base URL here (<code>https://ntfy.sh</code> or your own server). The topic goes into the message."
-          },
-          "facts": {
-            "urlFormat": "<code>https://ntfy.sh</code> (JSON publish to the root URL)",
-            "response": "<code>200</code> with event JSON (<code>id</code>, <code>time</code>)",
-            "auth": "for protected topics, header <code>Authorization: Bearer tk_…</code>"
-          },
-          "notes": {
-            "1": "Topics on ntfy.sh can be read by anyone who knows the name. Use your own server with access control for confidential data."
-          }
-        }
-      },
       "generic": {
         "name": "Generic webhook",
         "description": "Any service, JSON defined freely",
@@ -1784,6 +1591,15 @@
           }
         }
       }
+    },
+    "test": {
+      "button": "Send test message",
+      "hint": "Sends the current message once. References to earlier steps are filled with placeholders like [customer.name].",
+      "noUrl": "Set the webhook URL first.",
+      "invalidJson": "Fix the message JSON first.",
+      "sent": "Test message sent ({{status}})",
+      "failed": "The test message could not be sent.",
+      "result": "HTTP {{status}} · {{duration}} ms"
     }
   }
 }

@@ -24,6 +24,19 @@
   font-weight: 700;
 }
 
+.notificationToolMark.notificationToolLogo {
+  box-sizing: border-box;
+  padding: 4px;
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border-default);
+}
+
+.notificationToolLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .notificationToolMark--empty {
   background: var(--color-background-hover);
   color: var(--color-text-primary);
@@ -33,7 +46,6 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--typography-font-family-mono);
   font-size: 12px;
   font-weight: 400;
   color: var(--color-text-secondary);
@@ -280,24 +292,6 @@
   font-weight: 600;
 }
 
-.notificationFieldGroup {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 12px;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-}
-
-.notificationFieldGroup legend {
-  padding: 0 4px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
 .notificationFacts {
   display: grid;
   gap: 6px;
@@ -445,6 +439,20 @@
   color: var(--color-status-error-fg);
 }
 
+/* Test send */
+.notificationTestSend {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.notificationTestSendRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* Message step */
 .notificationMessageBar {
   display: flex;
@@ -502,20 +510,6 @@
 
 .notificationChatAuthor {
   font-weight: 700;
-}
-
-.notificationChatTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.notificationChatTags > span {
-  padding: 0 8px;
-  border-radius: 999px;
-  background: var(--color-background-hover);
-  color: var(--color-text-secondary);
-  font-size: 12px;
 }
 
 .notificationPreText {
@@ -580,34 +574,6 @@
   color: var(--color-text-secondary);
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-md);
-}
-
-.notificationPush {
-  display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  background: var(--color-background-surface);
-  box-shadow: var(--shadow-sm);
-}
-
-.notificationPushMeta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--color-text-secondary);
-}
-
-.notificationPushIcon {
-  width: 14px;
-  height: 14px;
-  border-radius: var(--radius-sm);
-}
-
-.notificationPushTitle {
-  font-weight: 700;
 }
 
 .notificationCode {

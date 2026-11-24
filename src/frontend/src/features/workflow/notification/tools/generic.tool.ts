@@ -8,7 +8,6 @@ export const genericTool: NotificationTool = {
 	brandColor: '#56606b',
 	markup: 'markdown',
 	isJsonOnly: true,
-	isPush: false,
 	webhook: { placeholder: 'https://…', pattern: /^https?:\/\// },
 	guide: { stepCount: 3, facts: ['method', 'response'], noteCount: 1 },
 	response: { status: '2xx', contentType: null, sampleBody: '', params: [

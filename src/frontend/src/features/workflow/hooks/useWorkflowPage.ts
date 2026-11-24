@@ -224,6 +224,9 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setNodes(result.nodes);
       setEdges(result.edges);
       setSidebarAction(null);
+      // A new notification step is unusable until a tool is picked, so its guided dialog opens right away.
+      const created = kind === 'notification' ? result.nodes.find((node) => !nodes.some((item) => item.id === node.id)) : undefined;
+      if (created) setNotificationEditor({ nodeId: created.id, target: { kind: 'step', step: 1 } });
     },
     // A note is an annotation, not a step: it belongs to the node it is added
     // from, gets no edge, and never enters the executed graph — which is why it

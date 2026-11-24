@@ -35,11 +35,3 @@ export const readString = (value: unknown, key: string): string => {
 	const nested = value[key];
 	return typeof nested === 'string' ? nested : nested == null ? '' : String(nested);
 };
-
-export const hexToInt = (hex: string) => {
-	const parsed = parseInt(hex.replace('#', ''), 16);
-	return Number.isFinite(parsed) ? parsed : undefined;
-};
-
-export const intToHex = (value: unknown) =>
-	typeof value === 'number' ? `#${value.toString(16).padStart(6, '0')}` : undefined;

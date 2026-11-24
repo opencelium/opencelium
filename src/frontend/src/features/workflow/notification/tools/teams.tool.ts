@@ -1,3 +1,4 @@
+import teamsLogo from '@assets/images/notification/teams.png';
 import type { NotificationPreviewCard, NotificationPreviewTone, NotificationTool } from './notificationTool.types';
 import { filledFacts, flagValue, readArray, readRecord, readString, textValue } from './toolValues';
 
@@ -9,10 +10,10 @@ export const teamsTool: NotificationTool = {
 	id: 'teams',
 	name: 'Microsoft Teams',
 	abbreviation: 'Te',
+	logo: teamsLogo,
 	brandColor: '#4b53bc',
 	markup: 'markdown',
 	isJsonOnly: false,
-	isPush: false,
 	webhook: { placeholder: 'https://….logic.azure.com/workflows/…',
 		pattern: /^https:\/\/[^/]+\.(logic\.azure\.com|powerplatform\.com|api\.powerplatform\.com)/ },
 	guide: { stepCount: 4, facts: ['urlFormat', 'response', 'payload'], noteCount: 2,
@@ -81,6 +82,6 @@ export const teamsTool: NotificationTool = {
 		});
 		const action = readArray(content, 'actions')[0];
 		if (action) card.button = readString(action, 'title');
-		return { kind: 'chat', lead: '', tags: [], card };
+		return { kind: 'chat', lead: '', card };
 	},
 };

@@ -1,4 +1,3 @@
-import { ColorPicker } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Checkbox } from '@shared/ui/primitives/Checkbox';
 import { Input } from '@shared/ui/primitives/Input';
@@ -50,14 +49,6 @@ export function MessageFieldControl({ field, values, isDisabled, onChange }: Pro
 					<Select value={textValue(values, field.key)} disabled={isDisabled} testId={id} sortOptions={false}
 						options={field.options.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
 						onChange={(value) => onChange(field.key, value)} />
-				</div>
-			);
-		case 'color':
-			return (
-				<div className='notificationField' data-testid={id}>
-					<span className='notificationFieldLabel'>{label}</span>
-					<ColorPicker value={textValue(values, field.key)} disabled={isDisabled} disabledAlpha showText
-						aria-label={label} onChange={(color) => onChange(field.key, color.toHexString())} />
 				</div>
 			);
 		case 'toggle':

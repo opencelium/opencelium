@@ -10,6 +10,7 @@ import { NotificationDialogFooter } from './NotificationDialogFooter';
 import { NotificationStepNav } from './NotificationStepNav';
 import { NotificationStepContent } from './NotificationStepContent';
 import { useNotificationDialog } from './useNotificationDialog';
+import { useNotificationTestSend } from '../test/useNotificationTestSend';
 import './notificationDialog.css';
 
 export type NotificationDialogProps = {
@@ -36,11 +37,12 @@ export function NotificationDialog(props: NotificationDialogProps) {
 
 type ContentProps = NotificationDialogProps & { editor: NotificationEditorState; node: WorkflowNodeModel };
 
-function NotificationDialogContent({ editor, node, isReadOnly, onClose, onSave }: ContentProps) {
+function NotificationDialogContent({ editor, node, nodes, edges, isReadOnly, onClose, onSave }: ContentProps) {
 	const { t } = useI18n('workflow');
 	const labelInputRef = useRef<HTMLInputElement>(null);
 	const state = useNotificationDialog({ rawConfig: node.data.notification, initialLabel: node.data.subtitle || node.data.title,
 		target: editor.target });
+	const testSend = useNotificationTestSend({ node, config: state.config, nodes, edges });
 
 	const apply = () => {
 		if (!state.isBodyValid()) {
@@ -61,10 +63,10 @@ function NotificationDialogContent({ editor, node, isReadOnly, onClose, onSave }
 			title={<NotificationDialogHeader color={node.data.color} toolId={state.config.tool}
 				label={state.label} inputRef={labelInputRef} isReadOnly={isReadOnly} onLabelChange={state.setLabel} />}
 			footer={<NotificationDialogFooter step={state.step} hasTool={state.hasTool} isReadOnly={isReadOnly}
-				onBack={state.back} onNext={state.next} onCancel={onClose} onApply={apply} />}>
+				onBack={state.back} onNext={state.next} onApply={apply} />}>
 			<div className='notificationDialog'>
 				<NotificationStepNav state={state} />
-				<NotificationStepContent state={state} nodeColor={node.data.color} />
+				<NotificationStepContent state={state} nodeColor={node.data.color} testSend={testSend} />
 			</div>
 		</Dialog>
 	);
