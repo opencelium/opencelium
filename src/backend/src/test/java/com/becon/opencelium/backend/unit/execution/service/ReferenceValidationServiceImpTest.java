@@ -307,6 +307,23 @@ class ReferenceValidationServiceImpTest {
         }
 
         @Test
+        @DisplayName("validate — {{name}} without 'global.' is pointed to {{global.name}}")
+        void validateSuggestsGlobalPrefixWhenGlobalIsWrittenWithoutIt() {
+            ReferenceValidationResultDTO result = validate("{{TEST_VAR}}");
+
+            assertSingleError(result, IssueCode.INVALID_REFERENCE, 0, "{{TEST_VAR}}");
+            assertThat(result.type()).isEqualTo(ReferenceType.GLOBAL);
+            assertThat(result.errors().get(0).hint()).isEqualTo("Did you mean {{global.TEST_VAR}}?");
+        }
+
+        @Test
+        void validateSuggestsGlobalPrefixWhenGlobalWithPathIsWrittenWithoutIt() {
+            ReferenceValidationResultDTO result = validate("{{tenants[0].id}}");
+
+            assertThat(result.errors().get(0).hint()).isEqualTo("Did you mean {{global.tenants[0].id}}?");
+        }
+
+        @Test
         void validateReportsInvalidReferenceWhenGlobalPathIsEmpty() {
             ReferenceValidationResultDTO result = validate("{{global.limits.}}");
 
