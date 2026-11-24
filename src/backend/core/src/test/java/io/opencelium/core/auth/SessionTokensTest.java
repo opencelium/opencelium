@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 
@@ -41,6 +42,15 @@ class SessionTokensTest {
 		assertThat(sessionJwt.getClaimAsStringList("roles")).containsExactly("ADMIN");
 		assertThat(sessionJwt.getIssuedAt()).isEqualTo(NOW);
 		assertThat(sessionJwt.getExpiresAt()).isEqualTo(NOW.plus(Duration.ofMinutes(15)));
+	}
+
+	@Test
+	void authenticationOfGivesEachRoleAsAnAuthorityWhenTheSessionJwtHasRoles() {
+		var editorAndAdmin = new UserPrincipal("user-2", TenantId.SELF_HOST, "session-2", Set.of("EDITOR", "ADMIN"));
+		Jwt sessionJwt = tokens.issueSessionJwt(editorAndAdmin, NOW.plus(Duration.ofHours(24)));
+
+		assertThat(SessionTokens.authenticationOf(sessionJwt).getAuthorities()).extracting(GrantedAuthority::getAuthority)
+				.containsExactlyInAnyOrder("ROLE_ADMIN", "ROLE_EDITOR");
 	}
 
 	@Test

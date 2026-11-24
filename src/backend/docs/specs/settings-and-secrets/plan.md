@@ -10,7 +10,8 @@ A setting definition has these parts:
 - the type: text, integer, host, or secret
 - the default, or no value
 - the rule for a valid value
-- the owner, which is the installation for each setting of this feature
+
+Each setting of this feature is an installation setting (record 20). Thus a definition has no part for the owner, and the first feature with a tenant setting adds it.
 
 The table of the spec gives the definitions of the broker connection and their rules. The registry collects each definition bean of the Spring context at the start (plan decision 2). A setting key that 2 definitions declare stops the start, and the message names the key.
 
