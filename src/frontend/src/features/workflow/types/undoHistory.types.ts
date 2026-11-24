@@ -37,7 +37,7 @@ export type WorkflowUndoOperatorKind = 'if' | 'loop';
  * a session that changed more than one of them, where naming any single aspect
  * would misreport what happened. */
 export type WorkflowUndoEnhancementAspect =
-	| 'script' | 'language' | 'description' | 'imports' | 'removed' | 'multiple';
+	| 'script' | 'language' | 'description' | 'removed' | 'multiple';
 
 /**
  * Which glyph identifies the node an entry concerns. `connector` carries the

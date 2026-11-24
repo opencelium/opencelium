@@ -10,9 +10,6 @@ import { EnhancementArgs } from '../EnhancementArgs/EnhancementArgs';
 import EnhancementDescription from '../EnhancementDescription/EnhancementDescription';
 import ScriptLanguage from '../ScriptLanguage/ScriptLanguage';
 import EnhancementScript from '../EnhancementScript/EnhancementScript';
-import { EnhancementImports } from '../EnhancementImports/EnhancementImports';
-import { argNamesOf } from '../EnhancementImports/enhancementImports.utils';
-import { insertCall } from '../EnhancementImports/insertCall';
 import type { Enhancement } from '../../../../types/connection';
 import type { useEnhancementState } from './useEnhancementState';
 
@@ -34,7 +31,7 @@ export function EnhancementDetails({
 	const { t } = useI18n('workflow');
 	const [draft, setDraft] = useState(enhancement.script);
 	const [sourceScript, setSourceScript] = useState(enhancement.script);
-	const { onChangeLanguage, onChangeScript: changeScript, onChangeDescription, onChangeImports } = state;
+	const { onChangeLanguage, onChangeScript: changeScript, onChangeDescription } = state;
 	const [issues, setIssues] = useState<CompatibilityIssue[]>([]);
 	const [runtimeLocation, setRuntimeLocation] = useState<{ line: number; column: number }>();
 	const editor = useRef<Ace.Editor | null>(null);
@@ -92,9 +89,6 @@ export function EnhancementDetails({
 							onChangeLanguage={onChangeLanguage}
 						/>
 					</div>
-					<EnhancementImports language={enhancement.language} value={enhancement.imports ?? []}
-						readOnly={readOnly} onChange={onChangeImports} argNames={argNamesOf(enhancement.args)}
-						onInsert={(call) => insertCall(editor.current, call)} />
 				</>
 			)}
 			<div className="bodyLegacyEnhancementScript">

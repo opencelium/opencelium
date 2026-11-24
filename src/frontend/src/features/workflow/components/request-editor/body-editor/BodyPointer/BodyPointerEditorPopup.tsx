@@ -19,7 +19,7 @@ export function BodyPointerEditorPopup({ connection, currentMethod, position, on
         maxWidth: 'calc(100vw - 48px)', pointerEvents: 'auto',
       }}>
         <LegacyBodyReferenceGenerator connection={connection} currentMethod={currentMethod}
-          onApply={onApply} value={value} />
+          onApply={onApply} value={value} canPickScripts />
       </div>
     </div>,
     document.body,

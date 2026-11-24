@@ -184,7 +184,6 @@ type EnhancementLike = {
 	enhanceId?: string;
 	language?: string;
 	description?: string;
-	imports?: string[];
 	script?: string;
 	args?: Record<string, string>;
 };
@@ -205,7 +204,6 @@ const aspectOf = (
 	const changed: WorkflowUndoEnhancementAspect[] = [];
 	if (before.language !== after?.language) changed.push('language');
 	if ((before.description ?? '') !== (after?.description ?? '')) changed.push('description');
-	if (stable(before.imports ?? []) !== stable(after?.imports ?? [])) changed.push('imports');
 	if (before.script !== after?.script
 		|| stable(before.args) !== stable(after?.args)) changed.push('script');
 	// One dialog session is one entry, so a visit that changed the language, the

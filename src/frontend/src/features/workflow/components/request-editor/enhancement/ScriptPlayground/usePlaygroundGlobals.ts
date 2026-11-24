@@ -11,7 +11,7 @@ const isPage = (value: unknown): value is PagedResponse<GlobalVariableListItem> 
 const isVariable = (value: unknown): value is GlobalVariable =>
 	typeof value === 'object' && value !== null && 'kind' in value && 'id' in value;
 
-// The picker gives names only, so each import is looked up by name, then loaded for its value or code.
+// References carry names only, so each variable is looked up by name, then loaded for its value or code.
 // apiExecutor, not RTK Query: the method dialog runs its own Redux store without the api slice.
 async function loadGlobal(name: string): Promise<PlaygroundGlobal> {
 	const page: unknown = await apiExecutor({

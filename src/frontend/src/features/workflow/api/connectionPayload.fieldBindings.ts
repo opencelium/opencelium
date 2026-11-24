@@ -1,6 +1,6 @@
+import { isGlobalReference } from '@entities/globalVariable/lib/globalReference';
 import { DEFAULT_ENHANCEMENT_SCRIPT } from '../components/request-editor/body-editor/bodyReference';
 import { describeBinding, logFieldBinding } from '../utils/fieldBindingDebug';
-import { parseImportArgs, toImportArgLines } from './enhancementGlobalImports';
 
 const parseBindingReference = (reference: unknown) => {
 	const match = String(reference ?? '')
@@ -12,22 +12,30 @@ const parseBindingReference = (reference: unknown) => {
 	return { color: match[1], type: match[2], field: match[3] };
 };
 
+const asGlobalArg = (value: unknown) => {
+	const text = String(value ?? '').trim();
+	return isGlobalReference(text) ? text : undefined;
+};
+
+// The backend runs the enhancement from `expertVar`, keyed by arg name, so a global keeps its own
+// VAR_n there. `from` lists only the method fields the binding reads.
 const serializeFieldBinding = (binding: any) => {
 	const args = binding?.enhancement?.args;
 	if (!args?.RESULT_VAR) return binding;
 	const to = parseBindingReference(args.RESULT_VAR);
-	const from = Object.keys(args)
+	const vars = Object.keys(args)
 		.filter((key) => /^VAR_\d+$/.test(key))
 		.sort((left, right) => Number(left.slice(4)) - Number(right.slice(4)))
-		.map((key) => parseBindingReference(args[key]))
-		.filter(Boolean);
+		.map((key) => ({ key, method: parseBindingReference(args[key]), global: asGlobalArg(args[key]) }));
+	const from = vars.flatMap((item) => item.method ? [item.method] : []);
 	if (!to || from.length === 0) return binding;
 
 	const expertVar = [
 		`//var RESULT_VAR = ${args.RESULT_VAR};`,
-		...from.map((item: any, index) =>
-			`//var VAR_${index} = ${item.color}.(${item.type}).${item.field};`),
-		...toImportArgLines(binding?.enhancement?.imports ?? []),
+		...vars.flatMap(({ key, method, global }) => {
+			if (method) return [`//var ${key} = ${method.color}.(${method.type}).${method.field};`];
+			return global ? [`//var ${key} = ${global};`] : [];
+		}),
 	].join('\n');
 	return {
 		...(binding?.id ? { id: binding.id } : {}),
@@ -72,9 +80,18 @@ const stableBindingId = (value: string) => {
 	return `enh_${hash.toString(16)}`;
 };
 
-const importsOf = (enhancement: { imports?: string[]; expertVar?: unknown }) => {
-	const imports = enhancement.imports ?? parseImportArgs(enhancement.expertVar);
-	return imports.length > 0 ? { imports } : {};
+const VAR_ARG_LINE = /^\s*\/\/\s*var\s+(VAR_\d+)\s*=\s*(.+?)\s*;?\s*$/;
+
+// The saved VAR_n names, read back from `expertVar`: with a global among them, the position in
+// `from` no longer matches the arg number.
+const parseVarArgs = (expertVar: unknown): Record<string, string> => {
+	if (typeof expertVar !== 'string') return {};
+	return expertVar.split('\n').reduce<Record<string, string>>((args, line) => {
+		const match = line.match(VAR_ARG_LINE);
+		const value = match?.[2];
+		if (match && value && (parseBindingReference(value) || asGlobalArg(value))) args[match[1]] = value;
+		return args;
+	}, {});
 };
 
 const normalizeFieldBinding = (binding: any) => {
@@ -93,7 +110,6 @@ const normalizeFieldBinding = (binding: any) => {
 				enhanceId: String(enhancement.enhanceId),
 				script: enhancement.script ?? enhancement.expertCode
 					?? `${DEFAULT_ENHANCEMENT_SCRIPT};`,
-				...importsOf(enhancement),
 			},
 		};
 	}
@@ -101,11 +117,13 @@ const normalizeFieldBinding = (binding: any) => {
 	const to = Array.isArray(binding?.to) ? binding.to[0] : undefined;
 	const from: any[] = Array.isArray(binding?.from) ? binding.from : [];
 	const resultVar = buildBindingReference(to);
-	const fromArgs = from.reduce<Record<string, string>>((args, item, index) => {
-		const value = buildBindingReference(item);
-		if (typeof value === 'string') args[`VAR_${index}`] = value;
-		return args;
-	}, {});
+	const expertArgs = parseVarArgs(enhancement.expertVar);
+	const fromArgs = Object.values(expertArgs).some((value) => asGlobalArg(value)) ? expertArgs
+		: from.reduce<Record<string, string>>((args, item, index) => {
+			const value = buildBindingReference(item);
+			if (typeof value === 'string') args[`VAR_${index}`] = value;
+			return args;
+		}, {});
 	return {
 		...binding,
 		enhancement: {
@@ -113,7 +131,6 @@ const normalizeFieldBinding = (binding: any) => {
 			enhanceId: String(enhancement.enhancementId ?? enhancement.enhanceId
 				?? binding.id ?? stableBindingId(resultVar ?? JSON.stringify(binding))),
 			script: enhancement.script ?? enhancement.expertCode ?? `${DEFAULT_ENHANCEMENT_SCRIPT};`,
-			...importsOf(enhancement),
 			args: resultVar ? { RESULT_VAR: resultVar, ...fromArgs } : enhancement.args ?? {},
 		},
 	};

@@ -8,6 +8,19 @@ type GlobalReferenceInfo = {
     /** Kind and value, the unknown-variable notice, or the raw reference while loading. */
     detail: string
     isUnknown: boolean
+    /** What a constant stands for, for display only; null for other kinds and for a reference with a path. */
+    constantValue: string | null
+}
+
+// The preview is the value as JSON text, cut to 100 characters: a whole JSON string reads better unquoted.
+const displayPreview = (preview: string | null): string | null => {
+    if (preview === null) return null
+    try {
+        const parsed: unknown = JSON.parse(preview)
+        return typeof parsed === 'string' ? parsed : preview
+    } catch {
+        return preview
+    }
 }
 
 // A user without VIEW_USE gets no picker entry, so the chip falls back to the bare name (FR-61).
@@ -22,5 +35,8 @@ export function useGlobalReferenceInfo(reference: string): GlobalReferenceInfo |
     const detail = item
         ? `${t(`global-variable.kind.${item.kind}.label`)} · ${value ?? item.description}`
         : isUnknown ? t('global-variable.picker.unknown') : reference
-    return { label: `${parsed.name}${parsed.path}`, detail, isUnknown }
+    const constantValue = item?.kind === 'CONSTANT' && !parsed.path
+        ? (item.secret ? SECRET_MASK : displayPreview(item.valuePreview))
+        : null
+    return { label: `${parsed.name}${parsed.path}`, detail, isUnknown, constantValue }
 }

@@ -50,9 +50,6 @@ export function useEnhancementState(enhancement?: Enhancement) {
 	const onChangeScript = (script: string) => {
 		if (enhancement) updateEnhancement({ ...enhancement, script });
 	};
-	const onChangeImports = (imports: string[]) => {
-		if (enhancement) updateEnhancement({ ...enhancement, imports });
-	};
 
 	return {
 		connection,
@@ -63,6 +60,5 @@ export function useEnhancementState(enhancement?: Enhancement) {
 		onChangeLanguage,
 		onChangeDescription,
 		onChangeScript,
-		onChangeImports,
 	};
 }

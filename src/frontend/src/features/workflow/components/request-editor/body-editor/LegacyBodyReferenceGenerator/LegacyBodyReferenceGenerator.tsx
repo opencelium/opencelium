@@ -24,7 +24,7 @@ import '../bodyLegacy.css';
 
 export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true, autoFocus, popupZIndex, defaultMethodId, resetKey,
   applyOnSelect, value, readOnly, showMethod = true,
-  responsePartAsText }: LegacyBodyReferenceGeneratorProps) {
+  responsePartAsText, canPickScripts = false }: LegacyBodyReferenceGeneratorProps) {
   const { t } = useI18n('workflow');
   const tooltipZIndex = (popupZIndex ?? DEFAULT_POPUP_Z_INDEX) + 1;
   // Read-only and apply-on-select hosts (the delete dialog's remap table) swap one method
@@ -127,7 +127,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
         </>
       ) : state.referenceType === 'global' ? (
         <>
-          <GlobalVariableSelect value={state.globalName} onChange={state.setGlobalName}
+          <GlobalVariableSelect value={state.globalName} onChange={state.setGlobalName} canPickScripts={canPickScripts}
             popupZIndex={popupZIndex} className='bodyLegacyWebhookSelect' size='large' testId='workflow-reference-global-select' />
           <Tooltip content={t('references.addReference')} zIndex={tooltipZIndex}>
             <Button
