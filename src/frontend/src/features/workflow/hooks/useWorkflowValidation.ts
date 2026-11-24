@@ -61,18 +61,6 @@ export const useWorkflowValidation = ({ persistedTitle, nodes, edges,
 		switch (resolution.source) {
 			case 'backend':
 				return resolution.message;
-			case 'references': {
-				const messages = resolution.problems.map((problem) => tEntities(problem.messageKey,
-					{ ...problem.messageParams, defaultValue: problem.fallback }));
-				resolution.problems.forEach((problem, index) => {
-					if (problem.nodeId) setNodeError(problem.nodeId, messages[index]);
-				});
-				const firstNodeId = resolution.problems.find((problem) => !!problem.nodeId)?.nodeId;
-				if (firstNodeId) centerOnNode(firstNodeId);
-				return messages.length > 1
-					? `${messages[0]} ${tEntities('global-variable.referenceErrors.more', { count: messages.length - 1 })}`
-					: messages[0];
-			}
 			case 'translated': {
 				const message = tEntities(resolution.messageKey, resolution.messageParams);
 				// A red ring the user has to hunt for is no better than none: the

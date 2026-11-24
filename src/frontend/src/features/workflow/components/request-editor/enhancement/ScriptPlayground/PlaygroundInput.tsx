@@ -17,13 +17,11 @@ type Props = {
 	input: InputValue;
 	isInvalid: boolean;
 	onChange: (input: InputValue) => void;
-	/** What "missing" means for this input; defaults to the enhancement meaning (an empty string). */
-	missingHint?: string;
 };
 
 const modes: InputMode[] = ['json', 'text', 'missing'];
 
-export function PlaygroundInput({ name, reference, entry, input, isInvalid, onChange, missingHint }: Props) {
+export function PlaygroundInput({ name, reference, entry, input, isInvalid, onChange }: Props) {
 	const { t } = useI18n('workflow');
 	const [isOpen, setOpen] = useState(false);
 	const jsonLocation = jsonInputLocation(input.text);
@@ -57,7 +55,7 @@ export function PlaygroundInput({ name, reference, entry, input, isInvalid, onCh
 			</div>
 			{input.mode === 'missing' ? (
 				<p className="scriptPlaygroundMissing" data-testid={`script-playground-var-${name}`}>
-					{missingHint ?? t('sandbox.missingHint')}
+					{t('sandbox.missingHint')}
 				</p>
 			) : input.mode === 'json' ? (
 				<PlaygroundJsonEditor

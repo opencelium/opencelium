@@ -6,7 +6,7 @@
 
 .data-aggregator-args__row {
     display: grid;
-    grid-template-columns: 1fr 2fr 32px;
+    grid-template-columns: 1fr 2fr auto;
     grid-template-areas: "name description remove";
     gap: 8px;
     align-items: start;
@@ -14,19 +14,13 @@
 
 .data-aggregator-args__name { grid-area: name; min-width: 0; }
 .data-aggregator-args__description { grid-area: description; min-width: 0; }
-.data-aggregator-args__remove { grid-area: remove; padding-top: 4px; }
+.data-aggregator-args__remove { grid-area: remove; padding-top: 24px; }
 
-/* Side by side the labels sit once above the first argument; each row is inputs only. */
-.data-aggregator-args__header { margin-bottom: 4px; }
-.data-aggregator-args__row-label { display: none; }
-
-/* Stacked, a single header can't name both fields, so each argument labels its own
-   fields again. It's outlined with the delete in its corner, so that reads as removing
+/* Side by side, the name column is too narrow for its label, which wraps and drops
+   the input below the description's; stack the description under the name instead.
+   Each argument is outlined with the delete in its corner, so it reads as removing
    the whole argument rather than just its name. */
 @container (max-width: 480px) {
-    .data-aggregator-args__header { display: none; }
-    .data-aggregator-args__row-label { display: block; }
-
     .data-aggregator-args__row {
         position: relative;
         grid-template-columns: 1fr;

@@ -24,7 +24,6 @@ export function LegacyWebhookReferenceSelect({ value, popupZIndex, onChange }: L
         onChange={onChange}
         options={options.map((item) => ({ label: item.label, value: item.value }))}
         className='bodyLegacyWebhookSelect'
-        size='large'
         showSearch
         optionFilterProp='label'
         getPopupContainer={() => document.body}

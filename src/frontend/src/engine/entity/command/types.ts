@@ -13,8 +13,7 @@ export interface EntityCommandConfig {
     >;
 
     overrides?: Partial<
-        // `record` is the fetched entity for update/view, whose execute renders what the override returns.
-        Record<EntityCommandType, (def: EntityDefinition, ctx: CommandExecutionContext, record?: unknown) => void>
+        Record<EntityCommandType, (def: EntityDefinition, ctx: CommandExecutionContext) => void>
     >;
     getUrl?: Partial<
         Record<

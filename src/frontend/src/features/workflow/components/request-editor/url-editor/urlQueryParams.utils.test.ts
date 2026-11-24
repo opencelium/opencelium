@@ -66,10 +66,6 @@ describe('Encode before sending', () => {
 			.toBe('#{%arg1%}%26{%#abc123.(response).body.$.a%}%26${name}%26@{page}%26{token}%26{#12.apiKey}');
 	});
 
-	it('never touches global variable references', () => {
-		expect(encodeQueryValue('{{global.tenants[0].id}}&#')).toBe('{{global.tenants[0].id}}%26%23');
-	});
-
 	it('is skipped for a row sent as entered', () => {
 		expect(buildQueryFromParams([{ id: '1', key: 'q', value: 'a&b', enabled: true, autoEncode: false }], true))
 			.toBe('q=a&b');

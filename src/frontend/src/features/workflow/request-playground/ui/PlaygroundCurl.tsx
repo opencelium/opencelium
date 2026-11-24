@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import type { Connector } from '@entities/connector/model/types';
+import { MasterPasswordGate } from '@features/master-password';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { Alert } from '@shared/ui/primitives/Alert';
@@ -49,8 +51,12 @@ function CurlBody({ curl, connectors }: Props) {
 	}
 }
 
-export function PlaygroundCurl({ curl, connectors }: Props) {
+function UnlockedCurl({ curl, connectors }: Props) {
 	const { t } = useI18n('workflow');
+	const { generateIfIdle } = curl;
+	// Mounts only once the master password is entered (or none is configured).
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	useEffect(() => generateIfIdle(), []);
 	const command = curl.state.kind === 'ready' && !curl.isGenerating ? curl.state.command : '';
 	return (
 		<div className='rpCurl' data-testid='request-playground-curl'>
@@ -68,5 +74,14 @@ export function PlaygroundCurl({ curl, connectors }: Props) {
 			<CurlBody curl={curl} connectors={connectors} />
 			{command && <div className='rpCurlNote'>{t('requestPlayground.curl.credentialsNote')}</div>}
 		</div>
+	);
+}
+
+export function PlaygroundCurl(props: Props) {
+	const { t } = useI18n('workflow');
+	return (
+		<MasterPasswordGate isCompact title={t('requestPlayground.curl.masterPasswordTitle')}>
+			<UnlockedCurl {...props} />
+		</MasterPasswordGate>
 	);
 }

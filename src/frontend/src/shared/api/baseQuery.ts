@@ -47,10 +47,9 @@ const rawBaseQuery = fetchBaseQuery({
     },
 })
 
-export type CustomFetchArgs = FetchArgs & {
+type CustomFetchArgs = FetchArgs & {
     customOptions?: {
         ignoreError?: boolean
-        headers?: Record<string, string>
     }
 }
 type ExtraOptions = {

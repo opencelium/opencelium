@@ -1,4 +1,3 @@
-import { GlobalVariableGlyph } from './custom/GlobalVariableGlyph';
 import React from 'react';
 import { LuScan, LuFlaskConical, LuPackage } from 'react-icons/lu';
 import {
@@ -58,8 +57,8 @@ import {
 
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
-import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff, MdCallSplit, MdLoop, MdRadioButtonUnchecked} from "react-icons/md";
-import {TbWebhook, TbReportAnalytics, TbLink, TbUnlink, TbMouse, TbVariable} from "react-icons/tb";
+import {MdKeyboardCommandKey, MdContentCopy, MdContentPaste, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff, MdCallSplit, MdLoop, MdRadioButtonUnchecked} from "react-icons/md";
+import {TbWebhook, TbReportAnalytics, TbLink, TbUnlink, TbMouse} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
 import { Waypoints } from "lucide-react";
@@ -81,6 +80,7 @@ const iconMap = {
     notification: NotificationOutlined,
     profile: UserOutlined,
     'content-copy': MdContentCopy,
+    'content-paste': MdContentPaste,
     webhook: TbWebhook,
     link: TbLink,
     unlink: TbUnlink,
@@ -134,8 +134,6 @@ const iconMap = {
     circle: MdRadioButtonUnchecked,
     git: GithubOutlined,
     globe: GlobalOutlined,
-    variable: TbVariable,
-    'global-variable': GlobalVariableGlyph,
     portal: AppstoreOutlined,
     'drag-handle': HolderOutlined,
     minus: MinusOutlined,

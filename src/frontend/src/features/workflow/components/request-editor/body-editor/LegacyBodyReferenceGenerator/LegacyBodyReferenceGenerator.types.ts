@@ -57,7 +57,4 @@ export type LegacyBodyReferenceGeneratorProps = {
 	 *  `document.body`. Defaults to clearing the method dialog it normally lives
 	 *  in; a host that stacks higher has to say so. */
 	popupZIndex?: number;
-	/** Offers script variables in the global source, for a request body or header field, where a
-	 *  global next to a method reference becomes an enhancement arg. */
-	canPickScripts?: boolean;
 };

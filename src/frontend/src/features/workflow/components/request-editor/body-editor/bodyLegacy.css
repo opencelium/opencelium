@@ -260,9 +260,6 @@
   margin-bottom: 10px;
 }
 
-
-
-
 .bodyLegacyEnhancementScript {
   flex: 1;
   /* A floor rather than 0: `flex: 1` alone resolves to nothing when no ancestor
@@ -504,9 +501,7 @@
   grid-template-columns: 40px 214px auto 214px 22px;
   gap: 0;
   align-items: center;
-  /* One line of the field path textarea (41px) plus padding and border, so the
-     webhook and global modes, which have no such field, keep the same height. */
-  min-height: 55px;
+  min-height: 52px;
   padding: 6px 10px;
   background: var(--color-background-elevated);
   border: 1px solid var(--color-border-default);
@@ -515,37 +510,8 @@
 }
 
 .bodyLegacyGeneratorShellWebhook {
-  grid-template-columns: 40px 1fr 26px;
+  grid-template-columns: 28px 1fr 26px;
   min-width: 452px;
-}
-
-/* Up to three sources (method, webhook, global) and the B/H/S switch share one row height so neither stack sets the shell height; the global source sits inside its tooltip's span. */
-.bodyLegacyGeneratorSwitch {
-  gap: 0;
-  align-self: center;
-}
-
-.bodyLegacyGeneratorSwitch > *,
-.bodyLegacyGeneratorSwitch .ant-radio-wrapper,
-.bodyLegacyGeneratorResponse .ant-radio-wrapper {
-  display: flex;
-  align-items: center;
-  height: 13px;
-}
-
-.compactRadioGroup .ant-radio-wrapper::after {
-  display: none;
-}
-
-/* antd's 3-4px focus outline and click wave are taller than these 13px rows and
-   cover the neighbouring radios; keep a thin, tight outline for keyboard focus. */
-.compactRadioGroup .ant-radio-wrapper .ant-radio {
-  outline-width: 1px !important;
-  outline-offset: 0 !important;
-}
-
-.compactRadioGroup .ant-wave {
-  display: none;
 }
 
 .bodyLegacyGeneratorShellNoToggle {
@@ -726,11 +692,16 @@
   width: 100%;
 }
 
-/* antd v6 renders no .ant-select-selector; the frame is .ant-select itself, as for .bodyLegacyGeneratorSelect. */
-.bodyLegacyWebhookSelect.ant-select {
+.bodyLegacyWebhookSelect .ant-select-selector {
   border-radius: 2px !important;
+  min-height: 38px !important;
   padding-inline: 10px !important;
-  font-size: 14px !important;
+}
+
+.bodyLegacyWebhookSelect .ant-select-selection-search-input,
+.bodyLegacyWebhookSelect .ant-select-selection-placeholder,
+.bodyLegacyWebhookSelect .ant-select-selection-item {
+  line-height: 36px !important;
 }
 
 .bodyLegacyWebhookCreate {
@@ -765,6 +736,22 @@
   font-size: 12px;
 }
 
+.bodyLegacyWebhookModalInput,
+.bodyLegacyWebhookModalSelect {
+  border-bottom: 1px solid var(--color-border-default);
+  border-radius: 0 !important;
+}
+
+.bodyLegacyWebhookModalInput .ant-input,
+.bodyLegacyWebhookModalSelect .ant-select-selector {
+  padding-left: 0 !important;
+}
+
+.bodyLegacyWebhookModalSelect .ant-select-selector {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
 .bodyLegacyWebhookWrap {
   position: relative;
   display: inline-flex;
@@ -776,7 +763,6 @@
 .bodyLegacyWebhookBadge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
   min-height: 22px;
   padding: 0 10px;
   border-radius: 0;
@@ -788,6 +774,14 @@
   white-space: nowrap;
 }
 
+.bodyLegacyWebhookRemove {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .bodyLegacyLeftPane--collapsed {
   flex: 0 0 46px;
   min-width: 46px;

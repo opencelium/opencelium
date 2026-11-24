@@ -12,6 +12,7 @@ export const MaterialTabs: TabsComponent = ({
     defaultValue,
     onChange,
     isFullHeight,
+    extraContent,
 }) => {
     const [internalValue, setInternalValue] = useState(
         defaultValue ?? items[0]?.key
@@ -26,12 +27,11 @@ export const MaterialTabs: TabsComponent = ({
 
     return (
         <Box sx={isFullHeight ? { display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 } : undefined}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--color-border-default)' }}>
             <MuiTabs
                 value={active}
                 onChange={handleChange}
-                sx={{
-                    borderBottom: '1px solid var(--color-border-default)',
-                }}
+                sx={{ flex: 1, minWidth: 0 }}
             >
                 {items.map((item) => (
                     <MuiTab
@@ -46,6 +46,8 @@ export const MaterialTabs: TabsComponent = ({
                     />
                 ))}
             </MuiTabs>
+            {extraContent}
+            </Box>
 
             <Box sx={isFullHeight ? { padding: '16px', flex: 1, minHeight: 0 } : { padding: '16px' }}>
                 {items.find(i => i.key === active)?.content}

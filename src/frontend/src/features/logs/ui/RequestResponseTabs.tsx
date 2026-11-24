@@ -57,6 +57,8 @@ type Props = {
   requestBodyContent?: ReactNode;
   // Adds a maximize button to both body panes that opens the body full screen.
   isBodyMaximizable?: boolean;
+  // Shown at the right end of the tab bar, level with the tabs.
+  tabBarExtra?: ReactNode;
 };
 
 export function RequestResponseTabs({
@@ -68,6 +70,7 @@ export function RequestResponseTabs({
   requestHeaderContent,
   requestBodyContent,
   isBodyMaximizable = false,
+  tabBarExtra,
 }: Props) {
   const { t } = useI18n("logs");
   const { tabs, setTab } = useMethodDetailViewState();
@@ -129,6 +132,7 @@ export function RequestResponseTabs({
         value={tabs[tabStateKey] ?? "body"}
         onChange={(key) => setTab(tabStateKey, key)}
         isFullHeight={isFullHeight}
+        extraContent={tabBarExtra}
         items={[
           { key: "body", label: t("tabs.sentReceived"), content: split("body") },
           { key: "headers", label: t("tabs.headers"), content: split("headers") },

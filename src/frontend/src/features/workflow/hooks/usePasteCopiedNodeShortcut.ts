@@ -18,10 +18,9 @@ export const usePasteCopiedNodeShortcut = ({ disabled, copiedNodeIds, nodes,
 				event.key.toLowerCase() !== 'v') return;
 			const target = event.target as Element | null;
 			if (target?.closest?.(EDITABLE_TARGET_SELECTOR) || disabled || copiedNodeIds.length === 0) return;
-			const copiedNodesExist = copiedNodeIds.every((id) => nodes.some((node) => node.id === id));
 			const targetNode = nodes.find((node) =>
 				node.selected && node.type !== 'comment');
-			if (!copiedNodesExist || !targetNode) return;
+			if (!targetNode) return;
 			event.preventDefault();
 			if (targetNode.type === 'if' || targetNode.type === 'loop') {
 				onChooseOperatorPlacement(copiedNodeIds, targetNode.id);

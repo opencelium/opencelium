@@ -1,4 +1,15 @@
 {
+  "pasteCheck": {
+    "referencesIntro": "Diese kopierten Schritte verweisen auf Methoden außerhalb der kopierten Gruppe. Wählen Sie Zielmethoden oder löschen Sie die Referenzen.",
+    "title": "Eingefügte Schritte prüfen",
+    "intro": "Prüfen Sie Konnektoren und Referenzen vor dem Einfügen. Nicht zugeordnete Referenzen werden gelöscht.",
+    "unavailable": "{{name}} kann nicht eingefügt werden: Der Konnektor {{connector}} existiert nicht mehr.",
+    "connector": "Konnektor für {{name}} auswählen",
+    "pasteRest": "Übrige Schritte einfügen",
+    "confirm": "Einfügen",
+    "copyFailed": "Die kopierten Schritte konnten nicht in diesem Browser gespeichert werden.",
+    "nothingToPaste": "Keiner der kopierten Schritte kann in diesen Workflow eingefügt werden."
+  },
   "loadError": {
     "title": "Workflow konnte nicht geladen werden",
     "description": "Der Workflow oder die Konnektorliste konnte nicht geladen werden. Versuchen Sie es erneut oder kehren Sie zur Workflow-Liste zurück.",
@@ -39,6 +50,8 @@
     "deleteReference": "Referenz löschen"
   },
   "referenceRemap": {
+    "details": "Details",
+    "query": "Abfrageparameter",
     "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie für jeden eine Ersatzmethode oder entfernen Sie die Referenz — einzelne Felder können Sie unten bei Bedarf noch anpassen:",
     "replaceWith": "Ersetzen durch:",
     "perFieldHint": "Optional — passen Sie nur die Felder an, die etwas anderes lesen sollen. Unverändert gelassene Felder folgen der oben gewählten Methode oder werden entfernt, falls keine gewählt wurde:",
@@ -143,7 +156,6 @@
     }
   },
   "messages": {
-    "focusElementNotFound": "Der verlinkte Schritt existiert in diesem Workflow nicht mehr.",
     "enterWorkflowName": "Bitte geben Sie einen Workflow-Namen ein",
     "workflowNameExists": "Ein Workflow mit diesem Titel existiert bereits",
     "saveTemplateFailed": "Vorlage konnte nicht gespeichert werden",
@@ -152,8 +164,8 @@
     "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
     "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
-    "nodeCopied": "Knoten kopiert",
-    "nodeCopied_one": "Knoten kopiert",
+    "nodeCopied": "{{count}} Schritte kopiert",
+    "nodeCopied_one": "{{count}} Schritt kopiert",
     "nodePasted": "Knoten eingefügt",
     "nodeDuplicated": "Knoten dupliziert",
     "deleteVersionSuccess": "Version gelöscht",
@@ -498,7 +510,8 @@
     "showResponse": "Antwort anzeigen",
     "tryRequest": "Request ausprobieren…",
     "newLabelPlaceholder": "Neue Bezeichnung",
-    "writeGlobals": "In globale Variablen schreiben"
+    "copy": "Kopieren",
+    "paste": "Einfügen"
   },
   "comment": {
     "badge": "Kommentar",
@@ -688,8 +701,7 @@
     "source": {
       "constant": "Konstante",
       "method": "Methode",
-      "webhook": "Webhook",
-      "global": "Globale Variable"
+      "webhook": "Webhook"
     },
     "responseType": {
       "body": "Body",
@@ -829,9 +841,7 @@
       "responseStatus": "Antwort-Status",
       "responseBody": "Antwort-Body",
       "responseHeader": "Antwort-Header"
-    },
-    "takenFromGlobal": "wird aus der globalen Variablen <global>{{name}}</global> übernommen.",
-    "callsGlobalScript": "ist die Skriptvariable <global>{{name}}</global>: rufen Sie sie als {{key}}(…) auf."
+    }
   },
   "references": {
     "responseStatus": "Antwort-Status",
@@ -868,7 +878,6 @@
     },
     "clearField": "Feld leeren",
     "addReference": "Referenz hinzufügen",
-    "globalVariable": "Globale Variable",
     "issueHint": "Hinweis:",
     "issues": {
       "REFERENCE_REQUIRED": "Die Referenz ist leer.",
@@ -933,8 +942,7 @@
     "selectedValue": "Ausgewählter Wert",
     "mixedValueTitle": "Gemischter Wert",
     "mixedValueDescription": "Dieses Feld sollte entweder nur Klartext oder nur Referenzen enthalten. Gemischte Werte sind nicht zulässig.",
-    "help": "Wählen Sie einen einfachen Wert im Anfragebaum aus, um ihn zu prüfen und Referenzen anzuhängen.",
-    "scriptNeedsMethodReference": "Eine Skriptvariable ist eine Funktion: Verwenden Sie sie in einem Feld zusammen mit einer Methodenreferenz und rufen Sie sie im Enhancement dieses Feldes auf, z. B. VAR_1(VAR_0)."
+    "help": "Wählen Sie einen einfachen Wert im Anfragebaum aus, um ihn zu prüfen und Referenzen anzuhängen."
   },
   "referenceInfo": {
     "title": "Referenzinformationen",
@@ -1091,6 +1099,7 @@
       "connectorError": "Die Daten des Konnektors {{connector}} konnten nicht gelesen werden",
       "invalidJson_one": "Ein Wert ist kein gültiges JSON. Korrigieren Sie ihn, um cURL zu erzeugen.",
       "invalidJson_other": "{{count}} Werte sind kein gültiges JSON. Korrigieren Sie sie, um cURL zu erzeugen.",
+      "masterPasswordTitle": "Der cURL-Befehl enthält echte Zugangsdaten. Geben Sie das Master-Passwort ein, um ihn zu erzeugen.",
       "credentialsNote": "Enthält echte Zugangsdaten und Tokens. Für eine POSIX-Shell (bash, zsh, Git Bash), nicht für Windows cmd oder PowerShell.",
       "generate": "Erzeugen",
       "idle": "Erzeugen Sie den Befehl, sobald die Testwerte ausgefüllt sind."
@@ -1324,22 +1333,6 @@
       "unauthorized": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an, um das Skript auszuführen.",
       "failed": "Der Testlauf konnte nicht gestartet werden."
     },
-    "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“.",
-    "globalUnavailable": "Die globalen Variablen {{names}} konnten nicht geladen werden: Sie wurden eventuell umbenannt, gelöscht oder sind für Sie nicht sichtbar.",
-    "refWithoutValue": "Für dieses ref() gibt es im Playground keinen Testwert: ",
-    "globalWritesTitle": "Schreibvorgänge in globale Variablen (nicht gespeichert)",
-    "globalWritesHint": "Ein Lauf schreibt diese Werte, sobald das Enhancement fertig ist. Der Playground zeigt sie nur an.",
-    "scriptArg": "{{name}} ist die Skriptvariable {{global}}: rufen Sie sie als {{name}}(…) auf.",
-    "setNotMutable": "set() kann nur eine veränderbare globale Variable schreiben, angegeben mit ihrer ganzen Referenz wie {{example}} (ohne Pfad). Nicht schreibbar: "
-  },
-  "globalWrites": {
-    "dialogTitle": "In globale Variablen schreiben: {{method}}",
-    "hint": "Nachdem diese Methode geantwortet hat, schreibt jede Zeile ihren Wert in eine veränderliche globale Variable. Nur der Besitzer-Workflow der Variable darf sie schreiben; beim Speichern werden die anderen abgelehnt. Wählen Sie ein Feld dieser oder einer früheren Methode, einen Webhook-Parameter oder geben Sie eine Konstante ein (JSON oder Text). In einer Schleife schreibt jeder Durchlauf erneut.",
-    "variable": "Variable",
-    "value": "Wert",
-    "add": "Schreibvorgang hinzufügen",
-    "remove": "Schreibvorgang entfernen",
-    "save": "Speichern",
-    "empty": "Diese Methode schreibt noch keine globalen Variablen."
+    "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“."
   }
 }

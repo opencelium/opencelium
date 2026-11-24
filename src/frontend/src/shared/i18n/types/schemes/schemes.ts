@@ -76,6 +76,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             restore: string
         }
         list: {
+            backToList: string
             searchPlaceholder: string
             empty: string
             actions: string
@@ -106,7 +107,6 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             invokers: string
             connectionTemplates: string
             dataAggregator: string
-            globalVariables: string
             notificationTemplates: string
             categories: string
             supportFiles: string
@@ -244,10 +244,6 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 description: string
             }
             changelog: {
-                title: string
-                description: string
-            }
-            globalVariables: {
                 title: string
                 description: string
             }

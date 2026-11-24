@@ -17,7 +17,6 @@ export const AntMultiSelectImpl: MultiSelectComponent = ({
             mode="multiple"
             data-testid={testId}
             className="ant-select-custom"
-            style={{ width: '100%' }}
             value={value}
             defaultValue={defaultValue}
             disabled={disabled}

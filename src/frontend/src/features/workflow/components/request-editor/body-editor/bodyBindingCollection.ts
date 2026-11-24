@@ -1,6 +1,6 @@
 import { createShortId } from '@shared/lib/createId';
 import type { Enhancement } from '../../../types/connection';
-import { buildBodyEnhancement, buildRequestResultField, getBindingArguments } from './bodyReference';
+import { buildBodyEnhancement, buildRequestResultField, getParsedReferences } from './bodyReference';
 import type { RequestMessageProperty } from './bodyBinding.types';
 
 export const collectEnhancementsFromObject = (
@@ -12,7 +12,7 @@ export const collectEnhancementsFromObject = (
   const visit = (value: unknown, namespace: string[] = [], name = '') => {
     const resultField = name ? buildRequestResultField(messageProperty, namespace, name) : '';
     if (typeof value === 'string') {
-      const refs = getBindingArguments(value);
+      const refs = getParsedReferences(value);
       if (refs.length > 0 && resultField) {
         const id = createShortId();
         seen.set(id, buildBodyEnhancement(id, `${methodColor}.(request).${resultField}`, refs));

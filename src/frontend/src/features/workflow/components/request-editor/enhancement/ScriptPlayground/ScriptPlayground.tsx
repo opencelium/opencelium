@@ -4,20 +4,17 @@ import { Button } from '@shared/ui/primitives/Button';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { Typography } from '@shared/ui/primitives/Typography';
 import type { Enhancement } from '@features/workflow/types/connection';
 import type { CompatibilityIssue } from '@features/workflow/script-sandbox/sandbox.types';
 import { useScriptRun } from '@features/workflow/script-sandbox/useScriptRun';
 import { useEnhancementArgs } from '../EnhancementArgs/useEnhancementArgs';
 import {
+	emptyInput,
+	parseInput,
 	readInputs,
 	saveInputs,
-	type InputValue,
 	type InputValues,
 } from './playgroundInputs';
-import { splitRunWrites } from './playgroundScriptCalls';
-import { usePlaygroundSources } from './usePlaygroundSources';
-import { PlaygroundGlobalWrites } from './PlaygroundGlobalWrites';
 import { PlaygroundHeader } from './PlaygroundHeader';
 import { PlaygroundInput } from './PlaygroundInput';
 import { PlaygroundOutput } from './PlaygroundOutput';
@@ -45,27 +42,24 @@ export function ScriptPlayground({
 	const [lastRun, setLastRun] = useState<string>();
 	const sandbox = useScriptRun();
 	const { entries: argEntries } = useEnhancementArgs(enhancement);
-	const { varRows, refRows, scriptArgs, args, invalid, unavailable, runScript,
-		isLoading: isLoadingGlobals } = usePlaygroundSources(enhancement, script, inputs);
-	const { result: runResult, writes } = splitRunWrites(sandbox.result);
-	const refLabel = (name: string) => {
-		const ref = refRows.find((row) => row.name === name);
-		return ref ? `ref(${ref.reference})` : name;
-	};
-	const changeInput = (name: string, input: InputValue) => {
-		const next = { ...inputs, [name]: input };
-		setInputs(next);
-		saveInputs(enhancement.enhanceId, next);
-	};
+	const args: Record<string, unknown> = {};
+	const invalid: string[] = [];
+	const names = Object.keys(enhancement.args).filter((name) => /^VAR_\d+$/.test(name));
+	names.forEach((name) => {
+		try {
+			args[name] = parseInput(inputs[name] ?? emptyInput);
+		} catch {
+			invalid.push(name);
+		}
+	});
 
 	const hasSyntaxError = issues.some((issue) => issue.kind === 'syntax');
 	const isDisabled =
 		enhancement.language !== 'js' ||
 		sandbox.status === 'running' ||
 		hasSyntaxError ||
-		isLoadingGlobals ||
 		invalid.length > 0;
-	const signature = JSON.stringify([runScript, inputs, enhancement.args, enhancement.language]);
+	const signature = JSON.stringify([script, inputs, enhancement.args, enhancement.language]);
 	const isStale = lastRun !== signature;
 	useEffect(() => {
 		const result = sandbox.result;
@@ -81,7 +75,7 @@ export function ScriptPlayground({
 	const run = () => {
 		if (isDisabled) return;
 		setLastRun(signature);
-		void sandbox.run({ language: 'js', script: runScript, variables: args });
+		void sandbox.run({ language: 'js', script, variables: args });
 	};
 	if (enhancement.language !== 'js')
 		return (
@@ -114,42 +108,28 @@ export function ScriptPlayground({
 			<PlaygroundHeader hasDocsLink />
 			<TestRunBanner />
 			<h4>{t('sandbox.inputs')}</h4>
-			{varRows.map((row) => (
+			{names.map((name) => (
 				<PlaygroundInput
-					key={row.name}
-					name={row.name}
-					reference={row.reference}
-					entry={argEntries.find((entry) => entry.key === row.name)}
-					input={row.input}
-					isInvalid={invalid.includes(row.name)}
-					onChange={(input) => changeInput(row.name, input)}
+					key={name}
+					name={name}
+					reference={enhancement.args[name]}
+					entry={argEntries.find((entry) => entry.key === name)}
+					input={inputs[name] ?? emptyInput}
+					isInvalid={invalid.includes(name)}
+					onChange={(input) => {
+						const next = { ...inputs, [name]: input };
+						setInputs(next);
+						saveInputs(enhancement.enhanceId, next);
+					}}
 				/>
 			))}
-			{scriptArgs.map((arg) => (
-				<Typography key={arg.name} variant="caption" isSubtle>
-					{t('sandbox.scriptArg', { name: arg.name, global: arg.global.name })}
-				</Typography>
-			))}
-			{refRows.map((row) => (
-				<PlaygroundInput
-					key={row.name}
-					name="ref()"
-					reference={row.reference}
-					input={row.input}
-					isInvalid={invalid.includes(row.name)}
-					onChange={(input) => changeInput(row.name, input)}
-				/>
-			))}
-			{unavailable.length > 0 && (
-				<Typography variant="caption" isDanger>{t('sandbox.globalUnavailable', { names: unavailable.join(', ') })}</Typography>
-			)}
 			<div className="scriptPlaygroundRunRow">
 				<Tooltip
 					content={
 						hasSyntaxError
 							? t('sandbox.fixSyntax')
 							: invalid.length
-								? t('sandbox.invalidJson', { name: refLabel(invalid[0]) })
+								? t('sandbox.invalidJson', { name: invalid[0] })
 								: t('sandbox.shortcut')
 					}
 				>
@@ -165,17 +145,16 @@ export function ScriptPlayground({
 				</Tooltip>
 				<PlaygroundRunStatus
 					blockedReason={
-						invalid.length ? t('sandbox.invalidJson', { name: refLabel(invalid[0]) }) : undefined
+						invalid.length ? t('sandbox.invalidJson', { name: invalid[0] }) : undefined
 					}
 					completedAt={sandbox.completedAt}
 					status={sandbox.status}
 					isStale={isStale}
 				/>
 			</div>
-			{!isStale && <PlaygroundGlobalWrites writes={writes} />}
 			<PlaygroundOutput
-				missingNames={isStale ? [] : varRows.filter((row) => row.input.mode === 'missing').map((row) => row.name)}
-				result={runResult}
+				missingNames={isStale ? [] : names.filter((name) => inputs[name]?.mode === 'missing')}
+				result={sandbox.result}
 				issues={issues}
 				isStale={isStale}
 				onLocate={onLocate}

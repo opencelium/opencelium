@@ -10,6 +10,8 @@ type MasterPasswordGateProps = {
     title?: React.ReactNode
     label?: string
     info?: { title: string; content: string }
+    /** Inline placement inside a panel: no reserved height, tight padding. */
+    isCompact?: boolean
 }
 
 /**
@@ -21,7 +23,7 @@ type MasterPasswordGateProps = {
  * configured on the backend — if none exists, there is nothing to unlock, so
  * `children` render directly.
  */
-export const MasterPasswordGate: React.FC<MasterPasswordGateProps> = ({ children, title, label, info }) => {
+export const MasterPasswordGate: React.FC<MasterPasswordGateProps> = ({ children, title, label, info, isCompact }) => {
     const { masterPassword } = useMasterPasswordStore()
     const [existsState, setExistsState] = useState<'loading' | boolean>('loading')
 
@@ -61,9 +63,9 @@ export const MasterPasswordGate: React.FC<MasterPasswordGateProps> = ({ children
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 16,
-                minHeight: 320,
-                padding: 24,
+                gap: isCompact ? 12 : 16,
+                minHeight: isCompact ? undefined : 320,
+                padding: isCompact ? '12px 0' : 24,
             }}
         >
             {title && (

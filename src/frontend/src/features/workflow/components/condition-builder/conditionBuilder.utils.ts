@@ -16,7 +16,6 @@ import {
 } from './conditionBuilder.types';
 import type { ResponseType } from '../request-editor/body-editor/requestReferenceOptions';
 import { generateTreeByExpression as parseConditionExpression } from './conditionExpressionParser';
-import { isGlobalReference } from '@entities/globalVariable/lib/globalReference';
 
 // Strips the `{% ... %}` enhancement-style wrapper a condition operand's
 // reference can arrive in (round-tripped through the expression string) —
@@ -62,7 +61,6 @@ export const parsePathFromReference = (value?: string) => {
 export const getSourceFromField = (field?: string): ConditionValueSource => {
 	const reference = unwrapConditionReference(field);
 	if (!reference) return 'direct';
-	if (isGlobalReference(reference)) return 'global';
 	if (reference.startsWith('${') && reference.endsWith('}')) return 'webhook';
 	if (/^#?[A-Fa-f0-9]{6}\.\(response\)\./.test(reference)) return 'direct';
 	return 'constant';
@@ -235,8 +233,7 @@ const isDirectReference = (value?: string) =>
 	!!value && DIRECT_REFERENCE_PATTERN.test(value);
 
 const isReference = (value?: string) =>
-	!!value && (isDirectReference(value) || WRAPPED_DIRECT_REFERENCE_PATTERN.test(value) || /^\$\{.*}$/.test(value)
-		|| isGlobalReference(value));
+	!!value && (isDirectReference(value) || WRAPPED_DIRECT_REFERENCE_PATTERN.test(value) || /^\$\{.*}$/.test(value));
 
 const wrapDirectReference = (value: string) =>
 	WRAPPED_DIRECT_REFERENCE_PATTERN.test(value) ? value : `{%${value.startsWith('#') ? value : `#${value}`}%}`;

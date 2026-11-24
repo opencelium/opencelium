@@ -62,7 +62,7 @@ export const createUpdateExecute = ({ def, config, by }) => {
                 return ctx.openModal(wizard);
             }
 
-            ctx.render(config?.overrides?.update ? config.overrides.update(def, ctx, result) : wizard);
+            ctx.render(wizard);
 
         } catch (error) {
             console.error('Fetch error:', error);

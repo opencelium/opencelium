@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useMasterPasswordStore } from '@features/master-password';
 import { errorBus } from '@shared/errors/api/errorBus';
 import { normalizeError } from '@shared/errors/api/normalizeError';
 import { buildStaticValues, findInvalidJsonInputKeys, listStaticInputKeys } from '../model/methodTestRefs';
@@ -24,6 +25,8 @@ export type PlaygroundCurlState =
 export function usePlaygroundCurl({ session, values }: Args) {
 	const [trigger, { isLoading }] = useGetMethodCurlMutation();
 	const [state, setState] = useState<PlaygroundCurlState>({ kind: 'idle' });
+	const { masterPassword } = useMasterPasswordStore();
+	const isInFlight = useRef(false);
 	const { draft, refs } = session;
 
 	const buildRequest = (): MethodCurlRequest | null => refs.refs ? {
@@ -37,8 +40,10 @@ export function usePlaygroundCurl({ session, values }: Args) {
 	const canGenerate = !!request && !refs.isLoading && invalidCount === 0;
 
 	const generate = async () => {
-		if (!canGenerate || !request || !requestKey) return;
-		const response = await trigger(request);
+		if (!canGenerate || !request || !requestKey || isInFlight.current) return;
+		isInFlight.current = true;
+		const response = await trigger({ body: request, masterPassword });
+		isInFlight.current = false;
 		if ('data' in response && response.data) {
 			const { curl, connectorErrors } = response.data;
 			setState(curl
@@ -65,7 +70,7 @@ export function usePlaygroundCurl({ session, values }: Args) {
 		// The request changed since the command was generated.
 		isOutdated: 'requestKey' in state && state.requestKey !== requestKey,
 		generate: () => void generate(),
-		// Opening the panel generates the first command; later ones are on demand.
+		// The panel generates the first command once it is unlocked; later ones are on demand.
 		generateIfIdle: () => { if (state.kind === 'idle') void generate(); },
 	};
 }

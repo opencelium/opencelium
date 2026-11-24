@@ -195,9 +195,7 @@ export type CrossFieldValidation = {
 }
 export type RouteType = 'create' | 'list' | 'view' | 'edit';
 
-export type EntityRoute =
-    | { type: RouteType }
-    | {
+export type EntityRoute = {
     type: RouteType;
     entityRouteName?: string;
     path?: string;      // override
@@ -305,17 +303,12 @@ export type ViewActionConfig = BaseListActionConfig & {
     type: 'view'
     /** Override the navigation URL. Receives the entity, the resolved value, and the row. */
     buildNavigationUrl?: (entity: EntityDefinition, value: string, row: unknown) => string
-    renderDialogContent?: RenderActionDialogContent
 }
 
 export type UpdateActionConfig = BaseListActionConfig & {
     type: 'update'
     buildNavigationUrl?: (entity: EntityDefinition, value: string, row: unknown) => string
-    renderDialogContent?: RenderActionDialogContent
 }
-
-/** Replaces the generic wizard inside the row action's dialog, for entities with their own form or detail screen. */
-export type RenderActionDialogContent = (args: { value: string; row: unknown; close: () => void }) => React.ReactNode
 
 export type DeleteActionConfig = BaseListActionConfig & {
     type: 'delete'

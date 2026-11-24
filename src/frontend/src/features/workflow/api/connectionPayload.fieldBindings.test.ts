@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeWorkflowFieldBindings, serializeWorkflowFieldBindings } from './connectionPayload.fieldBindings';
+import { normalizeWorkflowFieldBindings } from './connectionPayload.fieldBindings';
 
 type NormalizedEnhancement = {
 	enhanceId: string;
@@ -62,39 +62,5 @@ describe('normalizeWorkflowFieldBindings', () => {
 	it('leaves a binding without an enhancement alone', () => {
 		expect(normalizeWorkflowFieldBindings([{ id: 7 }])).toEqual([{ id: 7 }]);
 		expect(normalizeWorkflowFieldBindings(undefined)).toEqual([]);
-	});
-});
-
-describe('global references as enhancement args', () => {
-	const binding = {
-		enhancement: {
-			enhanceId: 'en-1', language: 'js', script: 'RESULT_VAR = VAR_0 + VAR_1 + VAR_2;',
-			args: {
-				RESULT_VAR: '#f5a623.(request).body.$.name',
-				VAR_0: '#3fa9f5.(response).body.$.first',
-				VAR_1: '{{global.separator}}',
-				VAR_2: '#3fa9f5.(response).body.$.last',
-			},
-		},
-	};
-
-	it('writes the global under its own arg name and keeps it out of `from`', () => {
-		const [saved] = serializeWorkflowFieldBindings([binding]);
-		expect(saved.from).toEqual([
-			{ color: '#3fa9f5', type: 'response', field: 'body.$.first' },
-			{ color: '#3fa9f5', type: 'response', field: 'body.$.last' },
-		]);
-		expect(saved.enhancement.expertVar.split('\n')).toEqual([
-			'//var RESULT_VAR = #f5a623.(request).body.$.name;',
-			'//var VAR_0 = #3fa9f5.(response).body.$.first;',
-			'//var VAR_1 = {{global.separator}};',
-			'//var VAR_2 = #3fa9f5.(response).body.$.last;',
-		]);
-	});
-
-	it('reads the same args back from the saved shape', () => {
-		const [saved] = serializeWorkflowFieldBindings([binding]);
-		const [loaded] = normalizeWorkflowFieldBindings([saved]);
-		expect(loaded.enhancement.args).toEqual(binding.enhancement.args);
 	});
 });

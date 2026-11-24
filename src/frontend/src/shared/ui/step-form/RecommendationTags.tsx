@@ -1,3 +1,4 @@
+import { listLocation } from '@shared/navigation/listLocation';
 import {EntityText} from "@shared/ui/primitives/Text";
 import { Link } from 'react-router-dom';
 
@@ -38,7 +39,7 @@ export function RecommendationTags({
                     return (
                         <Link
                             key={item.link}
-                            to={item.link}
+                            to={listLocation(item.link)}
                             style={{
                                 padding: "6px 14px",
                                 borderRadius: 20,

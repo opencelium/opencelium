@@ -36,8 +36,7 @@
     "success": "Schedule execution started",
     "error": {
       "concurrentForbidden": "Another schedule for this workflow is already running. Wait for it to finish before starting this one.",
-      "failed": "Could not start the schedule execution",
-      "busy": "The workflow is still running and does not start again now. {{detail}}"
+      "failed": "Could not start the schedule execution"
     }
   },
   "terminate": {

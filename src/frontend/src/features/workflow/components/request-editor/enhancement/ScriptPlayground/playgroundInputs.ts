@@ -9,8 +9,7 @@ export function readInputs(id: string): InputValues {
 		if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
 		const result: InputValues = {};
 		Object.entries(parsed).forEach(([name, entry]: [string, unknown]) => {
-			// VAR_n args, and imported global variables under their own name.
-			if (!/^[A-Za-z_$][\w$]*$/.test(name) || !entry || typeof entry !== 'object') return;
+			if (!/^VAR_\d+$/.test(name) || !entry || typeof entry !== 'object') return;
 			const value = entry as Record<string, unknown>;
 			if (
 				['json', 'text', 'missing'].includes(String(value.mode)) &&

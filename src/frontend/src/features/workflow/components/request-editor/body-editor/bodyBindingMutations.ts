@@ -1,6 +1,6 @@
 import { createShortId } from '@shared/lib/createId';
 import type { Connection } from '../../../types/connection';
-import { buildBodyEnhancement, buildRequestResultField, getBindingArguments, getParsedReferences } from './bodyReference';
+import { buildBodyEnhancement, buildRequestResultField, getParsedReferences } from './bodyReference';
 import { collectEnhancementsFromObject } from './bodyBindingCollection';
 import type { BodyEditData, RequestMessageProperty } from './bodyBinding.types';
 
@@ -12,7 +12,7 @@ export const updateRequestFieldBindings = (
 ) => {
   const resultField = buildRequestResultField(messageProperty, bodyData.namespace || [], bodyData.name || '');
   const resultVar = `${methodColor}.(request).${resultField}`;
-  const refs = getBindingArguments(typeof bodyData.newValue === 'string' ? bodyData.newValue : '');
+  const refs = getParsedReferences(typeof bodyData.newValue === 'string' ? bodyData.newValue : '');
   const current = (connection.fieldBindings || []).filter(
     (binding) => binding.enhancement?.args?.RESULT_VAR !== resultVar,
   );

@@ -75,16 +75,6 @@ describe('collectPlaygroundInputs', () => {
 		]);
 		expect(webhooks.map(({ name }) => name)).toEqual(['url']);
 	});
-
-	it('does not collect global variable references as connection placeholders', () => {
-		const { connectionFields } = collect({
-			endpoint: '{{global.url}}/api?token={token}',
-			header: { 'X-Tenant': '{{global.tenant}}' },
-		}, ['url', 'token', 'tenant']);
-		expect(connectionFields).toEqual([
-			{ field: 'token', targets: [{ location: 'url', property: 'token' }] },
-		]);
-	});
 });
 
 describe('readSampleValue', () => {
