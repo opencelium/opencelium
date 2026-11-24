@@ -176,6 +176,18 @@ class SettingsEndpointTest {
 	}
 
 	@Test
+	void patchGivesInvalidSettingsWhenTheUsernameHasALineFeed() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+
+		MvcTestResult change = SettingsRequests.change(mvc, admin, "{\"broker.username\": \"oc\\nadmin\"}");
+
+		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "invalid-settings");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].key").isEqualTo("broker.username");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].problem").isEqualTo("invalid-value");
+		assertThat(mongo.getCollection("settings").countDocuments()).isZero();
+	}
+
+	@Test
 	void patchGivesBadRequestWhenTheBodyIsNotAJsonObject() {
 		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
 
