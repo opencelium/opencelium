@@ -55,7 +55,7 @@
     "react-joyride": "^2.9.3",
     "react-js-cron": "^6.0.2",
     "react-json-view": "^1.21.3",
-    "react-redux": "^9.2.0",
+    "react-redux": "^9.3.1",
     "react-router": "^7.12.0",
     "react-router-dom": "^7.12.0",
     "sockjs-client": "^1.6.1",
