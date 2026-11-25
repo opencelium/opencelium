@@ -1638,5 +1638,10 @@
       "webhook": "Webhook",
       "global": "Global"
     }
+  },
+  "runPolicy": {
+    "queue": "Läuft immer nur einmal gleichzeitig: Ein zweiter Start wartet, bis die laufende Ausführung endet (wegen {{names}}).",
+    "refuse": "Läuft immer nur einmal gleichzeitig: Ein zweiter Start wird abgelehnt (wegen {{names}}).",
+    "hint": "Festgelegt durch das Verhalten bei laufender Ausführung dieser veränderbaren globalen Variablen, nicht durch den Workflow."
   }
 }

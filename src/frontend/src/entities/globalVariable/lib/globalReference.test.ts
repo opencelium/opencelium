@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+    collectGlobalNames,
     buildGlobalReference,
     findGlobalReferences,
     GLOBAL_REFERENCE_TOKEN,
@@ -45,5 +46,15 @@ describe('globalReference', () => {
     it('exposes a non-capturing token for split patterns', () => {
         const parts = 'a{{global.x}}b'.split(new RegExp(`(${GLOBAL_REFERENCE_TOKEN})`))
         expect(parts).toEqual(['a', '{{global.x}}', 'b'])
+    })
+
+    it('collects referenced names from nested data, once each and lower-cased', () => {
+        const circular: Record<string, unknown> = {}
+        circular.self = circular
+        const nodes = [
+            { data: { url: '/api?since={{global.lastSync}}', body: { a: '{{global.Tenants[0].id}}', b: String.raw`\{{global.escaped}}` } } },
+            { data: { header: '{{global.lastsync}}', onClick: () => '{{global.fromFunction}}' } },
+        ]
+        expect(collectGlobalNames([nodes, circular, '{{global.extra}}'])).toEqual(['extra', 'lastsync', 'tenants'])
     })
 })

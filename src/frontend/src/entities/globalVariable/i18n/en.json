@@ -328,6 +328,8 @@
   "mutable": {
     "busyPolicy": {
       "label": "When a run of a workflow that uses it is still going",
+      "scope": "This applies to every workflow that uses this variable: the owner workflow and every workflow that references it. Such a workflow runs one execution at a time, and if any of its mutable variables says Refuse, a second start is refused for the whole workflow.",
+      "queueLimits": "Queue limits are set in application.yml: <code>opencelium.global-variable.queue.max-waiting</code> (starts that may wait per workflow, default 100) and <code>opencelium.global-variable.queue.max-wait-minutes</code> (how long a start may wait, default 60). A start past either limit is refused. Change them in <page>System Configuration</page> and restart the backend.",
       "hints": {
         "QUEUE": "The next run waits and starts when the running one ends.",
         "REFUSE": "The next run does not start and is logged as failed."

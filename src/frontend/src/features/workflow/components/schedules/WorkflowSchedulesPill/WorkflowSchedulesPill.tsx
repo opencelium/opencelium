@@ -1,5 +1,6 @@
 import { CalendarClock } from 'lucide-react'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
+import { Icon } from '@shared/ui/primitives/Icon'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useWorkflowSchedules, type ScheduleAggregateStatus } from '../useWorkflowSchedules'
 import type { WorkflowSchedulesPillProps } from './WorkflowSchedulesPill.types'
@@ -11,10 +12,13 @@ const STATUS_LABEL_KEY: Record<ScheduleAggregateStatus, string> = {
     idle: 'schedules.aggregate.idle',
 }
 
-export function WorkflowSchedulesPill({ connectionId, open, onToggle }: WorkflowSchedulesPillProps) {
+export function WorkflowSchedulesPill({ connectionId, open, onToggle, runPolicy }: WorkflowSchedulesPillProps) {
     const { t } = useI18n('workflow')
     const { aggregate, count } = useWorkflowSchedules(connectionId)
-    const tooltip = count > 0 ? t(STATUS_LABEL_KEY[aggregate]) : t('schedules.pill.tooltip')
+    const status = count > 0 ? t(STATUS_LABEL_KEY[aggregate]) : t('schedules.pill.tooltip')
+    const tooltip = runPolicy
+        ? <>{status}<div className="wf-schedules-pill__policy">{runPolicy.summary}<br />{runPolicy.hint}</div></>
+        : status
 
     return <Tooltip content={tooltip}>
         <button type="button"
@@ -23,6 +27,11 @@ export function WorkflowSchedulesPill({ connectionId, open, onToggle }: Workflow
             <CalendarClock size={16} />
             <span className={`wf-schedules-pill__dot wf-schedules-pill__dot--${aggregate}`} />
             <span className="wf-schedules-pill__count">{count}</span>
+            {runPolicy && (
+                <span className="wf-schedules-pill__info" data-testid="workflow-run-policy-info">
+                    <Icon name="info" size={12} color="primary" />
+                </span>
+            )}
         </button>
     </Tooltip>
 }
