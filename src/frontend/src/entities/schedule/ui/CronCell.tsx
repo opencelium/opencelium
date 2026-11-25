@@ -6,6 +6,7 @@ import { useDialog } from '@shared/ui/dialog/useDialog'
 import { useScheduleUpdatePermission } from '../model/useScheduleUpdatePermission'
 import type { Schedule } from '../model/types'
 import { CronEditDialogContent } from './CronEditDialogContent'
+import { formatCronLabel } from './cronLabel'
 import './CronCell.css'
 
 type Props = {
@@ -14,7 +15,7 @@ type Props = {
 }
 
 export const CronCell = memo(function CronCell({ schedule, tooltipPlacement }: Props) {
-    const { t: tEntities } = useI18n('entities')
+    const { t: tEntities, lang } = useI18n('entities')
     const dialog = useDialog()
     const canUpdate = useScheduleUpdatePermission()
 
@@ -33,18 +34,25 @@ export const CronCell = memo(function CronCell({ schedule, tooltipPlacement }: P
     }
 
     if (schedule.cronExp) {
+        const label = formatCronLabel(schedule.cronExp, tEntities, lang)
+        const chipClass = `cron-cell__chip${label === schedule.cronExp.trim() ? '' : ' cron-cell__chip--text'}`
         if (!canUpdate) {
             return (
                 <span className="cron-cell">
-                    <code className="cron-cell__chip cron-cell__chip--readonly">{schedule.cronExp}</code>
+                    <Tooltip content={schedule.cronExp} placement={tooltipPlacement}>
+                        <code className={`${chipClass} cron-cell__chip--readonly`}>{label}</code>
+                    </Tooltip>
                 </span>
             )
         }
         return (
             <span className="cron-cell">
-                <Tooltip content={tEntities('schedule.cronEdit.tooltip')} placement={tooltipPlacement}>
-                    <code className="cron-cell__chip" onClick={open}>
-                        {schedule.cronExp}
+                <Tooltip
+                    content={`${schedule.cronExp} · ${tEntities('schedule.cronEdit.tooltip')}`}
+                    placement={tooltipPlacement}
+                >
+                    <code className={chipClass} onClick={open}>
+                        {label}
                     </code>
                 </Tooltip>
             </span>

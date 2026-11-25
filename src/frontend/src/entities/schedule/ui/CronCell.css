@@ -34,3 +34,7 @@
     color: var(--color-text-primary);
     border-color: var(--color-border-subtle);
 }
+
+.cron-cell__chip--text {
+    font-family: inherit;
+}
