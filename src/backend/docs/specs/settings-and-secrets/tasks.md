@@ -22,6 +22,15 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 1
 - **Status:** done
 
+## Task 2a: feat(core): refuse control characters in the text settings
+- **Criteria:** SS-03
+- **Function:** A change that gives a text setting a control character, for example a line feed in the broker username, changes nothing and names the setting key. The rule column of the table of spec.md names the control characters, and this PR changes it.
+- **Tests:** `SettingTypeTest` (unit): validateRefusesATextWhenItHasAControlCharacter, validateAcceptsATextWhenItHasLettersOfAnyScript; `SettingsEndpointTest` (full application): patchGivesInvalidSettingsWhenTheUsernameHasALineFeed
+- **Hand test:** 1. Start core and log in as in task 1, with the session JWT in `T`. 2. Send `PATCH /api/settings` with `{"broker.username": "oc\nadmin"}`. 3. The status code is 400, with `invalid-settings` and `broker.username` in `errors`. 4. Send `PATCH` with `{"broker.username": "oc-admin"}`: the status code is 200.
+- **Size:** approximately 10 lines, plus spec.md
+- **Depends on:** 2
+- **Status:** done
+
 ## Task 3: feat(core): keep the broker password as an encrypted secret
 - **Criteria:** SS-02, SS-04, SS-07, SS-08
 - **Function:** An admin sets and resets the broker password through the settings API. The database keeps only its ciphertext, and each response shows the mask. The task adds the secret contract of `common`, the secret storage, and the DEK access that the signing-key loader also uses.

@@ -105,6 +105,20 @@ class SettingTypeTest {
 	}
 
 	@Test
+	void validateRefusesATextWhenItHasAControlCharacter() {
+		for (String control : new String[] { "\u0000", "\n", "\r", "\t", "\u001B", "\u007F", "\u0085", "\u202E",
+				"\u2066" }) {
+			assertThat(SettingType.TEXT.validate("oc" + control + "admin", 1, 255))
+					.as("a text with the character U+%04X", (int) control.charAt(0)).isFalse();
+		}
+	}
+
+	@Test
+	void validateAcceptsATextWhenItHasLettersOfAnyScript() {
+		assertThat(SettingType.TEXT.validate("Ünïcødé-用户 /vhost_1", 1, 255)).isTrue();
+	}
+
+	@Test
 	void validateRefusesATextWhenItIsEmptyOrNotAString() {
 		assertThat(SettingType.TEXT.validate("", 1, 255)).isFalse();
 		assertThat(SettingType.TEXT.validate(15, 1, 255)).isFalse();
