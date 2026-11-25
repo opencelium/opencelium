@@ -1063,7 +1063,8 @@
     "zoomOut": "Verkleinern",
     "fitView": "Workflow an den Bildschirm anpassen",
     "legend": {
-      "system": "System",
+      "system": "HTTP-Anfrage",
+      "notification": "Benachrichtigung",
       "trigger": "Ausgelöster Workflow",
       "operator": "Logikblock",
       "otherConnectors": "Weitere Konnektoren"

@@ -249,6 +249,13 @@
 	border-radius: 50%;
 }
 
+.workflowMinimapSwatchBell {
+	width: 11px;
+	height: 11px;
+	margin: 0 -0.5px;
+	border-radius: 0;
+}
+
 .workflowMinimapSwatchDiamond {
 	width: 8px;
 	height: 8px;
