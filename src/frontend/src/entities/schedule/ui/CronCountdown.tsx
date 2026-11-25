@@ -1,22 +1,12 @@
 import {useEffect, useState} from 'react'
 import {getScheduleTimeZone, upcomingRuns} from '@shared/lib/cron/upcomingRuns'
+import {formatRemaining} from './cronLabel'
 
 const TICK_MS = 1000
 
 function getNextCronTriggerMs(cronExp: string, fromMs: number): number | null {
     const zone = getScheduleTimeZone()
     return upcomingRuns(cronExp, fromMs, 1, zone)?.[0] ?? null
-}
-
-function formatRemaining(ms: number): string {
-    const totalSec = Math.max(0, Math.floor(ms / 1000))
-    if (totalSec < 60) return `${totalSec}s`
-    const totalMin = Math.floor(totalSec / 60)
-    if (totalMin < 60) return `${totalMin}m ${totalSec % 60}s`
-    const totalHour = Math.floor(totalMin / 60)
-    if (totalHour < 24) return `${totalHour}h ${totalMin % 60}m`
-    const totalDay = Math.floor(totalHour / 24)
-    return `${totalDay}d ${totalHour % 24}h`
 }
 
 type Props = {cronExp?: string}

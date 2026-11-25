@@ -16,7 +16,6 @@ import { ComingSoonOverlay } from './components/ComingSoonOverlay'
 import { ScheduleCalendarCard } from './components/ScheduleCalendarCard'
 import { DashboardCardBoundary } from './components/DashboardCardBoundary'
 import { useSocketConnectionNotifications } from './useSocketConnectionNotifications'
-import './dashboard.css'
 
 export default function DashboardPage() {
     const { t } = useI18n('dashboard')
@@ -68,14 +67,6 @@ export default function DashboardPage() {
                     </DashboardCardBoundary>
                 </div>
 
-                {canReadSchedules && (
-                    <div className="dashboard-calendar-row">
-                        <DashboardCardBoundary>
-                            <ScheduleCalendarCard />
-                        </DashboardCardBoundary>
-                    </div>
-                )}
-
                 <div
                     data-testid="dashboard-coming-soon"
                     style={{
@@ -84,6 +75,11 @@ export default function DashboardPage() {
                         gap: 16,
                     }}
                 >
+                    {canReadSchedules && (
+                        <DashboardCardBoundary>
+                            <ScheduleCalendarCard />
+                        </DashboardCardBoundary>
+                    )}
                     <ComingSoonOverlay>
                         <AttentionRequiredCard />
                     </ComingSoonOverlay>
