@@ -11,11 +11,15 @@
 @import './styles/history-expand.css';
 @import './styles/history-dialog.css';
 @import './styles/change-history.css';
+@import './styles/problems.css';
 @import './styles/nodes.css';
 @import './styles/nodes.comment.css';
+@import './styles/nodes.notification.css';
 @import './styles/connector-status.css';
 @import './styles/node-toolbar.css';
+@import './styles/joint-picking.css';
 @import './styles/canvas-controls.css';
+@import './styles/canvas-minimap.css';
 @import './styles/edges.css';
 @import './styles/binding-lens.css';
 @import './styles/live-reference.css';

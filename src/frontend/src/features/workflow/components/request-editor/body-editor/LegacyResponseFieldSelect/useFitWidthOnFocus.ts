@@ -1,0 +1,103 @@
+import { useEffect, useLayoutEffect, useState, type CSSProperties, type RefObject } from 'react';
+
+const MAX_WIDTH = 560;
+const EDGE_GUTTER = 8;
+
+let measureContext: CanvasRenderingContext2D | null = null;
+
+function measureText(text: string, input: HTMLElement) {
+  measureContext ??= document.createElement('canvas').getContext('2d');
+  if (!measureContext) return 0;
+  const style = getComputedStyle(input);
+  measureContext.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+  return Math.ceil(measureContext.measureText(text).width);
+}
+
+/** Right edge of the nearest ancestor that would clip an overflowing child. */
+function getClipRight(element: HTMLElement) {
+  for (let node = element.parentElement; node; node = node.parentElement) {
+    if (getComputedStyle(node).overflowX !== 'visible') return node.getBoundingClientRect().right;
+  }
+  return document.documentElement.clientWidth;
+}
+
+const findTextarea = (host: HTMLElement | null) => host?.querySelector('textarea') ?? null;
+
+/**
+ * Keeps a long path readable. While focused, widens the select to fit `text`
+ * when it doesn't; the extra width is cancelled by an equal negative end margin,
+ * so the select overlays its right neighbours instead of reflowing the row —
+ * operator rows have no room to grow. Once the width is capped, the textarea
+ * wraps and grows in height instead. Unfocused, shows the end of the path on one line.
+ *
+ * Wrapping stays off until the width is capped: antd's autoSize measures the
+ * textarea's height before this hook widens it, so a soft-wrapping field would
+ * paint each new character on a second row for a frame, then snap back.
+ */
+export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, text: string) {
+  const [isFocused, setIsFocused] = useState(false);
+  const [layout, setLayout] = useState<{ width: number; hostWidth: number } | null>(null);
+  const [isCapped, setIsCapped] = useState(false);
+
+  useLayoutEffect(() => {
+    const host = hostRef.current;
+    const input = findTextarea(host);
+    const select = input?.closest<HTMLElement>('.ant-select');
+    if (!isFocused || !host || !input || !select) {
+      setLayout(null);
+      setIsCapped(false);
+      return;
+    }
+    const hostRect = host.getBoundingClientRect();
+    const inputStyle = getComputedStyle(input);
+    const contentWidth = input.clientWidth - parseFloat(inputStyle.paddingLeft)
+      - parseFloat(inputStyle.paddingRight);
+    const chrome = select.offsetWidth - contentWidth;
+    const available = getClipRight(host) - hostRect.left - EDGE_GUTTER;
+    const neededWidth = measureText(text, input) + chrome + 2;
+    const width = Math.min(neededWidth, MAX_WIDTH, available);
+    const isExpanded = width > hostRect.width;
+    setLayout(isExpanded ? { width, hostWidth: hostRect.width } : null);
+    setIsCapped(neededWidth > (isExpanded ? width : hostRect.width));
+  }, [hostRef, isFocused, text]);
+
+  const [isTailShown, setIsTailShown] = useState(false);
+
+  // Unfocused, an input shows the start of an overflowing value; the last
+  // segments are what tell paths apart, so scroll to the end instead.
+  useEffect(() => {
+    const input = findTextarea(hostRef.current);
+    if (isFocused || !input) {
+      setIsTailShown(false);
+      return;
+    }
+    const showTail = () => {
+      const isOverflowing = input.scrollWidth > input.clientWidth;
+      input.scrollLeft = isOverflowing ? input.scrollWidth : 0;
+      setIsTailShown(isOverflowing);
+    };
+    // Browsers reset the scroll on blur after the event, so wait a frame.
+    const frame = requestAnimationFrame(showTail);
+    const observer = new ResizeObserver(showTail);
+    observer.observe(input);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [hostRef, isFocused, text]);
+
+  const style: CSSProperties | undefined = layout
+    ? { width: layout.width, marginInlineEnd: layout.hostWidth - layout.width }
+    : undefined;
+
+  return {
+    isFocused,
+    /** Focused and as wide as it may get: only now may the path wrap onto more lines. */
+    isWrapping: isFocused && isCapped,
+    isExpanded: layout !== null,
+    isTailShown,
+    style,
+    onFocus: () => setIsFocused(true),
+    onBlur: () => setIsFocused(false),
+  };
+}

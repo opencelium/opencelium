@@ -4,8 +4,10 @@ import type { ConditionConfig } from '../components/condition-builder/conditionB
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 import type { JointRejectionReason } from '../utils/jumpValidator';
+import type { WorkflowIssueTone } from '../problems/workflowProblems';
+import type { NotificationConfig } from '../notification/model/notification.types';
 
-export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
+export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'notification' | 'if' | 'loop' | 'comment';
 
 // What a LOOP node shows while running, set by WorkflowCanvas — a live count
 // ("i = 3"), refreshed on every iteration. Nothing is shown at all before
@@ -16,7 +18,11 @@ export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-conne
 export type WorkflowLoopIterationDisplay = { iterator: string; count: number; indexPath: string };
 
 export type WorkflowAddDirection = 'right' | 'bottom';
-export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
+export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'notification' | 'if' | 'loop' | 'comment';
+
+/** `global.<name>` → the value written once the method has responded: a reference, or JSON / plain text. */
+export type WorkflowGlobalWrites = Record<string, string>;
+
 export type WorkflowOperatorKind = 'if' | 'loop';
 
 /** A free-text annotation belonging to one node. Carried in the connection's
@@ -84,12 +90,16 @@ export type WorkflowNodeData = {
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
 	triggerConnection?: WorkflowTriggerConnectionRef;
+	/** Only on a 'notification' node. Its `methodConfig` is derived from this on every save. */
+	notification?: NotificationConfig;
 	/** Only on a 'comment' node — the note itself. */
 	comment?: WorkflowCommentData;
 	/** Set by prepareWorkflowElements on a node that *has* a note, so NodeShell
 	 * can render its show/hide badge. The note itself lives on the comment node. */
 	anchoredComment?: { nodeId: string; collapsed: boolean };
 	dataAggregator?: number | null;
+	/** Mutable global variables this method writes after it has responded (methods only). */
+	globalWrites?: WorkflowGlobalWrites;
 	labelEdited?: boolean;
 	isLeaf?: boolean;
 	rightLeaf?: boolean;
@@ -115,6 +125,9 @@ export type WorkflowNodeData = {
 	 * live match ring distinct from the drag-preview `highlighted` state and
 	 * the `hasError` state, so all three can coexist without visual collision. */
 	searchHighlighted?: boolean;
+	/** The step last picked from the problems panel or the minimap, ringed in its
+	 *  problem's tone. Set only on the nodes passed to the canvas (applyProblemFocus). */
+	problemFocus?: WorkflowIssueTone;
 	hasError?: boolean;
 	errorMessage?: string;
 	dropTarget?: boolean;
@@ -202,12 +215,14 @@ export type TriggerConnectionWorkflowNode = Node<WorkflowNodeData, 'trigger-conn
 export type IfWorkflowNode = Node<WorkflowNodeData, 'if'>;
 export type LoopWorkflowNode = Node<WorkflowNodeData, 'loop'>;
 export type CommentWorkflowNode = Node<WorkflowNodeData, 'comment'>;
+export type NotificationWorkflowNode = Node<WorkflowNodeData, 'notification'>;
 
 export type WorkflowNodeModel =
 	| StartWorkflowNode
 	| ConnectorWorkflowNode
 	| SystemWorkflowNode
 	| TriggerConnectionWorkflowNode
+	| NotificationWorkflowNode
 	| IfWorkflowNode
 	| LoopWorkflowNode
 	| CommentWorkflowNode;
@@ -223,7 +238,7 @@ export type CreateNodeFromActionArgs = {
 export type WorkflowHeaderMenuItem = {
 	id: string;
 	labelKey: string;
-	section?: 'template' | 'history' | 'shortcuts' | 'exit';
+	section?: 'schedules' | 'template' | 'history' | 'shortcuts' | 'exit';
 	keepOpenOnSelect?: boolean;
 	disabled?: boolean;
 	/** Tooltip shown while `disabled` explaining why the action is unavailable. */
@@ -231,7 +246,3 @@ export type WorkflowHeaderMenuItem = {
 	badgeKey?: string;
 };
 
-export type WorkflowNodeMenuItem = {
-	id: string;
-	labelKey: string;
-};

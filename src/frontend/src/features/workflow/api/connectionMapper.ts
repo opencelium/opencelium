@@ -9,6 +9,7 @@ import { getInvalidSavedEdgeReason, getSavedUiEdges, getSavedUiNodes } from './c
 import {
 	findSavedNode,
 	mergeSavedNodeData,
+	resolveRestoredNodeType,
 } from './connectionMapper.savedNodeMatching';
 import { restoreNodesFromUi } from './connectionMapper.restoreNodes';
 import { withRestoredCommentNodes } from './connectionMapper.comments';
@@ -58,13 +59,15 @@ export function mapConnectionToWorkflowState(
 		const savedNode = findSavedNode(node, entryByNodeId.get(node.id), savedUiNodes, usedSavedNodeIds);
 		if (!savedNode) return node;
 		usedSavedNodeIds.add(savedNode.id);
+		const type = resolveRestoredNodeType(savedNode.type, node.type);
 
 		return {
 			...node,
+			type,
 			id: node.type === 'start' || hasUnmatchedEntries || hasInvalidRestoredEdges
 				? node.id : savedNode.id,
 			position: savedNode.position,
-			data: mergeSavedNodeData(node.data, savedNode.data),
+			data: { ...mergeSavedNodeData(node.data, savedNode.data), kind: type },
 			draggable: savedNode.draggable ?? node.draggable,
 			deletable: savedNode.deletable ?? node.deletable,
 		};
@@ -76,7 +79,8 @@ export function mapConnectionToWorkflowState(
 		: entries.length > 0 && savedUiEdges.length > 0 && !hasUnmatchedEntries && !invalidSavedEdgeReason;
 	const edges = useSavedEdges ? savedUiEdges : entries.length ? buildEdges(entries) : initialEdges;
 	const shouldAutoLayout = entries.length > 0
-		&& ((!restoredFromUi && savedUiNodes.length === 0) || hasStackedNodes(nodes));
+		&& !restoredFromUi
+		&& (savedUiNodes.length === 0 || (usedSavedNodeIds.size < builtNodes.length && hasStackedNodes(nodes)));
 	const positionedNodes = shouldAutoLayout ? normalizeWorkflowPositions(nodes, edges) : nodes;
 	const normalizedNodes = backfillMissingInvokerNames(
 		withLeafState(assignMissingMethodColors(positionedNodes), edges),

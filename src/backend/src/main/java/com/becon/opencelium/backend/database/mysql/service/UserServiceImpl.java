@@ -31,6 +31,7 @@ import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.EmailUtility;
 import org.slf4j.Logger;
@@ -40,7 +41,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,6 +87,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> findLocalAccount(String identifier) {
+        if (identifier == null || identifier.isBlank()) {
+            return Optional.empty();
+        }
+        String trimmed = identifier.trim();
+
+        return userRepository.findByEmail(trimmed)
+                .or(() -> userRepository.findByUsername(trimmed))
+                .filter(user -> user.getAuthMethod() == AuthMethod.BASIC && user.getPassword() != null);
+    }
+
+    @Override
     public Optional<User> findByOidcIdentity(String issuer, String subject) {
         return userRepository.findByOidcIssuerAndOidcSubject(issuer, subject);
     }
@@ -98,31 +110,116 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> findByIdNoLock(int id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public User getById(Integer userId) {
         return findById(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
     }
 
+    /**
+     * Persists {@code user} after normalizing and checking its login identifiers.
+     *
+     * <p>An OC ({@link AuthMethod#BASIC}) user signs in with its email or its username, so it needs
+     * at least one of the two; an LDAP user always carries the username the directory gave it. Both
+     * identifiers are stored trimmed, {@code null} when blank, and are unique across all users.
+     *
+     * @throws IllegalArgumentException if a non-blank email is not a valid address
+     * @throws GeneralServiceException with {@link ExceptionConstant#USERNAME_INVALID},
+     *     {@link ExceptionConstant#USERNAME_ALREADY_EXIST},
+     *     {@link ExceptionConstant#EMAIL_OR_USERNAME_REQUIRED} or
+     *     {@link ExceptionConstant#EMAIL_ALREADY_EXIST}
+     */
     @Override
     @Transactional
     public User save(User user) {
+        user.setEmail(normalizeEmail(user.getEmail()));
+        user.setUsername(normalizeUsername(user));
         String email = user.getEmail();
 
-        if (email != null && !EmailUtility.isValid(email)) {
-            throw new IllegalArgumentException("Invalid email is supplied");
+        if (user.getAuthMethod() == AuthMethod.BASIC && email == null && user.getUsername() == null) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_OR_USERNAME_REQUIRED,
+                    "Email or username is required");
         }
 
-        if (user.getAuthMethod() == AuthMethod.BASIC && email == null) {
-            throw new IllegalArgumentException("Email is required for BASIC users");
+        if (email != null && userRepository.existsByEmailAndIdNot(email, user.getId())) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_ALREADY_EXIST,
+                    "Email is already taken");
         }
 
         return userRepository.save(user);
     }
 
+    /**
+     * Returns the email to persist: trimmed and {@code null} when blank.
+     *
+     * <p>Blank must become {@code null} because the unique key on {@code user.email} tolerates any
+     * number of {@code NULL}s but only one empty string, and the user wizard sends an empty string
+     * for every user without an email.
+     *
+     * @throws IllegalArgumentException if a non-blank email is not a valid address
+     */
+    private static String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return null;
+        }
+        String trimmed = email.trim();
+
+        if (!EmailUtility.isValid(trimmed)) {
+            throw new IllegalArgumentException("Invalid email is supplied");
+        }
+
+        return trimmed;
+    }
+
+    /**
+     * Returns the username to persist: trimmed, {@code null} when blank, and for OC users checked
+     * against the rules that make it a login identifier.
+     *
+     * <p>Blank must become {@code null} because the unique key {@code uk_user_username}
+     * (changeset 5.2:2) tolerates any number of {@code NULL}s but only one empty string, and the
+     * user wizard sends an empty string for every user without a username. LDAP usernames are
+     * owned by the directory and may look like anything, including an email address, so only their
+     * whitespace is normalized. An OC username may not contain {@code '@'}: at login an
+     * email-shaped identifier is resolved as an email, so such a username could never sign in and
+     * could only block the first login of an LDAP account that authenticates with that address.
+     * Uniqueness spans both auth methods and is case-insensitive through the column collation.
+     *
+     * @throws GeneralServiceException with {@link ExceptionConstant#USERNAME_INVALID} or
+     *     {@link ExceptionConstant#USERNAME_ALREADY_EXIST}
+     */
+    private String normalizeUsername(User user) {
+        String username = user.getUsername();
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+        username = username.trim();
+
+        if (user.getAuthMethod() != AuthMethod.LDAP && username.contains("@")) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.USERNAME_INVALID,
+                    "Username must not contain '@'");
+        }
+
+        if (userRepository.existsByUsernameAndIdNot(username, user.getId())) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.USERNAME_ALREADY_EXIST,
+                    "Username '" + username + "' is already taken");
+        }
+
+        return username;
+    }
+
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
     @Override
@@ -219,11 +316,19 @@ public class UserServiceImpl implements UserService {
         return bCryptPasswordEncoder.encode(password);
     }
 
+    /**
+     * Returns the user behind the current security context, re-read by id so that callers inside
+     * a transaction get a managed entity ({@link #changePassword(ChangePasswordDTO)} relies on
+     * dirty checking), or {@code null} when no user is authenticated.
+     *
+     * @throws UserNotFoundException if the authenticated user has been deleted meanwhile
+     */
     @Override
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return findByEmail(userDetails.getUsername()).get();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipals principals) {
+            int id = principals.getUser().getId();
+            return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         }
         return null;
     }

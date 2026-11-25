@@ -1,4 +1,4 @@
-import type { WorkflowOperatorKind } from '../../types/workflow.types';
+import type { WorkflowCreateKind } from '../../types/workflow.types';
 
 export const sidebarItems: {
   key: string;
@@ -21,6 +21,11 @@ export const sidebarItems: {
     textKey: 'sidebar.addHttpRequest.description',
   },
   {
+    key: 'notification',
+    titleKey: 'sidebar.addNotification.title',
+    textKey: 'sidebar.addNotification.description',
+  },
+  {
     key: 'trigger-connection',
     titleKey: 'sidebar.triggerConnection.title',
     textKey: 'sidebar.triggerConnection.description',
@@ -28,7 +33,7 @@ export const sidebarItems: {
 ];
 
 export const operatorItems: {
-  key: WorkflowOperatorKind;
+  key: Extract<WorkflowCreateKind, 'if' | 'loop'>;
   titleKey: string;
   textKey: string;
 }[] = [

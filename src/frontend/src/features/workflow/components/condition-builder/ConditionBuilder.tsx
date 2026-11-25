@@ -1,12 +1,9 @@
 import {
-	ApiOutlined,
 	CopyOutlined,
 	DownOutlined,
-	LinkOutlined,
-	NumberOutlined,
 } from '@ant-design/icons';
 import { Button, Input, Modal, Select } from 'antd';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FocusEvent } from 'react';
 import type { Connection, MethodWithId } from '../../types/connection';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyResponseFieldSelect/LegacyResponseFieldSelect';
@@ -55,9 +52,13 @@ import { evaluateIfComparison, type ComparisonEvaluation, type OperandInput } fr
 import { LoopInfoPanel } from './LoopInfoPanel/LoopInfoPanel';
 import { useConditionDragItem } from './ConditionReorder/useConditionDragItem';
 import { ConditionReorderProvider } from './ConditionReorder/ConditionReorderProvider';
-import { Radio } from '@shared/ui/primitives/Radio';
+import { ReferenceSourceSelect } from '../reference-source/ReferenceSourceSelect';
+import { ResponseTypeSelect } from '../reference-source/ResponseTypeSelect';
+import { useGlobalPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
+import { GlobalVariableSelect } from '@entities/globalVariable/ui/picker/GlobalVariableSelect';
+import { buildGlobalReference, parseGlobalReference } from '@entities/globalVariable/lib/globalReference';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
@@ -67,6 +68,9 @@ import { LiveReferenceValuePreview } from '../request-editor/utils/LiveReference
 import { LiveInspectHint } from '../request-editor/utils/LiveInspectHint';
 import { useTestRun } from '../../test-run/useTestRun';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { isHttpRequestNodeType, isMethodNodeType } from '../../utils/methodNodeTypes';
+import { ConditionReferenceChip } from './ConditionValueInput/ConditionReferenceChip';
+import { useSettleOnOutsideClick } from '../reference-chip/useSettleOnOutsideClick';
 import '../request-editor/body-editor/bodyLegacy.css';
 import '../dialogHeader.css';
 import './conditionBuilder.css';
@@ -84,18 +88,6 @@ type Props = {
 	onClose: () => void;
 	onSave: (nodeId: string, config: ConditionConfig) => void;
 };
-
-const SOURCE_OPTIONS: { value: ConditionValueSource; titleKey: string; icon: ReactNode }[] = [
-	{ value: 'constant', titleKey: 'conditionBuilder.source.constant', icon: <NumberOutlined /> },
-	{ value: 'direct', titleKey: 'conditionBuilder.source.method', icon: <ApiOutlined /> },
-	{ value: 'webhook', titleKey: 'conditionBuilder.source.webhook', icon: <LinkOutlined /> },
-];
-
-const RESPONSE_TYPE_OPTIONS: { value: ResponseType; label: string; titleKey: string }[] = [
-	{ value: 'body', label: 'B', titleKey: 'conditionBuilder.responseType.body' },
-	{ value: 'header', label: 'H', titleKey: 'conditionBuilder.responseType.header' },
-	{ value: 'status', label: 'S', titleKey: 'conditionBuilder.responseType.status' },
-];
 
 const IF_OPERATOR_OPTIONS = Object.values(IfOperatorName).map((value) => ({
 	value,
@@ -116,7 +108,7 @@ const buildNodeBackedMethods = (
 ) => {
 	const methodsById = new Map(methods.map((method) => [method.id, method]));
 	return nodes
-		.filter((node) => node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection')
+		.filter((node) => isMethodNodeType(node.type))
 		.map((node) => {
 			const method = methodsById.get(node.id);
 			const label = node.data.subtitle || node.data.title || method?.label || method?.name || node.id;
@@ -126,7 +118,7 @@ const buildNodeBackedMethods = (
 					index: '',
 					name: label,
 					label,
-					connector: node.type === 'system' || node.type === 'trigger-connection' ? null : node.data.connector ?? null,
+					connector: isHttpRequestNodeType(node.type) ? null : node.data.connector ?? null,
 					request: {},
 					response: {},
 				}),
@@ -192,7 +184,7 @@ const getSourceMethods = (
 	const allowedIds = new Set(
 		nodes
 			.slice(0, nodeIndex)
-			.filter((item) => item.type === 'connector' || item.type === 'system' || item.type === 'trigger-connection')
+			.filter((item) => isMethodNodeType(item.type))
 			.map((item) => item.id),
 	);
 	return methods.filter((method) => allowedIds.has(method.id));
@@ -258,50 +250,6 @@ const getFirstRuleOperator = (group: ConditionGroup): string | undefined => {
 	}
 	return undefined;
 };
-
-function SourceSwitcher({
-	value,
-	onChange,
-}: {
-	value: ConditionValueSource;
-	onChange: (value: ConditionValueSource) => void;
-}) {
-	const { t } = useI18n('workflow');
-	return (
-		<div className="conditionSourceSwitcher compactRadioGroup">
-			{SOURCE_OPTIONS.map((option) => (
-				<Radio
-					key={option.value}
-					checked={value === option.value}
-					onChange={() => onChange(option.value)}
-					label={<span className="conditionRadioIcon" title={t(option.titleKey)}>{option.icon}</span>}
-				/>
-			))}
-		</div>
-	);
-}
-
-function ResponseTypeSwitcher({
-	value,
-	onChange,
-}: {
-	value: ResponseType;
-	onChange: (value: ResponseType) => void;
-}) {
-	const { t } = useI18n('workflow');
-	return (
-		<div className="conditionResponseTypeSwitcher compactRadioGroup">
-			{RESPONSE_TYPE_OPTIONS.map((option) => (
-				<Radio
-					key={option.value}
-					checked={value === option.value}
-					onChange={() => onChange(option.value)}
-					label={<span className="conditionRadioIcon conditionResponseTypeIcon" title={t(option.titleKey)}>{option.label}</span>}
-				/>
-			))}
-		</div>
-	);
-}
 
 function MethodSelect({
 	methods,
@@ -406,10 +354,19 @@ function ConditionValueInput({
 	const [draftSource, setDraftSource] = useState<ConditionValueSource>(() => getSourceFromField(fieldValue));
 	const [draftMethodId, setDraftMethodId] = useState<string | undefined>(() => parsedMethod?.id);
 	const [draftResponseType, setDraftResponseType] = useState<ResponseType>(() => parsedResponseType || 'body');
+	// A chosen reference shows as a chip; the selects come back while it is edited or still empty.
+	const [isEditing, setIsEditing] = useState(() => !fieldValue);
+	const editorRef = useRef<HTMLDivElement>(null);
+	const settle = useCallback(() => setIsEditing(false), []);
+	useSettleOnOutsideClick(editorRef, isEditing && !!fieldValue, settle);
 	const source = normalizeSource(fieldValue ? getSourceFromField(fieldValue) : draftSource);
 	const methodId = fieldValue ? parsedMethod?.id : draftMethodId;
 	const responseType = normalizeResponseType(draftResponseType);
 	const selectedMethod = allMethods.find((method) => method.id === methodId);
+	const hasGlobalSource = useGlobalPickerScope() !== null;
+	const sources: ConditionValueSource[] = hasGlobalSource
+		? ['constant', 'direct', 'webhook', 'global']
+		: ['constant', 'direct', 'webhook'];
 
 	// Hover-driven live value — same pattern as BodyPointer/RequestReferenceTokens:
 	// resolution only fires once the field-select itself is hovered, no eager
@@ -435,16 +392,32 @@ function ConditionValueInput({
 
 	const setSource = (nextSource: ConditionValueSource) => {
 		setDraftSource(nextSource);
+		setIsEditing(true);
 		if (nextSource === 'direct') {
 			setDraftResponseType(responseType || 'body');
 		}
 		onChange({ [fieldKey]: undefined });
 	};
 
+	// Leaving the whole input — not moving between its selects — settles a complete reference into a chip.
+	const finishEditing = (event: FocusEvent<HTMLDivElement>) => {
+		if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsEditing(false);
+	};
+
+	if (fieldValue && !isEditing && source !== 'constant') {
+		return <ConditionReferenceChip side={side} kind={source === 'direct' ? 'step' : source}
+			fieldValue={fieldValue} method={selectedMethod} onHoverChange={setIsFieldHovered}
+			tooltip={selectedMethod && testRun?.isPaused ? <LiveReferenceValuePreview label={fieldLabel}
+				isLoading={isLiveValueLoading} hasValue={hasLiveValue} rawValue={liveValue}
+				formattedValue={hasLiveValue ? formatLiveReferenceValue(liveValue) : null} /> : undefined}
+			onEdit={() => setIsEditing(true)}
+			onRemove={() => { setIsEditing(true); onChange({ [fieldKey]: undefined }); }} />;
+	}
+
 	if (source === 'constant') {
 		return (
 			<div className="conditionValueInput">
-				<SourceSwitcher value={source} onChange={setSource} />
+				<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 				<Input
 					placeholder={t('placeholders.constant')}
 					value={fieldValue}
@@ -455,10 +428,24 @@ function ConditionValueInput({
 		);
 	}
 
+	if (source === 'global') {
+		return (
+			<div ref={editorRef} className="conditionValueInput conditionValueInputWebhook" onBlur={finishEditing}>
+				<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
+				<GlobalVariableSelect
+					value={parseGlobalReference(fieldValue)?.name}
+					popupZIndex={popupZIndex}
+					testId={`workflow-condition-global-${side}`}
+					onChange={(name) => onChange({ [fieldKey]: buildGlobalReference(name) })}
+				/>
+			</div>
+		);
+	}
+
 	if (source === 'webhook') {
 		return (
-			<div className="conditionValueInput conditionValueInputWebhook">
-				<SourceSwitcher value={source} onChange={setSource} />
+			<div ref={editorRef} className="conditionValueInput conditionValueInputWebhook" onBlur={finishEditing}>
+				<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 				<LegacyWebhookReferenceSelect
 					value={extractWebhookValue(fieldValue) || undefined}
 					popupZIndex={popupZIndex}
@@ -469,8 +456,8 @@ function ConditionValueInput({
 	}
 
 	return (
-		<div className="conditionValueInput">
-			<SourceSwitcher value={source} onChange={setSource} />
+		<div ref={editorRef} className="conditionValueInput" onBlur={finishEditing}>
+			<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 			<MethodSelect
 				methods={methods}
 				selectedMethod={selectedMethod}
@@ -481,8 +468,10 @@ function ConditionValueInput({
 					onChange({ [fieldKey]: undefined });
 				}}
 			/>
-			<ResponseTypeSwitcher
+			<ResponseTypeSelect
 				value={responseType}
+				popupZIndex={popupZIndex ?? 13010}
+				testId={`workflow-condition-response-type-${side}`}
 				onChange={(value) => {
 					setDraftResponseType(value);
 					onChange({
@@ -619,7 +608,7 @@ function RuleRow({
 	const resolveOperand = (field: string | undefined, live: typeof leftLive): OperandInput => {
 		const source = getSourceFromField(field);
 		if (source === 'constant') return { known: true, value: field ?? '' };
-		if (source === 'webhook') return { known: false, value: undefined };
+		if (source === 'webhook' || source === 'global') return { known: false, value: undefined };
 		return { known: live.hasValue, value: live.value };
 	};
 	const comparisonEvaluation = !isLoop && operator
@@ -634,6 +623,7 @@ function RuleRow({
 	return (
 		<div
 			className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''} ${reorderItem?.className ?? ''}`}
+			data-testid="workflow-condition-rule"
 			{...reorderItem?.itemProps}
 		>
 			{reorderItem?.handle}
@@ -964,6 +954,7 @@ export function ConditionBuilderDialog({
 		if (!method) return undefined;
 		return {
 			methodLabel: method.label || method.name,
+			methodColor: method.color,
 			connectorIcon: getMethodConnectorIcon(method),
 			hasMethod: true,
 			responseType: parseResponseTypeFromReference(loopCollectionRef) || 'body',

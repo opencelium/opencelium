@@ -3,7 +3,7 @@ import {
     Tab as MuiTab,
     Box,
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import type {TabsComponent} from "@shared/ui/primitives/Tabs/Tabs.types.ts";
 
 export const MaterialTabs: TabsComponent = ({
@@ -11,6 +11,8 @@ export const MaterialTabs: TabsComponent = ({
     value,
     defaultValue,
     onChange,
+    isFullHeight,
+    extraContent,
 }) => {
     const [internalValue, setInternalValue] = useState(
         defaultValue ?? items[0]?.key
@@ -18,19 +20,18 @@ export const MaterialTabs: TabsComponent = ({
 
     const active = value ?? internalValue;
 
-    const handleChange = (_: any, newValue: string) => {
+    const handleChange = (_: SyntheticEvent, newValue: string) => {
         if (!value) setInternalValue(newValue);
         onChange?.(newValue);
     };
 
     return (
-        <>
+        <Box sx={isFullHeight ? { display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 } : undefined}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--color-border-default)' }}>
             <MuiTabs
                 value={active}
                 onChange={handleChange}
-                sx={{
-                    borderBottom: '1px solid var(--color-border-default)',
-                }}
+                sx={{ flex: 1, minWidth: 0 }}
             >
                 {items.map((item) => (
                     <MuiTab
@@ -45,10 +46,12 @@ export const MaterialTabs: TabsComponent = ({
                     />
                 ))}
             </MuiTabs>
+            {extraContent}
+            </Box>
 
-            <Box sx={{ padding: '16px' }}>
+            <Box sx={isFullHeight ? { padding: '16px', flex: 1, minHeight: 0 } : { padding: '16px' }}>
                 {items.find(i => i.key === active)?.content}
             </Box>
-        </>
+        </Box>
     );
 };

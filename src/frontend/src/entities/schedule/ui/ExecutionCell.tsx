@@ -28,7 +28,7 @@ export const ExecutionCell = memo(function ExecutionCell({
 
   const openLogs = () => {
     if (!logs) return;
-    dialog.open({
+    const dialogId = dialog.open({
       width: 900,
       maximizable: true,
       content: (
@@ -36,6 +36,7 @@ export const ExecutionCell = memo(function ExecutionCell({
           connectionId={logs.connectionId}
           schedulerId={logs.schedulerId}
           status={logs.status}
+          onClose={() => dialog.closeById(dialogId)}
         />
       ),
     });

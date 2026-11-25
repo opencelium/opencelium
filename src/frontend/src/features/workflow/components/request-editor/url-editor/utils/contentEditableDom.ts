@@ -21,6 +21,12 @@ export const contentLength = (node: Node, mode: LengthMode): number => {
 	if (node.nodeType === Node.TEXT_NODE) {
 		return stripCaretBoundaries(node.textContent || '').length;
 	}
+	if (node.nodeType === Node.ELEMENT_NODE && (node as HTMLElement).hasAttribute('data-global-ref')) {
+		const element = node as HTMLElement;
+		return mode === 'raw'
+			? (element.getAttribute('data-main') || '').length
+			: stripCaretBoundaries(element.textContent || '').length;
+	}
 	if (isEndpointRefElement(node)) {
 		return mode === 'raw'
 			? (node.getAttribute('data-main') || '').length

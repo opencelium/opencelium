@@ -1,45 +1,43 @@
-import { ApiOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { LegacyWebhookReferenceSelect } from '../LegacyWebhookReferenceSelect/LegacyWebhookReferenceSelect';
-import { LegacyResponseFieldSelect } from '../LegacyResponseFieldSelect/LegacyResponseFieldSelect';
-import { Radio } from '@shared/ui/primitives/Radio';
-import type { ResponseType } from '../requestReferenceOptions';
+import { DEFAULT_POPUP_Z_INDEX, LegacyResponseFieldSelect } from '../LegacyResponseFieldSelect/LegacyResponseFieldSelect';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { GlobalVariableSelect } from '@entities/globalVariable/ui/picker/GlobalVariableSelect';
+import { useGlobalPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
 import type { LegacyBodyReferenceGeneratorProps } from './LegacyBodyReferenceGenerator.types';
-
-/** The same letters the switch is labelled with, so a named part and a chosen
- *  one read as the same thing seen twice. */
-const RESPONSE_PART_LETTER: Record<ResponseType, string> = {
-  body: 'B',
-  header: 'H',
-  status: 'S',
-};
+import { ReferenceSourceSelect } from '../../../reference-source/ReferenceSourceSelect';
+import { ResponseTypeSelect } from '../../../reference-source/ResponseTypeSelect';
+import { RESPONSE_PART_LETTER } from '../../../reference-source/referenceSource.types';
 import { ReferenceMethodSelect } from '../../../method-select/ReferenceMethodSelect';
-import { useLegacyBodyReferenceGenerator } from './useLegacyBodyReferenceGenerator';
+import { useLegacyBodyReferenceGenerator, type GeneratorReferenceType } from './useLegacyBodyReferenceGenerator';
 import '../bodyLegacy.css';
 
 export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true, autoFocus, popupZIndex, defaultMethodId, resetKey,
   applyOnSelect, value, readOnly, showMethod = true,
-  responsePartAsText }: LegacyBodyReferenceGeneratorProps) {
+  responsePartAsText, canPickScripts = false }: LegacyBodyReferenceGeneratorProps) {
+  const { t } = useI18n('workflow');
+  const tooltipZIndex = (popupZIndex ?? DEFAULT_POPUP_Z_INDEX) + 1;
+  // Read-only and apply-on-select hosts (the delete dialog's remap table) swap one method
+  // reference for another, so they keep to methods.
+  const hasGlobalOption = useGlobalPickerScope() !== null && !readOnly && !applyOnSelect;
+  const hasSourceSwitch = showWebhookOption || hasGlobalOption;
+  const sources: GeneratorReferenceType[] = [
+    'direct',
+    ...(showWebhookOption ? ['webhook' as const] : []),
+    ...(hasGlobalOption ? ['global' as const] : []),
+  ];
   const state = useLegacyBodyReferenceGenerator({
-    connection, currentMethod, onApply, showWebhookOption, defaultMethodId, resetKey,
+    connection, currentMethod, onApply, showWebhookOption: hasSourceSwitch, defaultMethodId, resetKey,
     applyOnSelect, value, showMethod, readOnly,
   });
 
   return (
     <div className={state.shellClassName} data-testid='workflow-reference-generator'>
-      {showWebhookOption ? (
-        <div className='bodyLegacyGeneratorSwitch compactRadioGroup'>
-          <Radio
-            checked={state.referenceType === 'direct'}
-            onChange={() => state.setReferenceType('direct')}
-            label={<span className='bodyLegacyRadioIcon'><ApiOutlined /></span>}
-          />
-          <Radio
-            checked={state.referenceType === 'webhook'}
-            onChange={() => state.setReferenceType('webhook')}
-            label={<span className='bodyLegacyRadioIcon'><LinkOutlined /></span>}
-          />
-        </div>
+      {hasSourceSwitch ? (
+        <ReferenceSourceSelect value={state.referenceType} sources={sources} popupZIndex={popupZIndex ?? DEFAULT_POPUP_Z_INDEX}
+          testId='workflow-reference-source' onChange={state.setReferenceType} />
       ) : null}
       {state.referenceType === 'direct' ? (
         <>
@@ -60,23 +58,8 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
               {RESPONSE_PART_LETTER[state.responseType]}
             </span>
           ) : (
-            <div className='bodyLegacyGeneratorResponse compactRadioGroup'>
-              <Radio
-                checked={state.responseType === 'body'} disabled={readOnly}
-                onChange={() => state.selectResponseType('body')}
-                label={<span className='bodyLegacyRadioIcon'>B</span>}
-              />
-              <Radio
-                checked={state.responseType === 'header'} disabled={readOnly}
-                onChange={() => state.selectResponseType('header')}
-                label={<span className='bodyLegacyRadioIcon'>H</span>}
-              />
-              <Radio
-                checked={state.responseType === 'status'} disabled={readOnly}
-                onChange={() => state.selectResponseType('status')}
-                label={<span className='bodyLegacyRadioIcon'>S</span>}
-              />
-            </div>
+            <ResponseTypeSelect value={state.responseType} popupZIndex={popupZIndex ?? DEFAULT_POPUP_Z_INDEX}
+              disabled={readOnly} testId='workflow-reference-response-type' onChange={state.selectResponseType} />
           )}
           {/* Keyed on the method as well: its options come from that method's
               response, and a control still showing the previous one's path is
@@ -87,8 +70,10 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             disabled={readOnly || !state.methodId} iterators={state.iterators}
             popupZIndex={popupZIndex}
             onChange={state.setField}
+            onSubmit={!applyOnSelect && !readOnly ? state.applyDirect : undefined}
           />
           {!applyOnSelect && !readOnly && (
+            <Tooltip content={t('references.addReference')} zIndex={tooltipZIndex}>
             <Button
               type='text'
               className='bodyLegacyGeneratorAction'
@@ -96,18 +81,35 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
               icon={<PlusOutlined />}
               disabled={!state.selectedMethod || !state.field} onClick={state.applyDirect}
             />
+            </Tooltip>
           )}
+        </>
+      ) : state.referenceType === 'global' ? (
+        <>
+          <GlobalVariableSelect value={state.globalName} onChange={state.setGlobalName} canPickScripts={canPickScripts}
+            popupZIndex={popupZIndex} className='bodyLegacyWebhookSelect' size='large' testId='workflow-reference-global-select' />
+          <Tooltip content={t('references.addReference')} zIndex={tooltipZIndex}>
+            <Button
+              type='text'
+              className='bodyLegacyGeneratorAction'
+              data-testid='workflow-reference-apply'
+              icon={<PlusOutlined />}
+              disabled={!state.globalName} onClick={state.applyGlobal}
+            />
+          </Tooltip>
         </>
       ) : (
         <>
           <LegacyWebhookReferenceSelect value={state.webhookValue} onChange={state.setWebhookValue} />
-          <Button
-            type='text'
-            className='bodyLegacyGeneratorAction'
-            data-testid='workflow-reference-apply'
-            icon={<PlusOutlined />}
-            disabled={!state.webhookValue} onClick={state.applyWebhook}
-          />
+          <Tooltip content={t('references.addReference')} zIndex={tooltipZIndex}>
+            <Button
+              type='text'
+              className='bodyLegacyGeneratorAction'
+              data-testid='workflow-reference-apply'
+              icon={<PlusOutlined />}
+              disabled={!state.webhookValue} onClick={state.applyWebhook}
+            />
+          </Tooltip>
         </>
       )}
     </div>

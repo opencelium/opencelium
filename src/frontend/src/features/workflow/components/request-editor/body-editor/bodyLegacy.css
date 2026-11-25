@@ -260,6 +260,9 @@
   margin-bottom: 10px;
 }
 
+
+
+
 .bodyLegacyEnhancementScript {
   flex: 1;
   /* A floor rather than 0: `flex: 1` alone resolves to nothing when no ancestor
@@ -312,31 +315,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.scriptDebugTrigger {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: 1px solid var(--color-border-default);
-  background: var(--color-background-surface);
-  color: var(--color-text-secondary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.scriptDebugTrigger:hover {
-  border-color: var(--color-action-primary);
-  color: var(--color-action-primary);
-}
-
-.scriptDebugTrigger--active,
-.scriptDebugTrigger--active:hover {
-  background: var(--color-action-primary);
-  border-color: var(--color-action-primary);
-  color: var(--color-text-on-action);
 }
 
 .scriptDebugValue {
@@ -434,10 +412,9 @@
   color: var(--color-action-primary);
 }
 
-.bodyLegacyEnhancementScriptMaximized {
+.bodyLegacyEnhancementMaximized {
   z-index: 1100;
-  flex: none;
-  padding: 8px;
+  min-height: 0;
   background: var(--color-background-surface);
 }
 
@@ -519,15 +496,17 @@
 }
 
 .bodyLegacyDirectReferenceCreateButton {
-  align-self: center;
+  align-self: flex-end;
 }
 
 .bodyLegacyGeneratorShell {
   display: grid;
-  grid-template-columns: 40px 214px auto 214px 22px;
+  grid-template-columns: 64px minmax(160px, 214px) auto minmax(160px, 1fr) 22px;
   gap: 0;
   align-items: center;
-  min-height: 52px;
+  /* One 32px control row plus padding and border, so the webhook and global
+     modes, which have no field path, keep the same height. */
+  min-height: 46px;
   padding: 6px 10px;
   background: var(--color-background-elevated);
   border: 1px solid var(--color-border-default);
@@ -536,8 +515,23 @@
 }
 
 .bodyLegacyGeneratorShellWebhook {
-  grid-template-columns: 28px 1fr 26px;
-  min-width: 452px;
+  grid-template-columns: 64px 1fr 26px;
+  min-width: 476px;
+}
+
+.compactRadioGroup .ant-radio-wrapper::after {
+  display: none;
+}
+
+/* antd's 3-4px focus outline and click wave are taller than these 13px rows and
+   cover the neighbouring radios; keep a thin, tight outline for keyboard focus. */
+.compactRadioGroup .ant-radio-wrapper .ant-radio {
+  outline-width: 1px !important;
+  outline-offset: 0 !important;
+}
+
+.compactRadioGroup .ant-wave {
+  display: none;
 }
 
 .bodyLegacyGeneratorShellNoToggle {
@@ -551,9 +545,37 @@
   grid-template-columns: auto minmax(160px, 1fr);
 }
 
-.bodyLegacyGeneratorResponse {
-  margin-left: 9px;
-  width: 40px;
+/* Every control in the generator row has the operator dialog's size: antd's default
+   32px height and 8px corners. The field path textarea is large elsewhere, so it is
+   shrunk here; autoSize measures its computed padding, so it still grows while wrapping. */
+.bodyLegacyGeneratorShell .referenceSourceSelect.ant-select,
+.bodyLegacyGeneratorShell .referenceResponseTypeSelect.ant-select,
+.bodyLegacyGeneratorShell .bodyLegacyGeneratorSelect.ant-select:not(.referenceFieldPathSelect),
+.bodyLegacyGeneratorShell .bodyLegacyWebhookSelect.ant-select {
+  height: 32px;
+  border-radius: 8px !important;
+}
+
+.bodyLegacyGeneratorShell .referenceFieldPathSelect.ant-select.ant-select {
+  height: auto;
+  min-height: 32px;
+  border-radius: 8px !important;
+}
+
+.bodyLegacyGeneratorShell .referenceFieldPathSelect .referenceFieldPathInput {
+  min-height: 32px;
+  padding-block: 4px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.bodyLegacyGeneratorShell .referenceSourceSelect.ant-select {
+  margin-inline-end: 8px;
+}
+
+.bodyLegacyGeneratorShell .referenceResponseTypeSelect.ant-select {
+  margin-inline: 8px;
 }
 
 /* The response part where it is read rather than chosen: the switch's own
@@ -563,10 +585,6 @@
 .bodyLegacyGeneratorResponseText {
   margin-inline: 9px 0;
   color: var(--color-text-secondary);
-}
-
-.bodyLegacyGeneratorResponse .ant-radio-wrapper > span:last-child {
-  padding-inline-end: 0;
 }
 
 .compactRadioGroup {
@@ -665,20 +683,64 @@
   pointer-events: auto;
 }
 
+/* Widened past its slot while focused (useFitWidthOnFocus) — lift it over the
+   neighbours it now overlaps; the copy button would sit mid-text. */
+.selectCopyHost.isFitExpanded .bodyLegacyGeneratorSelect.ant-select {
+  position: relative;
+  z-index: 3;
+}
+
+.selectCopyHost.isFitExpanded .selectCopyButton {
+  display: none;
+}
+
+/* Scrolled to the end of an overflowing path (useFitWidthOnFocus): fade the
+   cut-off start so it reads as truncated rather than as the path's beginning. */
+.referenceFieldPathInput {
+  resize: none;
+  overflow: hidden;
+  word-break: break-all;
+}
+
+/* The textarea draws the field's border, so the select around it must not add
+   its own padding; the textarea's end padding keeps text clear of the clear icon. */
+.bodyLegacyGeneratorSelect.referenceFieldPathSelect.ant-select {
+  padding-inline: 0 !important;
+}
+
+.referenceFieldPathSelect .referenceFieldPathInput {
+  padding-inline-end: 32px;
+  border-radius: 2px;
+}
+
+.referenceFieldPathSelect .ant-select-clear {
+  inset-inline-end: 10px;
+}
+
+/* antd narrows the content on hover to make room for the clear icon; the textarea's
+   end padding already does, and narrowing would pull its border in under the cursor. */
+.referenceFieldPathSelect.ant-select .ant-select-content {
+  margin-inline-end: 0 !important;
+}
+
+/* antd reveals the clear icon only on hover; keep it while the user is typing too. */
+.referenceFieldPathSelect:focus-within .ant-select-clear {
+  opacity: 1;
+}
+
+.selectCopyHost.isTailShown .referenceFieldPathInput {
+  mask-image: linear-gradient(to right, transparent, #000 18px);
+}
+
 .bodyLegacyWebhookSelect {
   width: 100%;
 }
 
-.bodyLegacyWebhookSelect .ant-select-selector {
+/* antd v6 renders no .ant-select-selector; the frame is .ant-select itself, as for .bodyLegacyGeneratorSelect. */
+.bodyLegacyWebhookSelect.ant-select {
   border-radius: 2px !important;
-  min-height: 38px !important;
   padding-inline: 10px !important;
-}
-
-.bodyLegacyWebhookSelect .ant-select-selection-search-input,
-.bodyLegacyWebhookSelect .ant-select-selection-placeholder,
-.bodyLegacyWebhookSelect .ant-select-selection-item {
-  line-height: 36px !important;
+  font-size: 14px !important;
 }
 
 .bodyLegacyWebhookCreate {
@@ -713,22 +775,6 @@
   font-size: 12px;
 }
 
-.bodyLegacyWebhookModalInput,
-.bodyLegacyWebhookModalSelect {
-  border-bottom: 1px solid var(--color-border-default);
-  border-radius: 0 !important;
-}
-
-.bodyLegacyWebhookModalInput .ant-input,
-.bodyLegacyWebhookModalSelect .ant-select-selector {
-  padding-left: 0 !important;
-}
-
-.bodyLegacyWebhookModalSelect .ant-select-selector {
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
 .bodyLegacyWebhookWrap {
   position: relative;
   display: inline-flex;
@@ -740,6 +786,7 @@
 .bodyLegacyWebhookBadge {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   min-height: 22px;
   padding: 0 10px;
   border-radius: 0;
@@ -751,11 +798,29 @@
   white-space: nowrap;
 }
 
-.bodyLegacyWebhookRemove {
-  position: absolute;
-  top: -5px;
-  right: -6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.bodyLegacyLeftPane--collapsed {
+  flex: 0 0 46px;
+  min-width: 46px;
+  max-width: 46px;
+  margin-right: 16px;
 }
+
+.bodyLegacyLeftPane--collapsed > span {
+  height: 100%;
+}
+
+.bodyLegacyLeftPane--collapsed .bodyLegacyRequestStrip {
+  height: 100%;
+  width: 46px;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 16px 8px;
+  border-radius: var(--radius-md);
+}
+
+.bodyLegacyRequestStrip span {
+  writing-mode: vertical-rl;
+  font-size: 13px;
+}
+

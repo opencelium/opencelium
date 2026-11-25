@@ -18,29 +18,29 @@
 
 .bodyPointerMenuList {
   display: flex;
-  flex-direction: column;
-  min-width: 112px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
   background: var(--color-background-elevated);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 8px;
-  box-shadow: var(--shadow-lg);
-  padding: 4px;
+  border: 1px solid var(--color-status-info-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
 }
 
 .bodyPointerMenuItem {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   border: 0;
   background: transparent;
-  padding: 5px 8px;
-  border-radius: 6px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
-  line-height: 1.2;
+  line-height: 18px;
   color: var(--color-text-primary);
   cursor: pointer;
   white-space: nowrap;
-  text-align: left;
 }
 
 .bodyPointerMenuItem:hover {
@@ -49,4 +49,34 @@
 
 .bodyPointerMenuItem--danger {
   color: var(--color-status-error-fg);
+}
+
+/* The step reference's host: inline next to other chips, the menu anchored to it. */
+.bodyPointerHost {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin: 1px 2px;
+}
+
+/* BodyReferenceMenu wraps an inline chip; the menu anchors to it the same way. */
+.bodyReferenceMenuHost {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.bodyPointerMenuTitle {
+  flex-basis: 100%;
+  max-width: 280px;
+  padding: 2px 6px 4px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

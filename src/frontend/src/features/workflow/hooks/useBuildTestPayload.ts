@@ -4,6 +4,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.typ
 import { buildConnectionPayload, buildFromConnectorPayload } from '../api/connectionPayload';
 import { toPayloadDescription } from '../utils/workflowPage.utils';
 import { notifyError } from '@shared/ui/feedback/notifyError';
+import { isMethodNodeType } from '../utils/methodNodeTypes';
 
 type Params = {
 	connectionId?: string;
@@ -15,16 +16,16 @@ type Params = {
 	getViewport: () => { x: number; y: number; zoom: number } | undefined;
 	clearNodeErrors: () => void;
 	validateEnhancementScripts: (fieldBindings?: readonly unknown[]) => string | null;
+	validateTestRunProblems: (fieldBindings?: readonly unknown[]) => string | null;
 };
 
 export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 	edges, fieldBindings, getViewport, clearNodeErrors,
-	validateEnhancementScripts }: Params) => {
+	validateEnhancementScripts, validateTestRunProblems }: Params) => {
 	const { t } = useI18n('entities');
 	return useCallback(() => {
 		clearNodeErrors();
-		const hasMethod = nodes.some((node) => node.type === 'connector' ||
-			node.type === 'system' || node.type === 'trigger-connection');
+		const hasMethod = nodes.some((node) => isMethodNodeType(node.type));
 		if (!hasMethod) {
 			notifyError(t('connection.test.noMethods'));
 			return null;
@@ -37,6 +38,13 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			notifyError(brokenScriptMessage);
 			return null;
 		}
+		// What blocks a save cannot run either. Warnings stay silent here: a test run
+		// is how the user finds out whether an out-of-scope reference really breaks.
+		const blockingProblemMessage = validateTestRunProblems(fieldBindings);
+		if (blockingProblemMessage) {
+			notifyError(blockingProblemMessage);
+			return null;
+		}
 		return {
 			...buildConnectionPayload({ connectionId, title,
 				description: toPayloadDescription(description), nodes, edges,
@@ -45,5 +53,5 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			toConnector: null,
 		};
 	}, [connectionId, title, description, nodes, edges, fieldBindings,
-		getViewport, clearNodeErrors, validateEnhancementScripts, t]);
+		getViewport, clearNodeErrors, validateEnhancementScripts, validateTestRunProblems, t]);
 };

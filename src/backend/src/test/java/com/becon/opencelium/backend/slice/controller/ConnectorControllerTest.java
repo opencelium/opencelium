@@ -16,6 +16,9 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthServic
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Code;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
 import com.becon.opencelium.backend.mapper.mysql.ConnectorResourceMapper;
 import com.becon.opencelium.backend.resource.connector.ConnectorMetaDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
@@ -30,11 +33,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.mockito.InOrder;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,13 +55,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Slice tests for the icon endpoints ({@code POST/DELETE /connector/{id}/icon}) and the
+ * Slice tests for the icon endpoints ({@code POST/DELETE /connector/{id}/icon}), the
  * health/status endpoints ({@code GET /connector/meta/all},
- * {@code POST /connector/{id}/status/refresh}) of {@link ConnectorController}.
+ * {@code POST /connector/{id}/status/refresh}) and the answer to a rejected global variable
+ * reference ({@code POST /connector}, {@code PUT /connector/{id}/required-data}) of
+ * {@link ConnectorController}.
  *
  * Web layer only — service beans are mocked. Security filters are excluded so
  * MockMvc reaches the controller directly. RuntimeExceptions thrown by the
@@ -238,6 +248,50 @@ class ConnectorControllerTest {
         mockMvc.perform(post("/connector/{id}/status/refresh", 7))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DOWN"));
+    }
+
+    // ── global variable references ────────────────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connector — a rejected reference names the request data field and no workflow element")
+    void addReturnsBadRequestWhenReferenceIsRejected() throws Exception {
+        when(connectorResourceMapper.toEntity(any(ConnectorResource.class))).thenReturn(new Connector());
+        when(connectorService.save(any(Connector.class))).thenThrow(aRejectedReference());
+
+        mockMvc.perform(post("/connector")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"i-doit\",\"requestData\":{\"url\":\"{{global.idoitUrl}}/api\"}}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("GLOBAL_REFERENCE_INVALID"))
+                .andExpect(jsonPath("$.path").value("/connector"))
+                .andExpect(jsonPath("$.violations[0].code").value("SCOPE_NOT_ALL"))
+                .andExpect(jsonPath("$.violations[0].variable").value("idoitUrl"))
+                .andExpect(jsonPath("$.violations[0].field").value("url"))
+                .andExpect(jsonPath("$.violations[0].color").doesNotHaveJsonPath())
+                .andExpect(jsonPath("$.violations[0].index").doesNotHaveJsonPath());
+    }
+
+    @Test
+    void updateRequiredDataReturnsBadRequestWhenReferenceIsRejected() throws Exception {
+        doThrow(aRejectedReference()).when(connectorService)
+                .updateRequestData(7, Map.of("url", "{{global.idoitUrl}}/api"));
+
+        mockMvc.perform(put("/connector/{id}/required-data", 7)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"url\":\"{{global.idoitUrl}}/api\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("GLOBAL_REFERENCE_INVALID"))
+                .andExpect(jsonPath("$.violations[0].code").value("SCOPE_NOT_ALL"))
+                .andExpect(jsonPath("$.violations[0].field").value("url"));
+    }
+
+    /** What the service throws for a connector that reads a variable not open to all workflows. */
+    private static GlobalReferenceValidationException aRejectedReference() {
+        return new GlobalReferenceValidationException(List.of(new Violation(
+                Code.SCOPE_NOT_ALL,
+                "A connector may only use global variables that are open to all workflows, and 'idoitUrl' is not",
+                "idoitUrl", "{{global.idoitUrl}}", null, null, "url")));
     }
 
     private static ConnectorMetaDTO aMetaDto() {

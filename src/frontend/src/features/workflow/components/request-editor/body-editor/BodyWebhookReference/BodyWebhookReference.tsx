@@ -1,33 +1,25 @@
-import { useState } from 'react';
-import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { parseWebhookValue } from '../bodyWebhook';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
+import { WEBHOOK_CHIP_COLOR } from '../../../reference-chip/referenceChip.utils';
+import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
+import { parseWebhookValue, webhookSnippet } from '../bodyWebhook';
+import { BodyReferenceMenu } from '../BodyReferenceMenu/BodyReferenceMenu';
 import type { BodyWebhookReferenceProps } from './BodyWebhookReference.types';
 import '../bodyLegacy.css';
 
-export function BodyWebhookReference({ webhook, onRemove }: BodyWebhookReferenceProps) {
-  const { t } = useI18n('workflow');
-  const [hovered, setHovered] = useState(false);
+export function BodyWebhookReference({ webhook, onRemove, onEdit, connection, currentMethod }: BodyWebhookReferenceProps) {
   const parsed = parseWebhookValue(webhook);
+  const labels = useReferenceSourceLabels();
 
   if (!webhook) return null;
 
   return (
-    <span className='bodyLegacyWebhookWrap' onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-      <span className='bodyLegacyWebhookBadge' title={parsed.label}>
-        {parsed.name}
-      </span>
-      {hovered ? (
-        <span
-          className='bodyLegacyWebhookRemove'
-          onClick={(event) => event.stopPropagation()}
-        >
-          <Tooltip content={t('actions.delete')}>
-            <DeleteIconButton iconSize={11} onClick={() => onRemove?.(webhook)} />
-          </Tooltip>
-        </span>
-      ) : null}
+    <span className='bodyLegacyWebhookWrap'>
+      <BodyReferenceMenu value={webhookSnippet(webhook)} connection={connection} currentMethod={currentMethod}
+        onEdit={onEdit ? (reference) => onEdit(webhook, reference) : undefined}
+        onRemove={onRemove ? () => onRemove(webhook) : undefined}>
+        <ReferenceChip color={WEBHOOK_CHIP_COLOR} source={labels.webhook} path={parsed.name} title={parsed.label}
+          isClickable testId='webhook-reference-chip' />
+      </BodyReferenceMenu>
     </span>
   );
 }

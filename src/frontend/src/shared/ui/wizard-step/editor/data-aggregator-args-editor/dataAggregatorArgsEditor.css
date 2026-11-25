@@ -1,0 +1,47 @@
+/* Sized off the editor's own width, not the viewport: the same form renders in a
+   fullscreen mobile dialog and beside the step list in the desktop one. */
+.data-aggregator-args {
+    container-type: inline-size;
+}
+
+.data-aggregator-args__row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 32px;
+    grid-template-areas: "name description remove";
+    gap: 8px;
+    align-items: start;
+}
+
+.data-aggregator-args__name { grid-area: name; min-width: 0; }
+.data-aggregator-args__description { grid-area: description; min-width: 0; }
+.data-aggregator-args__remove { grid-area: remove; padding-top: 4px; }
+
+/* Side by side the labels sit once above the first argument; each row is inputs only. */
+.data-aggregator-args__header { margin-bottom: 4px; }
+.data-aggregator-args__row-label { display: none; }
+
+/* Stacked, a single header can't name both fields, so each argument labels its own
+   fields again. It's outlined with the delete in its corner, so that reads as removing
+   the whole argument rather than just its name. */
+@container (max-width: 480px) {
+    .data-aggregator-args__header { display: none; }
+    .data-aggregator-args__row-label { display: block; }
+
+    .data-aggregator-args__row {
+        position: relative;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "name"
+            "description";
+        padding: 8px 12px 0;
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-md);
+    }
+
+    .data-aggregator-args__remove {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        padding-top: 0;
+    }
+}

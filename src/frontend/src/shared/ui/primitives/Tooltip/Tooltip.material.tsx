@@ -19,6 +19,9 @@ export const MaterialTooltip: TooltipComponent = ({
     placement = 'top',
     zIndex,
     maxWidth,
+    variant = 'default',
+    open,
+    onOpenChange,
     children,
 }) => {
     return (
@@ -26,6 +29,9 @@ export const MaterialTooltip: TooltipComponent = ({
             title={content}
             placement={muiPlacement[placement]}
             arrow
+            open={open}
+            onOpen={() => onOpenChange?.(true)}
+            onClose={() => onOpenChange?.(false)}
             slotProps={{
                 tooltip: {
                     sx: {
@@ -33,9 +39,17 @@ export const MaterialTooltip: TooltipComponent = ({
                         color: 'var(--color-text-primary)',
                         borderRadius: 'var(--radius-md)',
                         fontSize: 12,
+                        ...(variant === 'card' && {
+                            backgroundColor: 'var(--color-background-elevated)',
+                            border: '1px solid var(--color-border-subtle)',
+                            borderRadius: '16px',
+                            boxShadow: 'var(--shadow-lg)',
+                            padding: '14px 18px 6px',
+                        }),
                         ...(maxWidth && { maxWidth }),
                     },
                 },
+                arrow: variant === 'card' ? { sx: { color: 'var(--color-background-elevated)' } } : undefined,
                 popper: zIndex ? { style: { zIndex } } : undefined,
             }}
         >

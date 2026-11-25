@@ -6,6 +6,9 @@ import usersData from "@/mock/user/users.ts";
 
 let users = [...usersData];
 export const userHandlers = [
+    // Before '/user/:id', which would otherwise read "all" as an id.
+    http.get('/user/all', () => HttpResponse.json(users)),
+
     http.get('/user/:id', ({ params }) => {
         const user = users.find((u) => u.userId === Number(params.id))
         if (!user) return HttpResponse.json({ message: 'User not found' }, { status: 404 })

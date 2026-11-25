@@ -5,10 +5,12 @@ import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetElementChildrenQuery } from "../api/logsApi";
 import { appendLoopIndex } from "../model/liveLogTree";
 import type { FlowchartChildLog } from "../model/types";
-import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, TraceDot, Url } from "./logRowUi";
+import { LogRow, Meta, OperatorLabel, StatusBadge, TraceDot, Url } from "./logRowUi";
+import { LogPlaygroundAction } from "./LogPlaygroundAction";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
 import { CopyButton } from "@shared/ui/actions/CopyButton";
+import { HttpMethodBadge } from "@shared/ui/http-method/HttpMethodBadge";
 import { serializeLogElement } from "./serializeLogElement";
 import { useMethodViewMode } from "./methodViewMode";
 import { methodDisplayText } from "./methodView";
@@ -233,7 +235,7 @@ export function LogElementRow({
             left={
               <>
                 {request?.http_method ? (
-                  <MethodBadge method={request.http_method} />
+                  <HttpMethodBadge method={request.http_method} />
                 ) : null}
                 <Url isError={hasError || target}>{displayText}</Url>
                 {displayText ? (
@@ -254,7 +256,8 @@ export function LogElementRow({
             }
           />
           {expanded ? (
-            <MethodLogDetails id={log.id} depth={depth + 1} path={path} />
+            <MethodLogDetails id={log.id} depth={depth + 1} path={path}
+              action={<LogPlaygroundAction elementId={log.id} indexPath={log.indexPath} loopIndex={loopIndexPath} />} />
           ) : null}
         </>
       );

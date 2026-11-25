@@ -20,6 +20,12 @@
 	cursor: pointer;
 	white-space: nowrap;
 }
+.referenceDropdownGroupLabel {
+	padding: 6px 6px 2px;
+	font-size: 11px;
+	color: var(--color-text-secondary);
+	cursor: default;
+}
 .referenceConnectorDropdownOption {
 	display: flex;
 	align-items: center;

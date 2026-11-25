@@ -1,44 +1,116 @@
-import type { WorkflowNodeMenuItem } from '../../types/workflow.types';
+import type { NewFeatureId } from '@shared/ui/feedback/NewFeature/newFeatures';
+import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
 
-export type MenuSection = { id: string; items: WorkflowNodeMenuItem[] };
-export type MenuEntry =
-  | { id: string; type: 'action'; item: WorkflowNodeMenuItem; indented?: boolean }
-  | { id: string; type: 'label'; labelKey: string };
+export type NodeMenuActionId = 'change-label' | 'change-connector' | 'change-connector-image'
+  | 'configure-aggregator' | 'open-config' | 'edit-url' | 'edit-headers' | 'edit-body'
+  | 'try-request' | 'show-response' | 'write-globals' | 'copy' | 'paste' | NotificationMenuActionId;
 
-const operatorMenu: MenuSection[] = [
-  {
-    id: 'main',
-    items: [
-      { id: 'open-config', labelKey: 'contextMenu.openConfiguration' },
-      { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' },
-    ],
-  },
+export type NotificationMenuActionId = 'notification-open' | 'notification-tool' | 'notification-webhook'
+  | 'notification-message' | 'notification-request-url' | 'notification-request-headers'
+  | 'notification-request-body' | 'notification-response' | 'notification-rename';
+
+export type NodeMenuAction = { id: NodeMenuActionId; labelKey: string; icon: IconName; newFeatureId?: NewFeatureId };
+
+export type NodeMenuRow =
+  | { kind: 'action'; action: NodeMenuAction }
+  // Closely related actions share one row as compact buttons (the three request editors).
+  | { kind: 'inline'; id: string; labelKey: string; icon: IconName; actions: NodeMenuAction[] }
+  // Rarely used actions fold under one row that expands in place.
+  | { kind: 'submenu'; id: string; labelKey: string; icon: IconName; actions: NodeMenuAction[] };
+
+export type NodeMenuSection = { id: string; rows: NodeMenuRow[] };
+
+const action = (item: NodeMenuAction): NodeMenuRow => ({ kind: 'action', action: item });
+
+const changeLabel = action({ id: 'change-label', labelKey: 'contextMenu.changeLabel', icon: 'edit' });
+const configureAggregator = action({ id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator', icon: 'aggregator' });
+const writeGlobals = action({ id: 'write-globals', labelKey: 'contextMenu.writeGlobals', icon: 'global-variable' });
+const changeConnector: NodeMenuAction = { id: 'change-connector', labelKey: 'contextMenu.changeConnector', icon: 'arrow-switch' };
+const connectorImage: NodeMenuAction = { id: 'change-connector-image', labelKey: 'contextMenu.changeConnectorImage', icon: 'image' };
+
+const requestRow: NodeMenuRow = { kind: 'inline', id: 'request', labelKey: 'contextMenu.request', icon: 'http-request', actions: [
+  { id: 'edit-url', labelKey: 'contextMenu.url', icon: 'link' },
+  { id: 'edit-headers', labelKey: 'contextMenu.header', icon: 'list' },
+  { id: 'edit-body', labelKey: 'contextMenu.body', icon: 'code' },
+] };
+const tryRequest = action({ id: 'try-request', labelKey: 'contextMenu.tryRequest', icon: 'send', newFeatureId: 'workflow-test-method' });
+const responseSection: NodeMenuSection = { id: 'response',
+  rows: [action({ id: 'show-response', labelKey: 'contextMenu.showResponse', icon: 'eye' })] };
+
+const copyAction = action({ id: 'copy', labelKey: 'contextMenu.copy', icon: 'content-copy' });
+const pasteAction = action({ id: 'paste', labelKey: 'contextMenu.paste', icon: 'content-paste' });
+const clipboardSection: NodeMenuSection = { id: 'clipboard', rows: [copyAction, pasteAction] };
+
+const operatorMenu: NodeMenuSection[] = [
+  { id: 'main', rows: [action({ id: 'open-config', labelKey: 'contextMenu.openConfiguration', icon: 'settings' }), configureAggregator] },
+  clipboardSection,
 ];
 
-const changeLabelItem: WorkflowNodeMenuItem = { id: 'change-label', labelKey: 'contextMenu.changeLabel' };
-const changeConnectorItem: WorkflowNodeMenuItem = { id: 'change-connector', labelKey: 'contextMenu.changeConnector' };
-const configureAggregatorItem: WorkflowNodeMenuItem = { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' };
-
-const requestSections: MenuSection[] = [
-  { id: 'request', items: [{ id: 'request', labelKey: 'contextMenu.request' }, { id: 'edit-url', labelKey: 'contextMenu.editUrl' }, { id: 'edit-headers', labelKey: 'contextMenu.editHeader' }, { id: 'edit-body', labelKey: 'contextMenu.editBody' }] },
-  { id: 'response', items: [{ id: 'show-response', labelKey: 'contextMenu.showResponse' }] },
+// Only a connector node draws its connector's image; a system node shows a globe.
+const connectorMenu: NodeMenuSection[] = [
+  { id: 'request', rows: [requestRow, tryRequest] },
+  responseSection,
+  { id: 'main', rows: [changeLabel, { kind: 'submenu', id: 'connector', labelKey: 'contextMenu.connector', icon: 'connector',
+    actions: [changeConnector, connectorImage] }, configureAggregator, writeGlobals] },
+  clipboardSection,
 ];
 
-const methodMenu: MenuSection[] = [
-  { id: 'main', items: [changeLabelItem, changeConnectorItem, configureAggregatorItem] },
-  ...requestSections,
+const systemMenu: NodeMenuSection[] = [
+  { id: 'request', rows: [requestRow, tryRequest] },
+  responseSection,
+  { id: 'main', rows: [changeLabel, action(changeConnector), configureAggregator, writeGlobals] },
+  clipboardSection,
 ];
 
-// A trigger-connection node calls another workflow's webhook — it has no connector to swap.
-const triggerConnectionMenu: MenuSection[] = [
-  { id: 'main', items: [changeLabelItem, configureAggregatorItem] },
-  ...requestSections,
+// A trigger-connection node calls another workflow's webhook — it has no connector to swap,
+// and no Try Request entry: trying it would start that other workflow for real.
+const triggerConnectionMenu: NodeMenuSection[] = [
+  { id: 'request', rows: [requestRow] },
+  responseSection,
+  { id: 'main', rows: [changeLabel, configureAggregator, writeGlobals] },
+  clipboardSection,
 ];
 
-export const menuByType: Record<string, MenuSection[]> = {
-  connector: methodMenu,
-  system: methodMenu,
+// The notification step has its own guided dialog: every entry opens it on the matching step or section.
+const notificationMenu: NodeMenuSection[] = [
+  { id: 'notification', rows: [
+    action({ id: 'notification-open', labelKey: 'notification.contextMenu.open', icon: 'bell' }),
+    action({ id: 'notification-tool', labelKey: 'notification.contextMenu.tool', icon: 'arrow-switch' }),
+    action({ id: 'notification-webhook', labelKey: 'notification.contextMenu.webhook', icon: 'webhook' }),
+    action({ id: 'notification-message', labelKey: 'notification.contextMenu.message', icon: 'edit' }),
+  ] },
+  { id: 'request', rows: [{ kind: 'inline', id: 'notification-request', labelKey: 'contextMenu.request', icon: 'http-request', actions: [
+    { id: 'notification-request-url', labelKey: 'contextMenu.url', icon: 'link' },
+    { id: 'notification-request-headers', labelKey: 'contextMenu.header', icon: 'list' },
+    { id: 'notification-request-body', labelKey: 'contextMenu.body', icon: 'code' },
+  ] }] },
+  { id: 'response', rows: [action({ id: 'notification-response', labelKey: 'contextMenu.showResponse', icon: 'eye' })] },
+  { id: 'main', rows: [action({ id: 'notification-rename', labelKey: 'contextMenu.changeLabel', icon: 'edit' }), configureAggregator] },
+  clipboardSection,
+];
+
+// The start step can't be copied, but steps can be pasted after it.
+const startMenu: NodeMenuSection[] = [{ id: 'clipboard', rows: [pasteAction] }];
+
+export const menuByType: Record<string, NodeMenuSection[]> = {
+  start: startMenu,
+  connector: connectorMenu,
+  system: systemMenu,
   'trigger-connection': triggerConnectionMenu,
+  notification: notificationMenu,
   if: operatorMenu,
   loop: operatorMenu,
 };
+
+// Drops the actions the user may not run; a group left with one action shows it directly.
+export function filterMenuSections(sections: NodeMenuSection[], canRun: (id: NodeMenuActionId) => boolean) {
+  const filterRow = (row: NodeMenuRow): NodeMenuRow | null => {
+    if (row.kind === 'action') return canRun(row.action.id) ? row : null;
+    const actions = row.actions.filter(({ id }) => canRun(id));
+    if (!actions.length) return null;
+    return row.kind === 'submenu' && actions.length === 1 ? action(actions[0]) : { ...row, actions };
+  };
+  return sections
+    .map((section) => ({ ...section, rows: section.rows.map(filterRow).filter((row): row is NodeMenuRow => !!row) }))
+    .filter((section) => section.rows.length > 0);
+}

@@ -212,7 +212,7 @@ export const UrlInlineValueEditor: React.FC<Props> = ({
 				padding: '0 11px',
 				background: readOnly
 					? 'var(--color-background-disabled)'
-					: 'var(--color-background-surface)',
+					: 'var(--color-background-input)',
 				cursor: readOnly ? 'default' : 'text',
 				outline: 'none',
 				overflow: 'hidden',

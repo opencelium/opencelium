@@ -4,6 +4,8 @@ import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
+import { formatStepReferencePath } from '../../../reference-chip/referenceChip.utils';
 
 type Props = {
 	field: string;
@@ -16,6 +18,11 @@ type Props = {
 	onDeleteEnhancement: (enhanceId: string) => void;
 };
 
+/** Lets a long path wrap at its segments; overflow-wrap still splits a single
+ *  segment that is wider than the panel. */
+const withSegmentBreaks = (path: string) => path.split('.').flatMap((segment, index) =>
+	index ? ['.', <wbr key={index} />, segment] : [segment]);
+
 export function ReferenceInfoRow({ field, refs, messageProperty, paramKey, readOnly,
 	onClick, onDeleteReference, onDeleteEnhancement }: Props) {
 	const confirm = useConfirm();
@@ -27,7 +34,7 @@ export function ReferenceInfoRow({ field, refs, messageProperty, paramKey, readO
 		<div className='referenceInfoRow' onClick={() => enhanceId && onClick?.(enhanceId)}>
 			<div className='referenceInfoTitle'>
 				<span className='referenceInfoTarget'>
-					{formatTargetField(messageProperty, field, paramKey)}
+					{withSegmentBreaks(formatTargetField(messageProperty, field, paramKey))}
 				</span>{' '}
 				has {refs.length > 1 ? 'next references:' : 'one reference:'}
 			</div>
@@ -37,15 +44,10 @@ export function ReferenceInfoRow({ field, refs, messageProperty, paramKey, readO
 					const key = `${reference.enhanceId}-${index}`;
 					return (
 					<div key={`${reference.enhanceId}-${index}`} className='referenceInfoBinding'>
-						<span className='referenceInfoMethod'
-							style={{ backgroundColor: reference.method?.color || reference.color }}>
-							{reference.method?.name || 'UnknownMethod'}
-						</span>
-						<span> bound with </span>
-						<span className='referenceInfoSource' style={{ color: reference.color }}>
-							{formatSourceField(reference.sourceMessageProperty, reference.target)}
-						</span>
-						<span>{index === refs.length - 1 ? ' field.' : ' field; '}</span>
+						<ReferenceChip color={reference.method?.color || reference.color} source={reference.method?.name}
+							path={formatStepReferencePath(buildReferenceToken(reference))}
+							title={formatSourceField(reference.sourceMessageProperty, reference.target)} />
+						<span>{index === refs.length - 1 ? '' : ';'}</span>
 						{!readOnly && <span className='referenceInfoDelete' onClick={async (event) => {
 							event.stopPropagation();
 							const ok = await confirm({ title: t('referenceInfo.confirmDelete.title'),

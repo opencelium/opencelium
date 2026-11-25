@@ -9,6 +9,8 @@ import { emptyChoice } from './referenceRemapChoice';
 
 // Identity translator, the pattern the other component tests use: this pins the
 // wiring, not the copy, which lives in the locale files.
+// The condition editor's reference chips confirm before deleting; these tests never delete one.
+vi.mock('@shared/ui/confirm/ConfirmDialogContext', () => ({ useConfirm: () => vi.fn() }));
 vi.mock('@shared/i18n/hooks/useI18n', () => ({
 	useI18n: () => ({ t: (key: string) => key, lang: 'en' }),
 }));
@@ -143,18 +145,10 @@ const openAndPick = (combobox: HTMLElement, label: string) => {
 const comboboxes = () => screen.getAllByRole('combobox')
 	.filter((box) => !box.hasAttribute('disabled'));
 
-/** Same for the response-part radios: the read-only column has a set too. */
-const radios = () => screen.getAllByRole('radio')
-	.filter((radio) => !radio.hasAttribute('disabled'));
-
-/** Clicks a label inside the editable half of a field row, so a click cannot
- *  land on the read-only copy of the same control. */
-const clickInEditable = (label: string, index = 0) => {
-	const cell = document.querySelectorAll('.referenceRemapSourceValue')[index];
-	const target = [...cell.querySelectorAll('*')]
-		.find((node) => node.textContent === label && node.children.length === 0);
-	fireEvent.click(target as HTMLElement);
-};
+/** The response-part select of the first field row's generator: after its method select. */
+const responsePart = () => comboboxes()[2];
+const shownResponsePart = () => responsePart().closest('.ant-select')?.textContent;
+const RESPONSE_PART_KEY = { B: 'body', H: 'header', S: 'status' } as const;
 
 /** Drive the shared generator: a method, and then either a response part that
  *  is an answer on its own (status) or a field. There is no apply button here —
@@ -164,7 +158,7 @@ const pickPath = (...steps: string[]) => steps.forEach((step) =>
 
 const generateReference = (methodLabel: string, path: string[], part?: 'B' | 'H' | 'S') => {
 	openAndPick(comboboxes()[1], methodLabel);
-	if (part) clickInEditable(part);
+	if (part) openAndPick(responsePart(), `conditionBuilder.responseType.${RESPONSE_PART_KEY[part]}`);
 	pickPath(...path);
 };
 
@@ -301,8 +295,10 @@ describe('ReferenceRemapChoices', () => {
 
 		// Nothing left half-picked: no method, and no path under it.
 		expect(screen.getAllByText('placeholders.selectMethod')
-			.filter((node) => !node.closest('.referenceRemapSourceHeld')).length).toBe(2);
+			.filter((node) => !node.closest('.referenceRemapSourceHeld')).length).toBe(1);
 		expect((comboboxes().at(-1) as HTMLInputElement).value).toBe('');
+		expect(document.querySelectorAll(
+			'.referenceRemapSourceValue textarea[placeholder="placeholders.selectMethod"]')).toHaveLength(1);
 	});
 
 	// The method-wide list is the union of the fields', so a pick from it can be
@@ -376,7 +372,9 @@ describe('ReferenceRemapChoices', () => {
 		// "pick a method" placeholder. Counted on the editable side only: the
 		// "used in" column has selects of its own.
 		expect(screen.getAllByText('placeholders.selectMethod')
-			.filter((node) => !node.closest('.referenceRemapSourceHeld')).length).toBe(2);
+			.filter((node) => !node.closest('.referenceRemapSourceHeld')).length).toBe(1);
+		expect(document.querySelectorAll(
+			'.referenceRemapSourceValue textarea[placeholder="placeholders.selectMethod"]')).toHaveLength(1);
 	});
 
 	it('still seeds the fields that can take it', () => {
@@ -397,13 +395,13 @@ describe('ReferenceRemapChoices', () => {
 
 		// Half-made: a header was chosen, and no field under it yet.
 		openAndPick(comboboxes()[1], 'm1');
-		clickInEditable('H');
-		expect((radios()[1] as HTMLInputElement).checked).toBe(true);
+		openAndPick(responsePart(), 'conditionBuilder.responseType.header');
+		expect(shownResponsePart()).toBe('H');
 
 		openAndPick(comboboxes()[0], 'm1');
 
 		// Back to a fresh generator: body selected, no answer recorded.
-		expect((radios()[0] as HTMLInputElement).checked).toBe(true);
+		expect(shownResponsePart()).toBe('B');
 		expect((comboboxes().at(-1) as HTMLInputElement).value).toBe('');
 	});
 
@@ -439,14 +437,14 @@ describe('ReferenceRemapChoices', () => {
 		renderChoices([target()]);
 
 		openAndPick(comboboxes()[0], 'm1');
-		const [, methodBefore, fieldBefore] = comboboxes();
+		const [, methodBefore, , fieldBefore] = comboboxes();
 		openAndPick(comboboxes().at(-1) as HTMLElement, 'user');
 
 		openAndPick(comboboxes()[0], 'm1');
 
 		// Different DOM nodes: the controls were replaced, so nothing antd was
 		// holding on to survived to be displayed.
-		const [, methodAfter, fieldAfter] = comboboxes();
+		const [, methodAfter, , fieldAfter] = comboboxes();
 		expect(methodAfter).not.toBe(methodBefore);
 		expect(fieldAfter).not.toBe(fieldBefore);
 	});
@@ -542,8 +540,8 @@ describe('ReferenceRemapChoices', () => {
 		openAndPick(comboboxes()[1], 'm1');
 		pickPath('token');
 
-		// Still a method select and a field select, now holding the answer.
-		expect(comboboxes()).toHaveLength(3);
+		// Still a method, response-part and field select, now holding the answer.
+		expect(comboboxes()).toHaveLength(4);
 		expect((comboboxes().at(-1) as HTMLInputElement).value).toBe('token');
 		// And a way to take the answer back.
 		expect(screen.getByTestId(
@@ -552,18 +550,18 @@ describe('ReferenceRemapChoices', () => {
 
 	// Which of the reader's own fields is about to change is the thing a user
 	// checks before agreeing to any of this.
-	it('shows where each reference is used, as the field it fills', () => {
+	it('shows the consuming method and field without disabled editor controls', () => {
 		renderChoices([target()]);
 
 		const held = document.querySelector('.referenceRemapSourceHeld') as HTMLElement;
 
-		expect(held.title).toBe('#f5a623.(request).body.$.total');
 		// The same controls as the columns beside it, disabled.
-		expect(held.querySelectorAll('[role="combobox"][disabled]').length).toBe(2);
+		expect(held.querySelectorAll('[role="combobox"]')).toHaveLength(0);
 		// Its part named rather than switched, like the column before it.
 		expect(held.querySelectorAll('[role="radio"]')).toHaveLength(0);
-		expect(held.querySelector('.bodyLegacyGeneratorResponseText')?.textContent?.trim())
-			.toBe('B');
+		expect(held.querySelector('.referenceRemapUsageItem')?.textContent)
+			.toContain('conditionBuilder.responseType.body');
+		expect(held.querySelector('.referenceRemapUsageItem code')?.textContent).toBe('total');
 		// And its method resolved rather than sitting on the placeholder: a step's
 		// own request is never upstream of itself, so a display that filtered by
 		// what it may read would show nothing here.
@@ -578,22 +576,57 @@ describe('ReferenceRemapChoices', () => {
 
 		const held = document.querySelector('.referenceRemapSourceHeld') as HTMLElement;
 
-		expect(held.textContent).toBe('url');
+		expect(held.textContent).toBe('contextMenu.url');
 		expect(held.querySelectorAll('[role="combobox"]')).toHaveLength(0);
+	});
+
+	it('groups usage by consuming method and names each method only once', () => {
+		renderChoices([target({sources: [{...target().sources[0], locations: [
+			{kind: 'reference', value: '#f5a623.(request).body.$.name'},
+			{kind: 'reference', value: '#f5a623.(request).header.$.Authorization'},
+			{kind: 'reference', value: `${OTHER}.(request).body.$.userId`},
+		]}]})]);
+		const held = document.querySelector('.referenceRemapSourceHeld') as HTMLElement;
+		expect([...held.querySelectorAll('.referenceRemapUsageMethod strong')]
+			.map((node) => node.textContent)).toEqual(['m3', 'm9']);
+		expect(held.querySelectorAll('.referenceRemapUsageGroup')).toHaveLength(2);
+		expect(held.querySelectorAll('.referenceRemapUsageItems > li')).toHaveLength(3);
 	});
 
 	// Re-pointing moves every copy at once, so there is nothing to answer per
 	// place — only the first is drawn, and the rest stay off screen rather than
 	// as a count nobody can act on. The full list is still on the cell's hover
 	// title (see the "carries the whole value as a hover hint" test below).
-	it('shows only the first place a reference is held, not the others', () => {
+	it('shows all body, header and URL locations of the same reference', () => {
 		renderChoices([target({ sources: [{ ...target().sources[0], locations: [
 			{ kind: 'reference', value: '#f5a623.(request).body.$.total' },
-			{ kind: 'label', value: 'url' },
+			{ kind: 'reference', value: '#f5a623.(request).header.$.Authorization' },
+			{ kind: 'label', value: '/users/{%#7ed321.(response).body.$.id%}',
+				url: {nodeId: 'm3', part: 'endpoint'} },
 		] }] })]);
 
 		const held = document.querySelector('.referenceRemapSourceHeld') as HTMLElement;
-		expect(held.textContent).not.toContain('url');
+		expect(held.textContent).toContain('conditionBuilder.responseType.body');
+		expect(held.textContent).toContain('conditionBuilder.responseType.header');
+		expect(held.textContent).toContain('contextMenu.url');
+		expect(held.querySelectorAll('.referenceRemapUsageItems > li')).toHaveLength(3);
+		expect(held.querySelectorAll('.referenceRemapUsageMethod')).toHaveLength(1);
+		expect(held.querySelectorAll('[role="combobox"]')).toHaveLength(0);
+	});
+
+	it('keeps the concrete URL collapsed until details are opened', () => {
+		const url = '/users/{%#7ed321.(response).body.$.id%}';
+		renderChoices([target({sources: [{...target().sources[0], locations: [
+			{kind: 'label', value: url, url: {nodeId: 'm3', part: 'endpoint'}},
+		]}]})]);
+		const held = document.querySelector('.referenceRemapSourceHeld') as HTMLElement;
+		expect(held.textContent).toContain('contextMenu.url');
+		expect(held.querySelector('.referenceRemapUrlValue')?.textContent).toBe(url);
+		expect(held.querySelector('.referenceRemapUsageMethod')).toBeTruthy();
+		const details = held.querySelector('details') as HTMLDetailsElement;
+		expect(details.open).toBe(false);
+		fireEvent.click(details.querySelector('summary')!);
+		expect(details.open).toBe(true);
 	});
 
 	// The part of the response is a fact there, not a choice: one word rather

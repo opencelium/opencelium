@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.constant.props.OpenceliumProps;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.exception.StorageException;
+import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.FileDTO;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -91,7 +93,6 @@ public class FileController {
     private final UserStorageService storageService;
     private final Mapper<Connector, ConnectorResource> connectorMapper;
     private final EntityUpdater<Template> templateUpdater;
-    private final OpenceliumProps ocProps;
 
     @Autowired
     public FileController(
@@ -104,8 +105,7 @@ public class FileController {
             InvokerSyncService invokerSyncService,
             UserStorageService storageService,
             Mapper<Connector, ConnectorResource> connectorMapper,
-            EntityVersionManager versionManager,
-            OpenceliumProps ocProps
+            EntityVersionManager versionManager
     ) {
         this.userDetailService = userDetailService;
         this.userService = userService;
@@ -117,10 +117,9 @@ public class FileController {
         this.storageService = storageService;
         this.connectorMapper = connectorMapper;
         this.templateUpdater = versionManager.getUpdater(Template.class);
-        this.ocProps = ocProps;
     }
 
-    @Operation(summary = "Uploads profile picture of a user by provided user email")
+    @Operation(summary = "Uploads the profile picture of the user identified by 'userId', or by 'email' for clients built before 5.2")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Profile picture has been successfully uploaded",
@@ -134,7 +133,8 @@ public class FileController {
     })
     @PostMapping(value = "/profilePicture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> profilePictureUpload(@RequestParam("file") MultipartFile file,
-                                                  @RequestParam("email") String email) {
+                                                  @RequestParam(value = "userId", required = false) Integer userId,
+                                                  @RequestParam(value = "email", required = false) String email) {
         // Get extension
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
 
@@ -143,8 +143,7 @@ public class FileController {
             throw new StorageException("File should be jpg or png");
         }
 
-        // Get user from database
-        User user = userService.findByEmail(email).get();
+        User user = resolveUser(userId, email);
 
         //Generate new file name
         String newFilename = UUID.randomUUID().toString() + "." + extension;
@@ -167,6 +166,25 @@ public class FileController {
         storageService.store(file, newFilename);
 
         return ResponseEntity.ok().build();
+    }
+
+    /*
+    'userId' is the identifier to prefer: it is immutable and every user has one, whereas 'email' is
+    optional for LDAP users and will become optional for OC users too. 'email' stays accepted so that
+    clients built before 5.2 keep working.
+    */
+    private User resolveUser(Integer userId, String email) {
+        if (userId != null) {
+            return userService.findByIdNoLock(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
+        }
+        if (email != null && !email.isBlank()) {
+            return userService.findByEmail(email)
+                    .orElseThrow(() -> new GeneralServiceException(HttpStatus.BAD_REQUEST,
+                            ExceptionConstant.EMAIL_NOT_EXISTS, "email does not exists"));
+        }
+        throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.USER_NOT_EXIST,
+                "'userId' or 'email' is required");
     }
 
     @Operation(summary = "Uploads role's(group) icon by provided user role(group) ID")
@@ -453,11 +471,11 @@ public class FileController {
 
     private void updateTemplate(Template template){
         try {
+            // The updater stamps the version it migrated to. Overwriting it with the running version
+            // would let an unmigrated file claim the current format and skip every later migration.
             templateUpdater.updateToCurrentVersion(template)
-                    .ifUpdated(temp -> {
-                        log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
-                    });
-            template.setVersion(ocProps.getVersion());
+                    .ifUpdated(temp -> log.info("Template[id={}, name={}] is successfully updated to {} version",
+                            template.getTemplateId(), template.getName(), template.getVersion()));
         } catch (Exception e) {
             log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
             throw new RuntimeException("INVALID_TEMPLATE");

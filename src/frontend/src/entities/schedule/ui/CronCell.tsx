@@ -27,7 +27,8 @@ export const CronCell = memo(function CronCell({ schedule, tooltipPlacement }: P
                     onClose={() => dialog.closeById(id)}
                 />
             ),
-            width: 720,
+            width: 780,
+            top: 72,
         })
     }
 

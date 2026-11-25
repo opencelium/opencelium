@@ -7,6 +7,12 @@ export interface ConfirmOptions {
 
     confirmText?: string;
     cancelText?: string;
+    confirmTestId?: string;
+    cancelTestId?: string;
+    /** For a dialog that only informs: the cancel button is the only way out. */
+    isConfirmHidden?: boolean;
+    /** False for a notice that only needs acknowledging: the cancel button is left out. Defaults to true. */
+    canCancel?: boolean;
 
     confirmVariant?: ButtonVariant;
     autoFocusConfirm?: boolean;

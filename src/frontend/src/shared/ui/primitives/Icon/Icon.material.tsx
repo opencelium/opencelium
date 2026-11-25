@@ -1,3 +1,5 @@
+import { GlobalVariableGlyph } from './custom/GlobalVariableGlyph';
+import { TbVariable } from 'react-icons/tb';
 import React from 'react';
 import {
     Check,
@@ -9,6 +11,7 @@ import {
     Info,
     PlusOne,
     Settings,
+    NotificationsNone,
     Download,
     Upload,
     Key,
@@ -39,6 +42,7 @@ import {
     Fullscreen,
     FullscreenExit,
     ContentCopy,
+    ContentPaste,
     AccountTree,
     Hub,
     Refresh,
@@ -65,6 +69,20 @@ import {
 
 import MouseOutlined from '@mui/icons-material/MouseOutlined';
 import DragIndicator from '@mui/icons-material/DragIndicator';
+import Remove from '@mui/icons-material/Remove';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import FitScreen from '@mui/icons-material/FitScreen';
+import Science from '@mui/icons-material/Science';
+import WarningAmber from '@mui/icons-material/WarningAmber';
+import HighlightOff from '@mui/icons-material/HighlightOff';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
+import AccessTime from '@mui/icons-material/AccessTime';
+import Code from '@mui/icons-material/Code';
+import CloudOutlined from '@mui/icons-material/CloudOutlined';
+import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
+import OpenInNew from '@mui/icons-material/OpenInNew';
+import SendOutlined from '@mui/icons-material/SendOutlined';
+import ImageOutlined from '@mui/icons-material/ImageOutlined';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
@@ -77,6 +95,7 @@ const iconMap = {
     info: Info,
     plus: PlusOne,
     settings: Settings,
+    bell: NotificationsNone,
     play: PlayArrow,
     pause: Pause,
     stop: Stop,
@@ -109,6 +128,7 @@ const iconMap = {
     minimize: FullscreenExit,
     'arrow-switch': SwapHoriz,
     'content-copy': ContentCopy,
+    'content-paste': ContentPaste,
     workflow: AccountTree,
     bindings: Hub,
     refresh: Refresh,
@@ -131,8 +151,24 @@ const iconMap = {
     circle: RadioButtonUnchecked,
     git: GitHub,
     globe: Public,
+    variable: TbVariable,
+    'global-variable': GlobalVariableGlyph,
     portal: Apps,
     'drag-handle': DragIndicator,
+    minus: Remove,
+    'chevron-up': ExpandLess,
+    'fit-view': FitScreen,
+    flask: Science,
+    warning: WarningAmber,
+    'error-circle': HighlightOff,
+    'check-circle': CheckCircleOutline,
+    clock: AccessTime,
+    code: Code,
+    cloud: CloudOutlined,
+    package: Inventory2Outlined,
+    'external-link': OpenInNew,
+    send: SendOutlined,
+    image: ImageOutlined,
 };
 
 export const MaterialIcon: IconComponent = ({

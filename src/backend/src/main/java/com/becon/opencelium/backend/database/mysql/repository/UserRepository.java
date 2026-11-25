@@ -35,6 +35,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByUsernameAndAuthMethod(String username, AuthMethod authMethod);
 
+    /** Any user, OC or LDAP, with this username; at most one thanks to {@code uk_user_username}. */
+    Optional<User> findByUsername(String username);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findOneById(int id);
 
@@ -42,4 +45,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     void deleteOneById(int id);
 
     boolean existsByEmail(String email);
+
+    /** Whether another user than {@code id} already owns {@code email}; pass {@code 0} for a new user. */
+    boolean existsByEmailAndIdNot(String email, int id);
+
+    boolean existsByUsername(String username);
+
+    /** Whether another user than {@code id} already owns {@code username}; pass {@code 0} for a new user. */
+    boolean existsByUsernameAndIdNot(String username, int id);
 }

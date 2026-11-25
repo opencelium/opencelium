@@ -1,5 +1,6 @@
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { buildWorkflowIndexes } from '../api/connectionPayload';
+import { isMethodNodeType } from './methodNodeTypes';
 
 /** Why a node cannot be the target of a joint started on another node. */
 export type JointRejectionReason =
@@ -23,8 +24,7 @@ export type JointTargetVerdict =
 
 const VALID: JointTargetVerdict = { valid: true };
 
-const isMethodNode = (node: WorkflowNodeModel) =>
-  node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
+const isMethodNode = (node: WorkflowNodeModel) => isMethodNodeType(node.type);
 
 /**
  * Index of the innermost LOOP the node at `index` runs inside, or '' when it

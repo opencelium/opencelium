@@ -92,7 +92,7 @@ public class YamlConfigReader {
         BitSet inactiveLines = built.inactiveLines();
         groupedComment(NodeComment.HEADER, root.getBlockComments()).ifPresent(orphans::add);
         if (root instanceof MappingNode mapping) {
-            for (NodeTuple tuple : mapping.getValue()) {
+            for (NodeTuple tuple : distinctByKey(mapping, inactiveLines)) {
                 fields.add(toNode(tuple, "", inactiveLines));
             }
         }
@@ -114,9 +114,7 @@ public class YamlConfigReader {
         String key = scalarString(keyNode);
         String path = parentPath.isEmpty() ? key : parentPath + "." + key;
 
-        int keyLine = keyNode.getStartMark().orElseThrow(() ->
-                new ApplicationConfigReadException("YAML node has no source position")).getLine();
-        String status = inactiveLines.get(keyLine) ? ConfigNode.INACTIVE : ConfigNode.ACTIVE;
+        String status = isInactive(keyNode, inactiveLines) ? ConfigNode.INACTIVE : ConfigNode.ACTIVE;
 
         List<NodeComment> comments = buildComments(keyNode, valueNode);
         Object value = toValue(valueNode, path, inactiveLines);
@@ -142,7 +140,7 @@ public class YamlConfigReader {
     private Object toValue(Node node, String path, BitSet inactiveLines) {
         if (node instanceof MappingNode mapping) {
             List<ConfigNode> children = new ArrayList<>();
-            for (NodeTuple tuple : mapping.getValue()) {
+            for (NodeTuple tuple : distinctByKey(mapping, inactiveLines)) {
                 children.add(toNode(tuple, path, inactiveLines));
             }
             return children;
@@ -174,6 +172,40 @@ public class YamlConfigReader {
             return scalarToJson(scalar);
         }
         return objectMapper.nullNode();
+    }
+
+    /**
+     * Returns one tuple per key, so every emitted {@link ConfigNode#path()} is
+     * unique. Repeated keys appear when a file keeps commented-out alternatives
+     * next to each other (e.g. two {@code # key-store:} lines under
+     * {@code # ssl:}): once the shadow strips their {@code #}, snakeyaml's
+     * composer — which does not reject duplicates — yields sibling tuples with
+     * the same key. Duplicate paths break path-keyed consumers (the UI's
+     * virtualized tree, PATCH matching), so they are collapsed here.
+     *
+     * <p>The active tuple wins; otherwise the first one does, matching the
+     * tuple {@link YamlConfigWriter} toggles for that path. Each surviving key
+     * keeps the position of its first occurrence. Dropped alternatives remain
+     * untouched on disk.</p>
+     */
+    private List<NodeTuple> distinctByKey(MappingNode mapping, BitSet inactiveLines) {
+        Map<String, NodeTuple> byKey = new LinkedHashMap<>();
+        for (NodeTuple tuple : mapping.getValue()) {
+            String key = scalarString(tuple.getKeyNode());
+            NodeTuple kept = byKey.get(key);
+            if (kept == null
+                    || (isInactive(kept.getKeyNode(), inactiveLines)
+                        && !isInactive(tuple.getKeyNode(), inactiveLines))) {
+                byKey.put(key, tuple);
+            }
+        }
+        return List.copyOf(byKey.values());
+    }
+
+    private boolean isInactive(Node node, BitSet inactiveLines) {
+        int line = node.getStartMark().orElseThrow(() ->
+                new ApplicationConfigReadException("YAML node has no source position")).getLine();
+        return inactiveLines.get(line);
     }
 
     private JsonNode scalarToJson(ScalarNode scalar) {

@@ -23,6 +23,7 @@ import {
     shouldDeleteProfilePicture,
     uploadUserProfilePicture,
 } from '@entities/user/lib/profilePicture'
+import {isOwnSavedUser, syncOwnSavedUser} from '@entities/user/lib/ownSessionUser'
 const baseKey = 'user';
 
 const resolveUserId = (value: string): string => {
@@ -159,13 +160,18 @@ export const userDefinition: EntityDefinition = {
                 bestEffort: true,
                 errorMessageKey: `${baseKey}.lifecycle.deleteProfilePicture.failed`,
             },
+            syncOwnSession: {
+                execute: syncOwnSavedUser,
+                condition: isOwnSavedUser,
+                bestEffort: true,
+            },
         },
         lifecycle: {
             create: {
                 after: ['uploadProfilePicture'],
             },
             update: {
-                after: ['uploadProfilePicture', 'deleteProfilePicture'],
+                after: ['uploadProfilePicture', 'deleteProfilePicture', 'syncOwnSession'],
             },
         },
     },
@@ -396,7 +402,6 @@ export const userDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 min: 8,
-                max: 16,
                 regex: [
                     { pattern: /[A-Z]/, message: `${baseKey}.fields.password.validation1` },
                     { pattern: /[a-z]/, message: `${baseKey}.fields.password.validation2` },

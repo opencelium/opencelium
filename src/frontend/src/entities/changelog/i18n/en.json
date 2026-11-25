@@ -1,0 +1,21 @@
+{
+  "title": "Changelog",
+  "subtitle": "What's new in OpenCelium: features and fixes for every release.",
+  "previous": "Previous versions",
+  "empty": "No changelog entries yet",
+  "badges": {
+    "installed": "Installed version",
+    "latest": "Latest release",
+    "major": "Major release"
+  },
+  "sections": {
+    "features": "New features",
+    "fixes": "Fixes"
+  },
+  "summary": {
+    "features_one": "{{count}} feature",
+    "features_other": "{{count}} features",
+    "fixes_one": "{{count}} fix",
+    "fixes_other": "{{count}} fixes"
+  }
+}

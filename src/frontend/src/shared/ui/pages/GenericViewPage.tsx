@@ -1,11 +1,13 @@
+import { listLocation } from '@shared/navigation/listLocation';
 import React, {useEffect, useMemo} from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import PageWrapper from '@pages/PageWrapper/PageWrapper';
 import { GenericViewWizard } from '@/engine/entity/runtime/genererics/GenericViewWizard';
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
 import {entityRegistry} from "@/engine/entity/EntityRegistry.ts";
 import {useFetchEntitiesQuery} from "@shared/api/genericApi.ts";
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
     entityName: string;
@@ -18,6 +20,9 @@ export const GenericViewPage: React.FC<Props> = ({ entityName }) => {
     const id = rawId ? decodeURIComponent(rawId) : rawId;
 
     const entity = entityRegistry.get(entityName);
+    const { t: tCommon } = useI18n('common');
+    const listRoute = entity.routes?.find(route => route.type === 'list');
+    const returnUrl = listLocation(listRoute?.path ?? `/${listRoute?.entityRouteName ?? entityName}`);
 
     // 🔥 fetch entity
     // A mutation elsewhere (e.g. a command-palette delete of this same record)
@@ -53,13 +58,14 @@ export const GenericViewPage: React.FC<Props> = ({ entityName }) => {
         return null;
     }
 
-    if (!record) {
-        return <div>Not found</div>;
+    if (!record || !id) {
+        return <div>{tCommon('notFound.entity')}</div>;
     }
 
 
     return (
         <PageWrapper>
+            <Link to={returnUrl}>{tCommon('list.backToList')}</Link>
             <GenericViewWizard
                 entityName={entityName}
                 identifier={id}

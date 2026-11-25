@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { message } from 'antd';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useWorkflowValidation } from './useWorkflowValidation';
+import { useSaveProblemsGate } from './useSaveProblemsGate';
+import { useWorkflowIssues } from '../problems/useWorkflowIssues';
+import { getIssueTone } from '../problems/workflowProblems';
 import { useSaveWorkflow } from './useSaveWorkflow';
 import { useAssignWorkflowCategory } from './useAssignWorkflowCategory';
 import { useWorkflowTemplates } from './useWorkflowTemplates';
@@ -15,6 +19,11 @@ import { useCopySelectedNodeShortcut } from './useCopySelectedNodeShortcut';
 import { usePasteCopiedNodeShortcut } from './usePasteCopiedNodeShortcut';
 import { useDuplicateSelectedNodeShortcut } from './useDuplicateSelectedNodeShortcut';
 import type { useWorkflowPageState } from './useWorkflowPageState';
+import { createWorkflowClipboard, type WorkflowClipboard } from '../clipboard/workflowClipboard';
+import { useWorkflowClipboard } from '../clipboard/useWorkflowClipboard';
+import { usePasteClipboard } from '../clipboard/usePasteClipboard';
+import { getSelectedDragGroup } from '../drag-drop/workflowDropTarget.utils';
+import { createShortId } from '@shared/lib/createId';
 import { buildConnectionPayload } from '../api/connectionPayload';
 
 type Params = {
@@ -35,22 +44,47 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 	const [schedulesOpen, setSchedulesOpen] = useState(false);
 	const [changeHistoryOpen, setChangeHistoryOpen] = useState(false);
+	const [problemsOpen, setProblemsOpen] = useState(false);
+	const [focusedProblemNodeId, setFocusedProblemNodeId] = useState<string | null>(null);
+	const issues = useWorkflowIssues(view.hydratedNodes, workflow.edges, fieldBindings);
 	const [jsonEditorOpen, setJsonEditorOpen] = useState(false);
 	const [jsonEditorValue, setJsonEditorValue] = useState<Record<string, unknown> | null>(null);
-	const [copiedNodeIds, setCopiedNodeIds] = useState<string[]>([]);
+	const [unsavedId] = useState(() => createShortId('unsaved'));
+	const clipboardWorkflowId = view.activeConnectionId ?? unsavedId;
+	const clipboard = useWorkflowClipboard();
+	const copiedNodeIds = clipboard.snapshot?.rootIds ?? [];
+	const externalPaste = usePasteClipboard({nodes: workflow.nodes, edges: workflow.edges,
+		fieldBindings, connectors, disabled: isEditLocked,
+		onApply: workflow.onApplyPastedGraph});
+	const copyNodes = (ids: string[]) => {
+		try {
+			const sourceNodes = view.hydratedNodes.map((node) => ({...node, data: {...node.data,
+				connector: node.data.connector ? {...node.data.connector,
+					invokerName: node.data.connector.invokerName ?? connectors.find((connector) =>
+						connector.connectorId === node.data.connector?.connectorId)?.invoker?.name,
+				} : undefined}}));
+			const snapshot = createWorkflowClipboard(String(clipboardWorkflowId), ids, sourceNodes, workflow.edges, fieldBindings);
+			clipboard.copy(snapshot);
+			message.success(t('messages.nodeCopied', {count: snapshot.nodes.filter((node) => node.type !== 'comment').length}));
+		} catch { notifyError(t('pasteCheck.copyFailed')); }
+	};
 	const [pasteOperatorTarget, setPasteOperatorTarget] = useState<{
 		sourceNodeIds: string[];
+		snapshot: WorkflowClipboard | null;
 		targetNodeId: string;
 	} | null>(null);
 	const validation = useWorkflowValidation({ persistedTitle: connection.persistedTitle,
 		nodes: view.hydratedNodes, edges: workflow.edges,
 		setNodeError: workflow.onSetNodeError,
 		centerOnNode: workflow.centerOnNode });
+	const saveProblems = useSaveProblemsGate({ nodes: view.hydratedNodes, edges: workflow.edges,
+		setNodeError: workflow.onSetNodeError, centerOnNode: workflow.centerOnNode });
 	const saveWorkflow = useSaveWorkflow({ connectionId: view.activeConnectionId,
 		categoryId, nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,
 		resolveError: validation.resolveAndHighlightError,
 		validateEnhancementScripts: validation.validateEnhancementScripts,
+		validateSaveProblems: saveProblems.validateSaveProblems,
 		setFieldBindings: connection.setFieldBindings,
 		setHeaderState: connection.setHeaderState,
 		setPersistedTitle: connection.setPersistedTitle,
@@ -62,6 +96,17 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		setSelectedHistoryVersionId: connection.setSelectedHistoryVersionId,
 		setCreatedConnectionId: connection.setCreatedConnectionId,
 	});
+	// Runs before the save-comment dialog opens, so the user is not asked for a
+	// comment on a save that is going to be refused.
+	const confirmBeforeSave = async (): Promise<boolean> => {
+		workflow.onClearNodeErrors();
+		const blockingMessage = saveProblems.validateSaveProblems(fieldBindings);
+		if (blockingMessage) {
+			notifyError(blockingMessage);
+			return false;
+		}
+		return saveProblems.confirmSaveWarnings(fieldBindings);
+	};
 	const category = useAssignWorkflowCategory({ title: headerState.title,
 		description: headerState.description, saveWorkflow });
 	const templates = useWorkflowTemplates({ connectionId: view.activeConnectionId,
@@ -92,6 +137,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		setContextMenu: workflow.setContextMenu, setHistoryOpen: workflow.setHistoryOpen,
 		setMethodEditor: workflow.setMethodEditor,
 		setConditionEditor: workflow.setConditionEditor,
+		setNotificationEditor: workflow.setNotificationEditor,
 		cancelJoint: workflow.onCancelJoint });
 	const header = useWorkflowHeaderActions({
 		openAssignCategory: () => category.setOpen(true),
@@ -118,6 +164,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		openChangeHistory: () => {
 			setSchedulesOpen(false);
 			workflow.setHistoryOpen(false);
+			setProblemsOpen(false);
 			canvas.closeCanvasPanels();
 			setChangeHistoryOpen(true);
 		},
@@ -130,14 +177,15 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		title: headerState.title, description: headerState.description,
 		nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,
-		validateEnhancementScripts: validation.validateEnhancementScripts });
+		validateEnhancementScripts: validation.validateEnhancementScripts,
+		validateTestRunProblems: saveProblems.validateTestRunProblems });
 
 	// Anything hosting its own editing surface: canvas-level keyboard shortcuts
 	// must not reach past it into the graph underneath.
 	const isEditorDialogOpen = !!(workflow.methodEditor || workflow.conditionEditor ||
-		workflow.aggregatorEditor || workflow.connectorEditor || workflow.historyOpen || templates.templateDialogOpen ||
+		workflow.aggregatorEditor || workflow.globalWritesEditor || workflow.connectorEditor || workflow.notificationEditor || workflow.historyOpen || templates.templateDialogOpen ||
 		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
-		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget);
+		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget || externalPaste.checking);
 
 	useDeleteSelectedNode({ readOnly: isEditLocked, nodes: workflow.nodes,
 		onDeleteNodes: workflow.onDeleteNodes, disabled: isEditorDialogOpen });
@@ -145,17 +193,22 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		redo: workflow.redo,
 		disabled: isEditorDialogOpen || !!workflow.responseNodeId });
 	useCopySelectedNodeShortcut({
-		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
+		disabled: isEditorDialogOpen || !!workflow.responseNodeId,
 		nodes: workflow.nodes,
 		edges: workflow.edges,
-		onCopyNodes: (nodeIds) => {
-			setCopiedNodeIds(nodeIds);
-			message.success(t('messages.nodeCopied'));
-		},
+		onCopyNodes: copyNodes,
 	});
 	const pasteNodes = async (sourceNodeIds: string[], targetNodeId: string,
-		direction: 'right' | 'bottom') => {
-		const pasted = await workflow.onPasteNodes(sourceNodeIds, targetNodeId, direction);
+		direction: 'right' | 'bottom', copied = clipboard.snapshot) => {
+		if (isEditLocked || externalPaste.checking || !copied) return;
+		const sameWorkflow = copied.sourceWorkflowId === String(clipboardWorkflowId);
+		// Same workflow with the originals still on the canvas: paste the live
+		// steps exactly as before; the stored copy only fills in once they are gone.
+		const originalsPresent = sourceNodeIds.every((id) => workflow.nodes.some((node) => node.id === id));
+		const pasted = !sameWorkflow
+			? await externalPaste.paste(copied, targetNodeId, direction)
+			: await workflow.onPasteNodes(sourceNodeIds, targetNodeId, direction,
+				originalsPresent ? undefined : copied);
 		if (pasted) message.success(t('messages.nodePasted'));
 	};
 	usePasteCopiedNodeShortcut({
@@ -166,7 +219,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 			void pasteNodes(sourceNodeIds, targetNodeId, 'right');
 		},
 		onChooseOperatorPlacement: (sourceNodeIds, targetNodeId) =>
-			setPasteOperatorTarget({ sourceNodeIds, targetNodeId }),
+			setPasteOperatorTarget({ sourceNodeIds, targetNodeId, snapshot: clipboard.snapshot }),
 	});
 	useDuplicateSelectedNodeShortcut({
 		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
@@ -189,20 +242,51 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		setChangeHistoryOpen(false);
 	}, [isTestRunLocked, setSidebarAction, setContextMenu, setHistoryOpen]);
 
-	return { validation, saveWorkflow, category, templates, history, canvas, header,
+	// Looked up live, so the ring goes once the step's problems are fixed.
+	const focusedIssue = [...issues.errors, ...issues.warnings, ...issues.notices]
+		.find((issue) => issue.nodeId === focusedProblemNodeId);
+	const problems = { issues, open: problemsOpen,
+		focus: { nodeId: focusedProblemNodeId, tone: focusedIssue ? getIssueTone(focusedIssue) : null },
+		setFocus: setFocusedProblemNodeId,
+		focusNode: (nodeId: string) => {
+			setFocusedProblemNodeId(nodeId);
+			workflow.centerOnNode(nodeId);
+		},
+		clearFocus: () => setFocusedProblemNodeId(null),
+		openPanel: () => {
+			setSchedulesOpen(false);
+			setChangeHistoryOpen(false);
+			canvas.closeCanvasPanels();
+			setProblemsOpen(true);
+		},
+		closePanel: () => setProblemsOpen(false) };
+
+	return { validation, saveWorkflow, confirmBeforeSave, problems, category, templates, history, canvas, header,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,
 		jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
 		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen,
 		copiedNodeIds, pasteOperatorTarget,
+		copyNodeFromMenu: (id: string) => {
+			if (isEditorDialogOpen) return;
+			copyNodes(workflow.nodes.some((node) => node.id === id && node.selected)
+				? getSelectedDragGroup(workflow.nodes, workflow.edges).rootIds : [id]);
+		},
+		canPasteNodes: copiedNodeIds.length > 0 && !isEditLocked && !isEditorDialogOpen,
+		pasteAtNode: (targetNodeId: string) => {
+			if (isEditLocked || isEditorDialogOpen || !clipboard.snapshot) return;
+			const target = workflow.nodes.find((node) => node.id === targetNodeId);
+			if (target?.type === 'if' || target?.type === 'loop') setPasteOperatorTarget({sourceNodeIds: copiedNodeIds, targetNodeId, snapshot: clipboard.snapshot});
+			else void pasteNodes(copiedNodeIds, targetNodeId, 'right');
+		},
 		cancelPasteOperator: () => setPasteOperatorTarget(null),
 		pasteOperatorInScope: () => {
 			if (pasteOperatorTarget) void pasteNodes(pasteOperatorTarget.sourceNodeIds,
-				pasteOperatorTarget.targetNodeId, 'bottom');
+				pasteOperatorTarget.targetNodeId, 'bottom', pasteOperatorTarget.snapshot);
 			setPasteOperatorTarget(null);
 		},
 		pasteOperatorAfter: () => {
 			if (pasteOperatorTarget) void pasteNodes(pasteOperatorTarget.sourceNodeIds,
-				pasteOperatorTarget.targetNodeId, 'right');
+				pasteOperatorTarget.targetNodeId, 'right', pasteOperatorTarget.snapshot);
 			setPasteOperatorTarget(null);
 		} };
 };

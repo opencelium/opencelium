@@ -328,3 +328,33 @@ versions:
         operation: add
         value: TRANSACTION_READ_COMMITTED
         path: spring.datasource.hikari.transaction-isolation
+      - changeset: 3
+        operation: add
+        value: 65536
+        path: opencelium.global-variable.max-value-bytes
+  - version: 5.3
+    changes:
+      - changeset: 1
+        operation: add
+        value: 262144
+        path: opencelium.global-variable.max-script-bytes
+      - changeset: 2
+        operation: add
+        value: 5000
+        path: opencelium.global-variable.script-timeout-ms
+      - changeset: 3
+        operation: add
+        value: 100
+        path: opencelium.global-variable.queue.max-waiting
+      - changeset: 4
+        operation: add
+        value: 60
+        path: opencelium.global-variable.queue.max-wait-minutes
+      - changeset: 5
+        operation: add
+        value: 200
+        path: opencelium.global-variable.change-log.max-run-entries
+      - changeset: 6
+        operation: add
+        value: 5.3
+        path: opencelium.version

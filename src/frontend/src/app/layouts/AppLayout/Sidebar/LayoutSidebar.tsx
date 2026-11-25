@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Layout } from 'antd';
 import { useLayoutStore } from '../layout.store';
 import { Sidebar } from './Sidebar';
@@ -7,9 +8,19 @@ import {WidgetCrash} from "@shared/ui/feedback/crash/WidgetCrash.tsx";
 
 const { Sider } = Layout;
 
+const AUTO_COLLAPSE_BELOW_WIDTH = 800;
+
 export const LayoutSidebar = () => {
     const collapsed = useLayoutStore((s) => s.collapsed);
-    const {isMobile} = useBreakpoints();
+    const collapse = useLayoutStore((s) => s.collapse);
+    const {isMobile, width} = useBreakpoints();
+    const isNarrow = width < AUTO_COLLAPSE_BELOW_WIDTH;
+
+    // Fires on the way into a narrow window (or a load at one), not on every render
+    // while narrow, so a user who opens the sidebar again on a small screen keeps it open.
+    useEffect(() => {
+        if (isNarrow) collapse();
+    }, [isNarrow, collapse]);
     return (
         <Sider
             width={240}

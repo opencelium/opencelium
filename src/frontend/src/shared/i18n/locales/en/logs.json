@@ -1,6 +1,7 @@
 {
+  "openInPlayground": "Open in Playground",
   "title": "Execution Logs",
-  "subtitle": "Pick an execution to inspect its connector, method and operator logs.",
+  "subtitle": "Pick an execution to inspect its connector, method and logic block logs.",
   "selectLabel": "Execution",
   "selectPlaceholder": "Select an execution",
   "selectHint": "Select an execution to view its logs.",
@@ -13,10 +14,12 @@
     "tooBig": "The log is too big to download. You can find it on the server at {{path}}."
   },
   "tabs": {
-    "requestHeader": "Request Header",
     "requestBody": "Request Body",
-    "responseHeader": "Response Header",
-    "responseBody": "Response Body"
+    "responseBody": "Response Body",
+    "sentReceived": "Sent / Received",
+    "headers": "Headers",
+    "request": "Request",
+    "response": "Response"
   },
   "methodView": {
     "tooltip": "Toggle URL / name"
@@ -43,5 +46,18 @@
     "collapse": "Collapse logs panel",
     "clear": "Clear logs",
     "orphaned": "This test was started before the page was reopened, so its live logs are no longer available. Please stop the test and run it again to see the logs."
+  },
+  "globals": {
+    "title": "Global variables",
+    "lockWait": "Waited {{ms}} ms for the run lock",
+    "callSummary": "{{variable}}: {{total}} calls, {{failed}} failed",
+    "duration": "{{ms}} ms · version {{version}}",
+    "result": {
+      "SAVED": "Saved",
+      "REJECTED": "Rejected"
+    },
+    "writeCount": "{{count}} writes combined",
+    "snapshot": "Values read at start ({{count}})",
+    "valueOmitted": "value not logged ({{bytes}} bytes)"
   }
 }

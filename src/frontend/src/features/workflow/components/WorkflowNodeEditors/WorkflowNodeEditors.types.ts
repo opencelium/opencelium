@@ -4,11 +4,20 @@ import type { MethodConfigDialog } from '../request-editor/MethodConfigDialog/Me
 import type { ConditionBuilderDialog } from '../condition-builder/ConditionBuilder';
 import type { AggregatorConfigDialog } from '../aggregator/AggregatorConfigDialog';
 import type { ChangeConnectorDialog } from '../change-connector/ChangeConnectorDialog';
+import type { ConnectorImageDialog } from '../connector-image/ConnectorImageDialog';
+import type { RequestPlaygroundDialogProps } from '../../request-playground/ui/RequestPlaygroundDialog';
+import type { GlobalWritesDialog } from '../global-writes/GlobalWritesDialog';
+
+import type { NotificationDialogProps } from '../../notification/ui/dialog/NotificationDialog';
 
 export type WorkflowNodeEditorsProps = {
 	response: ComponentProps<typeof ResponseDialog>;
 	method: ComponentProps<typeof MethodConfigDialog>;
 	condition: ComponentProps<typeof ConditionBuilderDialog>;
+	globalWrites: ComponentProps<typeof GlobalWritesDialog>;
 	aggregator: ComponentProps<typeof AggregatorConfigDialog>;
 	connector: ComponentProps<typeof ChangeConnectorDialog>;
+	connectorImage: ComponentProps<typeof ConnectorImageDialog>;
+	requestPlayground: RequestPlaygroundDialogProps;
+	notification: NotificationDialogProps;
 };

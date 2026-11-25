@@ -1,0 +1,333 @@
+package com.becon.opencelium.backend.validation.connection;
+
+import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
+import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
+import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
+import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.ElementType;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
+import com.becon.opencelium.backend.reference.ReferenceScanner;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+/**
+ * Finds every global variable reference a workflow holds, or a set of named texts outside a
+ * workflow: the request data of a connector, the subject and body of a notification template.
+ *
+ * <p>In a workflow it looks where a run resolves references: the endpoint, the headers and the
+ * body of every method, the values a method writes to variables, the expression and the
+ * condition of every operator, and the args and
+ * the code of every field binding's enhancement, where code reads a variable through {@code
+ * ref("{{global.name}}")}. An escaped token, {@code \{{global.name}}}, is literal text and is not
+ * reported. The targets of a method's {@code globalWrites} and of {@code set("...", value)} in
+ * enhancement code are reported as writes. An enhancement arg whose whole value is a reference
+ * without a path, {@code //var VAR_1 = {{global.name}};}, is reported with the language of the
+ * enhancement: a run imports a script variable named so as a function.
+ */
+public final class GlobalReferenceCollector {
+
+    private static final Pattern GLOBAL_REFERENCE = Pattern.compile(RegExpression.globalRef);
+    private static final Pattern GLOBAL_WRITE_TARGET = Pattern.compile(RegExpression.globalWriteTarget);
+    // the field of a method that lists the variables it writes
+    private static final String GLOBAL_WRITES = "globalWrites";
+    // one arg of an enhancement, [//]var NAME = {{global.name}}, whose whole value is a reference
+    // without a path; group 1 is the name of the arg, group 2 the reference
+    private static final Pattern WHOLE_ARG_REFERENCE = Pattern.compile(
+            "(?:^|;)\\s*(?://)?\\s*[A-Za-z]+\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*"
+                    + "(\\{\\{global\\.[A-Za-z][A-Za-z0-9_]*\\}\\})\\s*(?=;|$)");
+    // the arg that holds the result of an enhancement; a run binds it to no value
+    private static final String RESULT_VAR = "RESULT_VAR";
+
+    private GlobalReferenceCollector() {
+    }
+
+    /**
+     * One reference and the element that holds it.
+     *
+     * @param elementType kind of the element, {@code null} outside a workflow
+     * @param color       color of the element if it is a method, otherwise {@code null}
+     * @param index       index path of the element, {@code null} outside a workflow
+     * @param label       what the editor calls the element, {@code null} outside a workflow
+     * @param field       where the reference stands: in an element e.g. {@code
+     *                    body.filter.since}, outside a workflow the name of the text
+     * @param variable    name of the referenced variable
+     * @param reference   the reference as written, e.g. {@code {{global.limits.maxPerPage}}}; for
+     *                    a write the whole target as written
+     * @param write       whether the element writes the variable rather than reads it: a target
+     *                    of a method's {@code globalWrites}
+     * @param importInto  for the whole value of an enhancement arg, which imports the variable if
+     *                    it is a script, the language of the enhancement, empty if it has none;
+     *                    {@code null} for any other reference
+     */
+    public record Found(ElementType elementType, String color, String index, String label, String field,
+                        String variable, String reference, boolean write, String importInto) {
+
+        /** A reference that reads the variable. */
+        public Found(ElementType elementType, String color, String index, String label, String field,
+                String variable, String reference) {
+            this(elementType, color, index, label, field, variable, reference, false);
+        }
+
+        /** A reference that is no enhancement arg of its own. */
+        public Found(ElementType elementType, String color, String index, String label, String field,
+                String variable, String reference, boolean write) {
+            this(elementType, color, index, label, field, variable, reference, write, null);
+        }
+
+        /** Whether the reference is the whole value of an enhancement arg, which imports a script. */
+        public boolean importing() {
+            return importInto != null;
+        }
+    }
+
+    /** Returns the references of {@code connection} in the order its elements hold them. */
+    public static List<Found> collect(ConnectionMng connection) {
+        List<Found> found = new ArrayList<>();
+        if (connection == null) {
+            return found;
+        }
+
+        collect(connection.getFromConnector(), found);
+        collect(connection.getToConnector(), found);
+        collectFieldBindings(connection, found);
+
+        return found;
+    }
+
+    /**
+     * Returns the references of texts that belong to no workflow element, in the order of the
+     * texts. Each reference is reported with the name of its text as the field.
+     *
+     * @param texts the texts by name, e.g. the values of a connector's request data by field
+     */
+    public static List<Found> collectFromTexts(Map<String, String> texts) {
+        List<Found> found = new ArrayList<>();
+        if (texts == null) {
+            return found;
+        }
+
+        Element outsideWorkflow = new Element(null, null, null, null, found);
+        texts.forEach(outsideWorkflow::scan);
+
+        return found;
+    }
+
+    private static void collect(ConnectorMng connector, List<Found> found) {
+        if (connector == null) {
+            return;
+        }
+
+        if (connector.getMethods() != null) {
+            connector.getMethods().stream()
+                    .filter(method -> method != null && method.getRequest() != null)
+                    .forEach(method -> collect(method, found));
+        }
+
+        if (connector.getOperators() != null) {
+            connector.getOperators().stream()
+                    .filter(operator -> operator != null)
+                    .forEach(operator -> collect(operator, found));
+        }
+    }
+
+    private static void collect(MethodMng method, List<Found> found) {
+        String label = method.getLabel() != null ? method.getLabel() : method.getName();
+        Element element = new Element(ElementType.METHOD, method.getColor(), method.getIndex(), label, found);
+
+        RequestMng request = method.getRequest();
+        element.scan("endpoint", request.getEndpoint());
+
+        if (request.getHeader() != null) {
+            request.getHeader().forEach((name, value) -> element.scan("header." + name, value));
+        }
+
+        BodyMng body = request.getBody();
+        if (body != null && body.getFields() != null) {
+            body.getFields().forEach((name, value) -> element.scanValue("body." + name, value));
+        }
+
+        if (method.getGlobalWrites() != null) {
+            method.getGlobalWrites().forEach((target, value) -> {
+                element.scanWriteTarget(target);
+                element.scan(GLOBAL_WRITES + "." + target, value);
+            });
+        }
+    }
+
+    private static void collect(OperatorMng operator, List<Found> found) {
+        Element element = new Element(ElementType.OPERATOR, null, operator.getIndex(), operator.getType(), found);
+
+        element.scan("expression", operator.getExpression());
+
+        ConditionMng condition = operator.getCondition();
+        if (condition != null) {
+            scan(element, "condition.left", condition.getLeftStatement());
+            scan(element, "condition.right", condition.getRightStatement());
+        }
+    }
+
+    /**
+     * Reports the references of each field binding's enhancement against the method the binding
+     * fills, so the usage list can open that method.
+     */
+    private static void collectFieldBindings(ConnectionMng connection, List<Found> found) {
+        if (connection.getFieldBindings() == null) {
+            return;
+        }
+
+        for (FieldBindingMng binding : connection.getFieldBindings()) {
+            EnhancementMng enhancement = binding == null ? null : binding.getEnhancement();
+            if (enhancement == null) {
+                continue;
+            }
+
+            String color = targetColor(binding);
+            String index = indexOfMethod(connection, color);
+            String label = enhancement.getTitle();
+            Element element = new Element(ElementType.ENHANCEMENT, color, index, label, found);
+
+            element.scanArgs("enhancement.args", enhancement.getArgs(), enhancement.getLanguage());
+            element.scanScript("enhancement.script", enhancement.getScript());
+        }
+    }
+
+    // the color of the method the binding writes into; null for a binding without a target
+    private static String targetColor(FieldBindingMng binding) {
+        if (binding.getTo() == null) {
+            return null;
+        }
+
+        return binding.getTo().stream()
+                .filter(linked -> linked != null && linked.getColor() != null)
+                .map(LinkedFieldMng::getColor)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static String indexOfMethod(ConnectionMng connection, String color) {
+        if (color == null) {
+            return null;
+        }
+
+        return Stream.of(connection.getFromConnector(), connection.getToConnector())
+                .filter(connector -> connector != null && connector.getMethods() != null)
+                .flatMap(connector -> connector.getMethods().stream())
+                .filter(method -> method != null && color.equals(method.getColor()))
+                .map(MethodMng::getIndex)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static void scan(Element element, String field, StatementMng statement) {
+        if (statement == null) {
+            return;
+        }
+
+        element.scan(field + ".field", statement.getField());
+        element.scan(field + ".rightPropertyValue", statement.getRightPropertyValue());
+    }
+
+    /** An element being scanned: every reference found in it is reported with its position. */
+    private record Element(ElementType type, String color, String index, String label, List<Found> found) {
+
+        /** Scans a body value of any JSON shape: a text, a map or a list of further values. */
+        void scanValue(String field, Object value) {
+            if (value instanceof String text) {
+                scan(field, text);
+            } else if (value instanceof Map<?, ?> map) {
+                map.forEach((key, nested) -> scanValue(field + "." + key, nested));
+            } else if (value instanceof Collection<?> items) {
+                int position = 0;
+                for (Object item : items) {
+                    scanValue(field + "[" + position++ + "]", item);
+                }
+            }
+        }
+
+        /**
+         * Reports the variable a write target names: {@code global.name}. A target of any other
+         * form is reported with no variable, so the check on save can refuse it.
+         */
+        void scanWriteTarget(String target) {
+            Matcher matcher = GLOBAL_WRITE_TARGET.matcher(target == null ? "" : target.strip());
+            String variable = matcher.matches() ? matcher.group(1) : null;
+            found.add(new Found(type, color, index, label, GLOBAL_WRITES, variable, target, true));
+        }
+
+        /**
+         * Scans the args of an enhancement. A reference that is the whole value of an arg, as a
+         * run splits the args, is reported with {@code language}, for a script variable is
+         * imported that way; every other reference, one with a path included, as a plain read.
+         */
+        void scanArgs(String field, String args, String language) {
+            if (args == null || args.indexOf('{') == -1) {
+                return;
+            }
+
+            Set<Integer> wholeArgs = new HashSet<>();
+            Matcher arg = WHOLE_ARG_REFERENCE.matcher(args);
+            while (arg.find()) {
+                if (!RESULT_VAR.equals(arg.group(1))) {
+                    wholeArgs.add(arg.start(2));
+                }
+            }
+
+            String importInto = language == null ? "" : language;
+            Matcher matcher = GLOBAL_REFERENCE.matcher(args);
+            while (matcher.find()) {
+                found.add(new Found(type, color, index, label, field, matcher.group(1), matcher.group(), false,
+                        wholeArgs.contains(matcher.start()) ? importInto : null));
+            }
+        }
+
+        /**
+         * Scans the code of a script: the target of each {@code set("{{global.name}}", value)}
+         * is reported as a write, and every other reference, {@code ref("...")} included, as a
+         * read. A target with a path or any other text is reported with no variable, so the
+         * check on save can refuse it.
+         */
+        void scanScript(String field, String code) {
+            if (code == null) {
+                return;
+            }
+
+            char[] readable = code.toCharArray();
+            for (ReferenceScanner.ScriptRef set : ReferenceScanner.findScriptSets(code)) {
+                String variable = GlobalVariableWriter.ScriptSets.nameOf(set.reference()).orElse(null);
+                found.add(new Found(type, color, index, label, field, variable, set.reference(), true));
+                // the target is written, not read
+                Arrays.fill(readable, set.start(), set.end(), ' ');
+            }
+
+            scan(field, new String(readable));
+        }
+
+        void scan(String field, String text) {
+            if (text == null || text.indexOf('{') == -1) {
+                return;
+            }
+
+            Matcher matcher = GLOBAL_REFERENCE.matcher(text);
+            while (matcher.find()) {
+                found.add(new Found(type, color, index, label, field, matcher.group(1), matcher.group()));
+            }
+        }
+    }
+}

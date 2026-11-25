@@ -12,6 +12,7 @@ import { buildRemapPlan, emptyChoice } from './referenceRemapChoice';
 import { CONFIRM_POPUP_Z_INDEX } from './referenceRemap.constants';
 
 type Props = {
+	intro?: string;
 	targets: ReferenceRemapTarget[];
 	/** The graph as it will be once the deletion goes through — what the field
 	 *  pickers must offer references from. */
@@ -24,7 +25,7 @@ type Props = {
 	onChange: (plan: ReferenceRemapPlan) => void;
 };
 
-export function ReferenceRemapChoices({ targets, after, before, onChange }: Props) {
+export function ReferenceRemapChoices({ targets, after, before, onChange, intro }: Props) {
 	const { t } = useI18n('workflow');
 	const [choices, setChoices] = useState<Record<string, ReferenceRemapChoice>>({});
 	// Conditions rewritten by hand, held here until the deletion is confirmed —
@@ -66,7 +67,7 @@ export function ReferenceRemapChoices({ targets, after, before, onChange }: Prop
 
 	return (
 		<div className='referenceRemap' data-testid='workflow-reference-remap'>
-			<div className='referenceRemapIntro'>{t('referenceRemap.intro')}</div>
+			<div className='referenceRemapIntro'>{intro ?? t('referenceRemap.intro')}</div>
 			{targets.map((target) => (
 				<ReferenceRemapRow
 					key={target.color}

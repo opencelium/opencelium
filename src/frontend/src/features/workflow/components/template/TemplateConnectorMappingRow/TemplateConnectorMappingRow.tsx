@@ -32,7 +32,8 @@ export const TemplateConnectorMappingRow = ({ group, value, connectors,
 		<div className="templateConnectorMappingRow">
 			<div className="templateConnectorMappingRowInfo">
 				<span className="templateConnectorMappingRowTitle">
-					{group.invokerName ?? fallbackTitle ?? unknownLabel}
+					{fallbackTitle ?? unknownLabel}
+					{group.invokerName && <span> · {group.invokerName}</span>}
 				</span>
 				<span className="templateConnectorMappingRowMeta">
 					{!group.invokerName && <>{noInvokerHint}{' · '}</>}

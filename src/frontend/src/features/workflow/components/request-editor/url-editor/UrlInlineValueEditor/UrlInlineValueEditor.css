@@ -5,7 +5,7 @@
 	border: 1px solid var(--color-border-default);
 	border-radius: 8px;
 	padding: 0 11px;
-	background: var(--color-background-surface);
+	background: var(--color-background-input);
 	cursor: text;
 	outline: none;
 	overflow: hidden;

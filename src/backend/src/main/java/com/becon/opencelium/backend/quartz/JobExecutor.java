@@ -19,6 +19,9 @@ package com.becon.opencelium.backend.quartz;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalSnapshotLogLines;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
@@ -28,6 +31,7 @@ import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.utility.TestNameUtils;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -39,10 +43,21 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Set;
 
+/**
+ * Runs a connection for one schedule.
+ *
+ * <p>{@link DisallowConcurrentExecution} lets only one run per Quartz job go at a time. Every
+ * trigger of a schedule fires the same job (cron, manual start, test run and webhook), so a
+ * second start of that schedule waits for the running one. Two schedules of one connection are
+ * two jobs and can still overlap.
+ */
 @Component
+@DisallowConcurrentExecution
 public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
+    private final GlobalVariableWriter globalVariableWriter;
     private final SubscriptionService subscriptionService;
     private final WebSocketNotificationService notificationService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
@@ -52,9 +67,11 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     public JobExecutor(
             @Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
-            WebSocketNotificationService notificationService
+            WebSocketNotificationService notificationService,
+            GlobalVariableWriter globalVariableWriter
     ) {
         this.executionObjectService = executionObjectService;
+        this.globalVariableWriter = globalVariableWriter;
         this.subscriptionService = subscriptionService;
         this.notificationService = notificationService;
     }
@@ -83,13 +100,20 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             jobDataMap.put("data", data);
         }
         int schedulerId = data.getScheduleId();
+        // the values of the secrets this run reads, which nothing that reports the run may show
+        Set<String> hiddenTexts = Set.of();
 
         try {
             ExecutionObj executionObj = executionObjectService.buildObj(data);
+            // a test run writes only to its own copy of the values; see GlobalVariableWriter
+            executionObj.setGlobalWriter(globalVariableWriter.forRun(connectionId, execId));
+            hiddenTexts = executionObj.getGlobalSnapshot().secretTexts();
 
             // setup execution logger:
             boolean loggingEnabled = debugMode || data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
             OcLogger<ExecutionLog> executionLogger = new OcLogger<>(loggingEnabled, new ExecutionLog(), connectionId, timestamp, execId);
+            // a request, a response or an error may hold the value of a secret this run reads
+            executionLogger.hide(hiddenTexts);
             ThreadLocalOcLogger.set(executionLogger);
 
             ConnectionExecutor executor = new ConnectionExecutor(executionObj, data.getRules());
@@ -97,12 +121,17 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             long startTime = System.currentTimeMillis();
             try {
                 executionLogger.logAndSend("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d".formatted(execId, connectionId, schedulerId));
+                if (loggingEnabled) {
+                    logGlobalSnapshot(executionLogger, executionObj.getGlobalSnapshot());
+                }
                 executor.start();
             } finally {
                 executionLogger.logAndSend("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d".formatted(execId, connectionId, schedulerId));
                 ThreadLocalOcLogger.clear();
 
                 context.put("operationsEx", executor.getOperations());
+                // what the run wrote to mutable variables stays written however it ended
+                executionObj.getGlobalWriter().logWrites();
             }
 
             // increments current_usage in subscription and saves entity in current_usage_history.
@@ -115,12 +144,24 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         } catch (ThreadDeath ignored) {
         } catch (Exception e) {
             ErrorResource message = new ErrorResource(e, HttpStatus.INTERNAL_SERVER_ERROR);
+            message.setMessage(OcLogger.hideIn(message.getMessage(), hiddenTexts));
             notificationService.send(connectionId, message);
 
             throw e;
         } finally{
             thread = null;
         }
+    }
+
+    /**
+     * Records which version of each global variable the run reads, and the values of the
+     * variables that are not secrets within the limits of {@link GlobalSnapshotLogLines}, so a
+     * run can be explained after the variables changed. The lines follow EXECUTION_START, so they
+     * belong to the execution element of the log, which returns them as its global snapshot.
+     * Called only while logging is on: the lines serialize every value of the snapshot.
+     */
+    private static void logGlobalSnapshot(OcLogger<ExecutionLog> executionLogger, GlobalVariableSnapshot snapshot) {
+        GlobalSnapshotLogLines.of(snapshot).forEach(executionLogger::logAndSend);
     }
 
     @Override

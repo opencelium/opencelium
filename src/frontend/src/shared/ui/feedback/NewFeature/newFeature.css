@@ -1,0 +1,84 @@
+/* The Ant Tooltip wraps its trigger in a full-width flex span that centres it
+   (inline style, so `justify-content` can't be overridden); shrinking the span
+   keeps a pill after a left-aligned label (menu item, group header) on the left. */
+:has(> .newFeature) {
+    width: fit-content;
+}
+
+.newFeature {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Primary rather than red: red already means delete/error in this app. The ring
+   in the surface colour keeps the dot legible over the icon it overlaps. */
+.newFeature__dot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-action-primary);
+    box-shadow: 0 0 0 2px var(--color-background-surface);
+    pointer-events: none;
+    animation: newFeaturePulse 1.6s ease-out 2;
+}
+
+.newFeatureBadge {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    color: var(--color-text-on-action);
+    background: var(--color-action-primary);
+}
+
+.newFeatureCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.newFeatureCard__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.newFeatureCard__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.newFeatureCard__description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+.newFeatureCard__footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+@keyframes newFeaturePulse {
+    0% { box-shadow: 0 0 0 2px var(--color-background-surface), 0 0 0 2px var(--color-action-primary); }
+    100% { box-shadow: 0 0 0 2px var(--color-background-surface), 0 0 0 8px transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .newFeature__dot {
+        animation: none;
+    }
+}

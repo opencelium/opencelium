@@ -1,15 +1,36 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ContextMenuEditor } from '../context-menu/ContextMenuEditor/ContextMenuEditor';
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
+import { placeContextMenu } from './contextMenuPlacement';
 import { NodeContextMenuSections } from './NodeContextMenuSections';
+import { moveFocus } from './contextMenuKeyboard';
 
-export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor, onOpenConnectorEditor }: NodeContextMenuProps) {
+export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor, onOpenGlobalWritesEditor, onOpenNotificationEditor, onCopyNodes, onPasteNodes, canPasteNodes }: NodeContextMenuProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [draftLabel, setDraftLabel] = useState('');
+  const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
+
+  // Re-placed whenever the menu changes size (a group expands, the label editor opens).
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!menu || !element) return;
+    const place = () => setPosition(placeContextMenu({ x: menu.x, y: menu.y },
+      { width: element.offsetWidth, height: element.offsetHeight },
+      { width: window.innerWidth, height: window.innerHeight }));
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [menu]);
+
+  // Focus the first entry so a menu opened from the keyboard can be driven by it.
+  useEffect(() => {
+    if (menu) ref.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
+  }, [menu]);
 
   useEffect(() => {
     if (!menu) return;
@@ -37,7 +58,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
 
   if (!menu) return null;
   return createPortal(
-    <div ref={ref} className="contextMenu" data-testid="workflow-context-menu" style={{ left: menu.x, top: menu.y }}>
+    <div ref={ref} className="contextMenu" role="menu" data-testid="workflow-context-menu" onKeyDown={moveFocus} style={position ?? { left: menu.x, top: menu.y, visibility: 'hidden' }}>
       {isEditingLabel ? (
         <ContextMenuEditor
           inputRef={inputRef}
@@ -54,8 +75,11 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
       ) : (
         <NodeContextMenuSections menu={menu} node={node} onClose={onClose}
           onEditLabel={() => setIsEditingLabel(true)} onOpenRequestEditor={onOpenRequestEditor}
-          onOpenConditionEditor={onOpenConditionEditor} onShowResponse={onShowResponse}
-          onOpenAggregatorEditor={onOpenAggregatorEditor} onOpenConnectorEditor={onOpenConnectorEditor} />
+          onOpenConditionEditor={onOpenConditionEditor} onShowResponse={onShowResponse} onTryRequest={onTryRequest}
+          onOpenAggregatorEditor={onOpenAggregatorEditor} onOpenConnectorEditor={onOpenConnectorEditor}
+          onOpenGlobalWritesEditor={onOpenGlobalWritesEditor}
+          onCopyNodes={onCopyNodes} onPasteNodes={onPasteNodes} canPasteNodes={canPasteNodes}
+          onOpenNotificationEditor={onOpenNotificationEditor} />
       )}
     </div>,
     document.body,

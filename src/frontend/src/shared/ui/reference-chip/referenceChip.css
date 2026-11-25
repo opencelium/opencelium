@@ -1,0 +1,86 @@
+/*
+ * The one look for a reference wherever it is shown: a dot in the source's colour, the
+ * source name, then the path. The dot and the source are pseudo-elements on purpose —
+ * contenteditable hosts (the URL field) map the caret by the chip's text, which must stay
+ * the path alone. Set `--wf-ref-color` and `data-source` on the element.
+ */
+.wfReferenceChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  margin: 0 1px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  line-height: 20px;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid var(--color-status-info-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-status-info-bg);
+  color: var(--color-text-primary);
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  font-weight: 400;
+  user-select: none;
+}
+
+.wfReferenceChip::before {
+  content: '';
+  order: -2;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--wf-ref-color, var(--color-text-disabled));
+}
+
+.wfReferenceChip[data-source]::after {
+  content: attr(data-source) ' ·';
+  order: -1;
+  flex: none;
+}
+
+.wfReferenceChip--warning {
+  border-color: var(--color-status-warning-border);
+  background: var(--color-status-warning-bg);
+}
+
+.wfReferenceChip--error {
+  border-color: var(--color-status-error-border);
+  background: var(--color-status-error-bg);
+}
+
+.wfReferenceChip--selected {
+  outline: 2px solid var(--color-action-primary);
+  outline-offset: 1px;
+}
+
+.wfReferenceChip--clickable {
+  cursor: pointer;
+}
+
+.wfReferenceChip--clickable:hover {
+  border-color: var(--color-action-primary);
+}
+
+.wfReferenceChipText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wfReferenceChipRemove {
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.wfReferenceChipRemove:hover {
+  opacity: 1;
+}

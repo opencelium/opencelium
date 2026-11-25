@@ -1,4 +1,4 @@
-import {BranchesOutlined, DashboardOutlined, ScheduleOutlined, UserAddOutlined} from "@ant-design/icons";
+import {ArrowLeftOutlined, BranchesOutlined, DashboardOutlined, ScheduleOutlined, UserAddOutlined} from "@ant-design/icons";
 import {GoWorkflow} from "react-icons/go";
 import {MdNotificationAdd, MdOutlineAssistantPhoto, MdOutlineSettingsAccessibility} from "react-icons/md";
 import {GrAggregate, GrConfigure, GrDocumentConfig, GrGroup, GrLicense, GrSystem} from "react-icons/gr";
@@ -8,10 +8,12 @@ import {ImInsertTemplate} from "react-icons/im";
 import {BiCategory} from "react-icons/bi";
 import {LuFileQuestion, LuFileCog} from "react-icons/lu";
 import {TbLicense} from "react-icons/tb";
+import {GlobalVariableGlyph} from "@shared/ui/primitives/Icon/custom/GlobalVariableGlyph";
 import {BsLayoutTextWindowReverse} from "react-icons/bs";
 import {useMemo, type ReactNode} from "react";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {buildTestId} from "@shared/testing/testId.ts";
+import {NewFeature} from "@shared/ui/feedback/NewFeature/NewFeature";
 import {useAuth} from "@features/auth/useAuth.ts";
 import type {PermissionComponent} from "@/engine/policy";
 import {filterMenuItems} from "./filterMenuItems";
@@ -30,6 +32,7 @@ const MENU_ITEM_COMPONENT: Partial<Record<string, PermissionComponent>> = {
     // application configuration rather than like the user/group screens.
     '/oidc/config': 'APP',
     '/invoker': 'INVOKER',
+    '/global-variable': 'GLOBAL_VARIABLE',
     '/system-config': 'APP',
 };
 
@@ -54,6 +57,9 @@ const leaf = (key: string, icon: ReactNode, label: string) => ({
     'data-testid': buildTestId('sidebar-menu', key),
 });
 
+// Not a route: NavigationMenu intercepts this key and switches back to the main menu.
+export const BACK_TO_MAIN_MENU_KEY = 'back-to-main-menu';
+
 export const useMainMenu = (): any[] => {
     const {t} = useI18n('common');
     const {normalizedUser} = useAuth();
@@ -71,6 +77,12 @@ export const useAdminMenu = (): any[] => {
     const {normalizedUser} = useAuth();
     const permissions = normalizedUser?.permissions ?? [];
     return useMemo(() => filterMenuItems([
+        {
+            key: BACK_TO_MAIN_MENU_KEY,
+            icon: <ArrowLeftOutlined/>,
+            label: <NewFeature id='sidebar-back-to-main-menu' variant='pill' placement='right'>{t('menu.backToMain')}</NewFeature>,
+            'data-testid': 'sidebar-menu-back-to-main',
+        },
         {
             key: 'user_access',
             label: t('menu.usersAccess'),
@@ -90,6 +102,10 @@ export const useAdminMenu = (): any[] => {
                 leaf('/invoker', <FaRegFileCode/>, t('menu.invokers')),
                 leaf('/workflow-template', <ImInsertTemplate/>, t('menu.connectionTemplates')),
                 leaf('/data-aggregator', <GrAggregate/>, t('menu.dataAggregator')),
+                {
+                    ...leaf('/global-variable', <GlobalVariableGlyph/>, t('menu.globalVariables')),
+                    label: link('/global-variable', <NewFeature id='global-variables' variant='pill' placement='right'>{t('menu.globalVariables')}</NewFeature>),
+                },
                 leaf('/notification-template', <MdNotificationAdd/>, t('menu.notificationTemplates')),
                 leaf('/category', <BiCategory/>, t('menu.categories')),
                 leaf('/support-file', <LuFileQuestion/>, t('menu.supportFiles')),

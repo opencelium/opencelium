@@ -1,4 +1,5 @@
 import type React from 'react';
+import { findGlobalReferences } from '@entities/globalVariable/lib/globalReference';
 import { ARG_TOKEN_RE, sanitizePlainTextPaste, sanitizeUrlInputValue,
 	shouldBlockUrlKeyInput } from '../urlEditor.utils';
 
@@ -11,9 +12,12 @@ export const preventInvalidQueryParamKey = (event: React.KeyboardEvent<HTMLInput
 export const sanitizePastedQueryParam = (value: string) =>
 	sanitizeUrlInputValue(sanitizePlainTextPaste(value));
 
-export const hasArgToken = (value: string) => {
+const hasArgToken = (value: string) => {
 	ARG_TOKEN_RE.lastIndex = 0;
-	const result = ARG_TOKEN_RE.test(value || '');
+	const result = ARG_TOKEN_RE.test(value);
 	ARG_TOKEN_RE.lastIndex = 0;
 	return result;
 };
+
+export const hasInlineReference = (value: string) =>
+	hasArgToken(value || '') || findGlobalReferences(value || '').length > 0;
