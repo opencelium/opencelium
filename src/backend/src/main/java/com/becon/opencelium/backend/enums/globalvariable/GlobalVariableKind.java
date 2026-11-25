@@ -6,7 +6,7 @@ package com.becon.opencelium.backend.enums.globalvariable;
 public enum GlobalVariableKind {
     /** Only users change it. Runs read it and never write it. */
     CONSTANT,
-    /** Starts with a value a user sets; its owner workflow changes it during runs. */
+    /** Starts with a value a user sets; its owner workflows change it during runs. */
     MUTABLE,
     /** A reusable function that returns a value on every call. */
     SCRIPT

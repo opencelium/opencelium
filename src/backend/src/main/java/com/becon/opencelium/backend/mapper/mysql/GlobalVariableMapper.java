@@ -112,10 +112,10 @@ public class GlobalVariableMapper {
     /**
      * Builds one row of the list.
      *
-     * @param beingUpdatedBy the run that updates the variable now, or {@code null}
+     * @param beingUpdatedBy the runs that update the variable now; empty if none
      */
     public GlobalVariableListItemDTO toListItem(GlobalVariable variable, Set<GlobalVariablePermission> myPermissions,
-            long usageCount, GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
+            long usageCount, List<GlobalVariableDTO.BeingUpdatedBy> beingUpdatedBy) {
         GlobalScript script = scriptOf(variable);
 
         return new GlobalVariableListItemDTO(
@@ -188,7 +188,6 @@ public class GlobalVariableMapper {
      */
     public GlobalVariablePickerItemDTO toPickerItem(GlobalVariable variable, Long workflowId) {
         GlobalScript script = scriptOf(variable);
-        WorkflowRef ownerWorkflow = ownerWorkflowOf(variable);
 
         return new GlobalVariablePickerItemDTO(
                 variable.getName(),
@@ -198,8 +197,8 @@ public class GlobalVariableMapper {
                 variable.isSecret() || script != null ? null : preview(variable.getReadableValue()),
                 script == null ? null : script.language(),
                 script == null ? null : script.parameters(),
-                ownerWorkflow,
-                ownerWorkflow != null && ownerWorkflow.id().equals(workflowId));
+                ownerWorkflowsOf(variable),
+                workflowId != null && variable.isWritableBy(workflowId));
     }
 
     /** Returns the script of a script variable, which its value column holds; {@code null} otherwise. */
@@ -221,9 +220,10 @@ public class GlobalVariableMapper {
      * a reset or a run, so the time and the user are those of the current value, not of the
      * definition.
      *
-     * @param beingUpdatedBy the run that updates the variable now, or {@code null}
+     * @param beingUpdatedBy the runs that update the variable now; empty if none
      */
-    public GlobalVariableValueDTO toValue(GlobalVariable variable, GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
+    public GlobalVariableValueDTO toValue(GlobalVariable variable,
+            List<GlobalVariableDTO.BeingUpdatedBy> beingUpdatedBy) {
         boolean mutable = variable.getKind() == GlobalVariableKind.MUTABLE;
 
         return new GlobalVariableValueDTO(
@@ -304,20 +304,22 @@ public class GlobalVariableMapper {
                 toActor(variable.getCurrentSetByUser()),
                 variable.getCurrentSetByExecution(),
                 variable.getBusyPolicy(),
-                ownerWorkflowOf(variable));
+                ownerWorkflowsOf(variable));
     }
 
     /**
-     * Returns the owner workflow of a mutable variable with its title; {@code null} for the other
-     * kinds and once the owner workflow is deleted.
+     * Returns the owner workflows of a mutable variable with their titles, ordered by id; empty
+     * for the other kinds and once every owner workflow is deleted.
      */
-    private WorkflowRef ownerWorkflowOf(GlobalVariable variable) {
-        Long ownerWorkflowId = variable.getOwnerWorkflowId();
-        if (variable.getKind() != GlobalVariableKind.MUTABLE || ownerWorkflowId == null) {
-            return null;
+    private List<WorkflowRef> ownerWorkflowsOf(GlobalVariable variable) {
+        if (variable.getKind() != GlobalVariableKind.MUTABLE) {
+            return List.of();
         }
 
-        return new WorkflowRef(ownerWorkflowId, workflowTitle(ownerWorkflowId));
+        return variable.getOwnerWorkflowIds().stream()
+                .sorted()
+                .map(id -> new WorkflowRef(id, workflowTitle(id)))
+                .toList();
     }
 
     private Scope toScope(GlobalVariable variable) {
@@ -389,7 +391,7 @@ public class GlobalVariableMapper {
     private Actor toActor(GlobalVariableChange change) {
         Long workflowId = change.getWorkflowId();
         if (change.getActorType() == GlobalVariableChange.ActorType.WORKFLOW && workflowId != null) {
-            // a workflow id is an INT column, as the owner workflow of a variable is
+            // a workflow id is an INT column, as an owner workflow of a variable is
             return Actor.workflow(Math.toIntExact(workflowId), workflowTitle(workflowId));
         }
 

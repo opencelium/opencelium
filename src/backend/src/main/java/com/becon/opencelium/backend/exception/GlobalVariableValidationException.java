@@ -31,9 +31,9 @@ public class GlobalVariableValidationException extends RuntimeException {
         VALUES_TARGET_AMBIGUOUS,
         PICKER_TARGET_AMBIGUOUS,
         NOT_RESTORABLE,
-        // a mutable variable names the workflow whose runs may write it
+        // a mutable variable names at least one workflow whose runs may write it
         OWNER_WORKFLOW_REQUIRED,
-        // the owner workflow does not exist or is outside the scope of the variable
+        // an owner workflow does not exist or is outside the scope of the variable
         OWNER_WORKFLOW_INVALID,
         // a field that only a mutable variable has was given for another kind
         MUTABLE_ONLY,

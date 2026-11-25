@@ -104,7 +104,7 @@ class GlobalVariableMapperTest {
         String value = "\"" + "a".repeat(150) + "\"";
         GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "longText", value);
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, null);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, List.of());
 
         assertThat(item.valuePreview()).isEqualTo(value.substring(0, 100));
     }
@@ -114,7 +114,7 @@ class GlobalVariableMapperTest {
         String value = "\"" + "a".repeat(98) + "\"";
         GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "text", value);
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, null);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, List.of());
 
         assertThat(item.valuePreview()).isEqualTo(value);
     }
@@ -307,9 +307,25 @@ class GlobalVariableMapperTest {
 
         GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 42L);
 
-        assertThat(item.ownerWorkflow()).isEqualTo(new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"));
+        assertThat(item.ownerWorkflows()).containsExactly(new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"));
         assertThat(item.writable()).isTrue();
         assertThat(item.valuePreview()).isEqualTo("\"live\"");
+    }
+
+    @Test
+    @DisplayName("toPickerItem — any of several owner workflows may write; the owners come ordered by id")
+    void toPickerItemReturnsWritableWhenWorkflowIsOneOfSeveralOwners() {
+        givenWorkflowTitled(42L, "VMware to i-doit");
+        givenWorkflowTitled(43L, "Ivanti to Slack");
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 43L);
+        variable.getOwnerWorkflowIds().add(42L);
+
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 43L);
+
+        assertThat(item.ownerWorkflows()).containsExactly(
+                new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"),
+                new GlobalVariableDTO.WorkflowRef(43L, "Ivanti to Slack"));
+        assertThat(item.writable()).isTrue();
     }
 
     @Test
@@ -319,7 +335,7 @@ class GlobalVariableMapperTest {
 
         GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 42L);
 
-        assertThat(item.ownerWorkflow()).isEqualTo(new GlobalVariableDTO.WorkflowRef(43L, "Ivanti to Slack"));
+        assertThat(item.ownerWorkflows()).containsExactly(new GlobalVariableDTO.WorkflowRef(43L, "Ivanti to Slack"));
         assertThat(item.writable()).isFalse();
     }
 
@@ -331,7 +347,7 @@ class GlobalVariableMapperTest {
 
         GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, null);
 
-        assertThat(item.ownerWorkflow()).isEqualTo(new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"));
+        assertThat(item.ownerWorkflows()).containsExactly(new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"));
         assertThat(item.writable()).isFalse();
     }
 
@@ -341,7 +357,7 @@ class GlobalVariableMapperTest {
 
         GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 42L);
 
-        assertThat(item.ownerWorkflow()).isNull();
+        assertThat(item.ownerWorkflows()).isEmpty();
         assertThat(item.writable()).isFalse();
     }
 
@@ -351,7 +367,7 @@ class GlobalVariableMapperTest {
 
         GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 42L);
 
-        assertThat(item.ownerWorkflow()).isNull();
+        assertThat(item.ownerWorkflows()).isEmpty();
         assertThat(item.writable()).isFalse();
     }
 
@@ -361,7 +377,7 @@ class GlobalVariableMapperTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(7L, "idoit", "{\"host\":\"cmdb.example\"}");
         variable.setVersion(4L);
 
-        GlobalVariableValueDTO value = mapper.toValue(variable, null);
+        GlobalVariableValueDTO value = mapper.toValue(variable, List.of());
 
         assertThat(value.id()).isEqualTo(7L);
         assertThat(value.version()).isEqualTo(4L);
@@ -374,7 +390,7 @@ class GlobalVariableMapperTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(7L, "apiKey", "\"s3cr3t\"");
         variable.setSecret(true);
 
-        GlobalVariableValueDTO value = mapper.toValue(variable, null);
+        GlobalVariableValueDTO value = mapper.toValue(variable, List.of());
 
         assertThat(value.id()).isEqualTo(7L);
         assertThat(value.value()).isNull();
@@ -391,7 +407,7 @@ class GlobalVariableMapperTest {
         variable.setUpdatedAt(Date.from(Instant.parse("2026-11-01T08:00:00Z")));
         variable.setUpdatedBy(1);
 
-        GlobalVariableValueDTO value = mapper.toValue(variable, null);
+        GlobalVariableValueDTO value = mapper.toValue(variable, List.of());
 
         assertThat(value.version()).isEqualTo(4L);
         assertThat(value.revision()).isEqualTo(6L);
@@ -406,7 +422,7 @@ class GlobalVariableMapperTest {
         variable.setCurrentSetByExecution(900L);
         variable.setUpdatedBy(1);
 
-        GlobalVariableValueDTO value = mapper.toValue(variable, null);
+        GlobalVariableValueDTO value = mapper.toValue(variable, List.of());
 
         assertThat(value.updatedBy()).isNull();
     }
@@ -427,7 +443,25 @@ class GlobalVariableMapperTest {
         assertThat(detail.mutable().setBy()).isNull();
         assertThat(detail.mutable().setByExecutionId()).isEqualTo(900L);
         assertThat(detail.mutable().busyPolicy()).isEqualTo(GlobalVariableBusyPolicy.QUEUE);
-        assertThat(detail.mutable().ownerWorkflow()).isEqualTo(new GlobalVariableDTO.WorkflowRef(12L, "Sync tenants"));
+        assertThat(detail.mutable().ownerWorkflows())
+                .containsExactly(new GlobalVariableDTO.WorkflowRef(12L, "Sync tenants"));
+    }
+
+    @Test
+    @DisplayName("toDetail — every owner workflow is named, ordered by id; a deleted one has no title")
+    void toDetailReturnsEveryOwnerWorkflowWhenVariableHasSeveral() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 42L);
+        variable.getOwnerWorkflowIds().addAll(List.of(12L, 30L));
+        givenWorkflowTitled(12L, "Sync tenants");
+        givenWorkflowTitled(42L, "VMware to i-doit");
+        when(connectionRepository.findById(30L)).thenReturn(Optional.empty());
+
+        GlobalVariableDTO detail = mapper.toDetail(variable, EnumSet.allOf(GlobalVariablePermission.class));
+
+        assertThat(detail.mutable().ownerWorkflows()).containsExactly(
+                new GlobalVariableDTO.WorkflowRef(12L, "Sync tenants"),
+                new GlobalVariableDTO.WorkflowRef(30L, null),
+                new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"));
     }
 
     @Test
@@ -436,7 +470,7 @@ class GlobalVariableMapperTest {
 
         GlobalVariableDTO detail = mapper.toDetail(variable, EnumSet.allOf(GlobalVariablePermission.class));
 
-        assertThat(detail.mutable().ownerWorkflow()).isNull();
+        assertThat(detail.mutable().ownerWorkflows()).isEmpty();
     }
 
     @Test
@@ -452,7 +486,7 @@ class GlobalVariableMapperTest {
     void toListItemPreviewsCurrentValueWhenVariableIsMutable() {
         GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 12L);
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0, null);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0, List.of());
 
         assertThat(item.valuePreview()).isEqualTo("\"live\"");
     }
@@ -486,7 +520,7 @@ class GlobalVariableMapperTest {
     void toListItemReturnsLanguageAndParameterCountWhenVariableIsScript() {
         GlobalVariable variable = GlobalVariableFixture.aScriptVariable(7L, "formatDate", FORMAT_DATE.toJson());
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0, null);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0, List.of());
 
         assertThat(item.valuePreview()).isNull();
         assertThat(item.language()).isEqualTo("js");
@@ -640,7 +674,7 @@ class GlobalVariableMapperTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "apiKey", "encrypted-text");
         variable.setSecret(true);
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, null);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, List.of());
 
         assertThat(item.secret()).isTrue();
         assertThat(item.valuePreview()).isNull();

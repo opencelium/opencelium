@@ -41,7 +41,7 @@ public class GlobalVariableChange {
         CREATE, VALUE, CONFIG, PERMISSIONS, RESTORE, DELETE,
         /** The current value of a mutable variable was set back to its initial value. */
         RESET,
-        /** A run of the owner workflow wrote the current value of a mutable variable. */
+        /** A run of an owner workflow wrote the current value of a mutable variable. */
         RUN_WRITE
     }
 

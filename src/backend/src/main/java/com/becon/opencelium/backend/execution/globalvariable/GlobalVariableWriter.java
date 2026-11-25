@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,13 +32,15 @@ import java.util.regex.Pattern;
 /**
  * Writes mutable global variables for running executions, and reads their current value live.
  *
- * <p>Only a run of a variable's owner workflow may write it. A write replaces the whole current
- * value in one statement and records when and by which execution it was written. A test run, which
- * runs a copy of the workflow, is checked as its origin but stores nothing: its writes reach only
- * the run's own copy of the values, so testing never moves a value a production run relies on.
+ * <p>Only a run of one of a variable's owner workflows may write it. A write replaces the whole
+ * current value in one statement and records when and by which execution it was written. Runs of
+ * different owner workflows may write the same variable at the same time: their writes are not
+ * ordered, and the last one wins. A test run, which runs a copy of the workflow, is checked as its
+ * origin but stores nothing: its writes reach only the run's own copy of the values, so testing
+ * never moves a value a production run relies on.
  *
  * <p>Any run may read the current value as the store holds it at that moment, so a run sees what
- * a run of the owner workflow wrote after it started.
+ * a run of an owner workflow wrote after it started.
  *
  * <p>The change log gets one entry per run and variable, however often the run wrote: see {@link
  * Run#logWrites()}.
@@ -135,8 +136,8 @@ public class GlobalVariableWriter {
          * @return the value as it was written, as a JSON tree
          * @throws GlobalVariableNotFoundException if no variable has that name
          * @throws IllegalStateException           if the variable is not mutable, the run's
-         *                                         workflow is not its owner, or the value is too
-         *                                         large
+         *                                         workflow is not one of its owners, or the value
+         *                                         is too large
          */
         public JsonNode write(String name, Object value) {
             GlobalVariable variable = find(name).orElseThrow(() -> new GlobalVariableNotFoundException(name));
@@ -145,9 +146,9 @@ public class GlobalVariableWriter {
                 throw new IllegalStateException("Global variable '%s' is a %s and cannot be written by a run"
                         .formatted(name, variable.getKind()));
             }
-            if (!Objects.equals(variable.getOwnerWorkflowId(), workflowId)) {
+            if (!variable.isWritableBy(workflowId)) {
                 throw new IllegalStateException(
-                        "Only the owner workflow of global variable '%s' writes it, and workflow %d is not its owner"
+                        "Only the owner workflows of global variable '%s' write it, and workflow %d is not one of them"
                                 .formatted(name, workflowId));
             }
 

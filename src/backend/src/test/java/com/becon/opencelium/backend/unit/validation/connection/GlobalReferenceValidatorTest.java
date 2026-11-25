@@ -590,6 +590,16 @@ class GlobalReferenceValidatorTest {
     }
 
     @Test
+    void validateAcceptsWriteWhenWorkflowIsOneOfSeveralOwners() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", 99L);
+        variable.getOwnerWorkflowIds().add(WORKFLOW);
+        when(globalVariableRepository.findByNameIn(Set.of("lastSync"))).thenReturn(List.of(variable));
+
+        assertThatCode(() -> validator.validate(aWorkflowWriting("global.lastSync"), WORKFLOW, null))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
     void validateReportsNotMutableWhenMethodWritesConstant() {
         when(globalVariableRepository.findByNameIn(Set.of("lastSync")))
                 .thenReturn(List.of(GlobalVariableFixture.aConstant(5L, "lastSync", "0")));

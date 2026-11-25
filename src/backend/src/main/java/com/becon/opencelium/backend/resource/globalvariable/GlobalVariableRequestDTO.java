@@ -26,8 +26,10 @@ import java.util.List;
  * @param scope       which workflows may use the variable
  * @param busyPolicy  mutable variables only: what a second start of a workflow using it does;
  *                    left out is QUEUE on create and keeps the policy on update
- * @param ownerWorkflowId mutable variables only: the workflow whose runs may write it, which
- *                    must be in the scope; required on create, left out on update keeps it
+ * @param ownerWorkflowIds mutable variables only: the workflows whose runs may write it, at
+ *                    least one, each in the scope; a workflow given twice counts once. Required
+ *                    on create; left out on update keeps the owners, given on update replaces
+ *                    them all
  * @param version     the version the edit form loaded; required on update, ignored on create
  * @param script      script variables only, required on create and update: the language, which
  *                    cannot change, the code and the parameters. A script variable leaves
@@ -41,7 +43,7 @@ public record GlobalVariableRequestDTO(
         Boolean secret,
         Scope scope,
         GlobalVariableBusyPolicy busyPolicy,
-        Long ownerWorkflowId,
+        List<Long> ownerWorkflowIds,
         Long version,
         Script script) {
 
@@ -52,8 +54,9 @@ public record GlobalVariableRequestDTO(
 
     /** Creates the request of a constant or a mutable variable, which has no script. */
     public GlobalVariableRequestDTO(String name, GlobalVariableKind kind, String description, JsonNode value,
-            Boolean secret, Scope scope, GlobalVariableBusyPolicy busyPolicy, Long ownerWorkflowId, Long version) {
-        this(name, kind, description, value, secret, scope, busyPolicy, ownerWorkflowId, version, null);
+            Boolean secret, Scope scope, GlobalVariableBusyPolicy busyPolicy, List<Long> ownerWorkflowIds,
+            Long version) {
+        this(name, kind, description, value, secret, scope, busyPolicy, ownerWorkflowIds, version, null);
     }
 
     // a request body is logged through this, e.g. by Spring MVC at DEBUG: a value that may be a
@@ -63,8 +66,8 @@ public record GlobalVariableRequestDTO(
         Object shownValue = Boolean.FALSE.equals(secret) ? value : "****";
 
         return ("GlobalVariableRequestDTO[name=%s, kind=%s, description=%s, value=%s, secret=%s, scope=%s, "
-                + "busyPolicy=%s, ownerWorkflowId=%s, version=%s, script=%s]")
-                .formatted(name, kind, description, shownValue, secret, scope, busyPolicy, ownerWorkflowId, version,
+                + "busyPolicy=%s, ownerWorkflowIds=%s, version=%s, script=%s]")
+                .formatted(name, kind, description, shownValue, secret, scope, busyPolicy, ownerWorkflowIds, version,
                         script);
     }
 

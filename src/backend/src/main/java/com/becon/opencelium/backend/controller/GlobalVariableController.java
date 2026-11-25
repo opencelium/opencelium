@@ -166,7 +166,8 @@ public class GlobalVariableController {
     @Operation(summary = "Lists the variables the caller may use in one place, for the reference picker")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The usable variables ordered by name, unpaged. A"
-                    + " mutable variable names its owner workflow and is writable when that is the connectionId."),
+                    + " mutable variable names its owner workflows and is writable when the connectionId is one of"
+                    + " them."),
             @ApiResponse(responseCode = "400", description = "More than one of the parameters is given.",
                     content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
             @ApiResponse(responseCode = "404", description = "The workflow or the schedule does not exist.",

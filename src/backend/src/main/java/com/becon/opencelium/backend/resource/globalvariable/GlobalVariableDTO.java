@@ -56,8 +56,10 @@ public record GlobalVariableDTO(
      *                              reset; {@code null} when a run wrote it
      * @param setByExecutionId      the execution that wrote it; {@code null} otherwise
      * @param busyPolicy            what a second start of a workflow that uses it does
-     * @param ownerWorkflow         the workflow whose runs may write it; {@code null} once that
-     *                              workflow is deleted, until another one is chosen
+     * @param ownerWorkflows        the workflows whose runs may write it, ordered by id. Runs of
+     *                              different owners may write it at the same time, and the last
+     *                              write wins. Empty once every owner workflow is deleted, until
+     *                              another one is chosen
      */
     public record Mutable(
             JsonNode currentValue,
@@ -66,7 +68,11 @@ public record GlobalVariableDTO(
             Actor setBy,
             Long setByExecutionId,
             GlobalVariableBusyPolicy busyPolicy,
-            WorkflowRef ownerWorkflow) {
+            List<WorkflowRef> ownerWorkflows) {
+
+        public Mutable {
+            ownerWorkflows = ownerWorkflows == null ? List.of() : List.copyOf(ownerWorkflows);
+        }
     }
 
     /** A user by id and display name. */
@@ -93,10 +99,10 @@ public record GlobalVariableDTO(
     }
 
     /**
-     * The run that is updating a mutable variable: a run of its owner workflow, which may write
-     * it at any moment until it ends.
+     * A run that is updating a mutable variable: a run of one of its owner workflows, which may
+     * write it at any moment until it ends.
      *
-     * @param workflowId  the owner workflow
+     * @param workflowId  the owner workflow that runs
      * @param executionId the running execution; {@code null} for the moment before it is created
      * @param startedAt   when the run started
      */
