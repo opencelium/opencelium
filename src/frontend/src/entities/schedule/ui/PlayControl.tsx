@@ -1,13 +1,11 @@
-import {useState} from 'react'
-import {message, Progress} from 'antd'
+import {Progress} from 'antd'
 import {IconButton} from '@shared/ui/primitives/IconButton'
 import {Loading} from '@shared/ui/primitives/Loading/Loading'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {Icon} from '@shared/ui/primitives/Icon'
-import {useGeneralRequestMutation} from '@shared/api/genericApi'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
 import type {Schedule} from '../model/types'
-import { notifyError } from '@shared/ui/feedback/notifyError'
+import {useRunScheduleNow} from './useRunScheduleNow'
 
 export type RingStatus = 'success' | 'exception'
 export type PlayVariant = 'bare' | 'neutral' | RingStatus
@@ -15,36 +13,6 @@ export type PlayVariant = 'bare' | 'neutral' | RingStatus
 const NEUTRAL_STROKE = 'var(--color-border-strong)'
 const NEUTRAL_TRAIL = 'var(--color-border-subtle)'
 const CIRCLE_SIZE = 28
-
-// The backend rejects a manual trigger while the schedule is already running
-// with this code; it can surface in the error body's message/error/code field.
-function isConcurrentTestForbidden(error: unknown): boolean {
-    if (!error || typeof error !== 'object') return false
-    const data = (error as {data?: unknown}).data
-    const candidates = [error, data].flatMap((source) =>
-        source && typeof source === 'object'
-            ? [
-                  (source as Record<string, unknown>).message,
-                  (source as Record<string, unknown>).error,
-                  (source as Record<string, unknown>).code,
-              ]
-            : [source]
-    )
-    return candidates.some(
-        (value) =>
-            typeof value === 'string' && value.includes('CONCURRENT_TEST_IS_FORBIDDEN')
-    )
-}
-
-// A workflow with a mutable global variable runs once at a time; a start its busy policy
-// refuses answers 409 with code BUSY, whose message names the variable and the running execution.
-function readBusyMessage(error: unknown): string | null {
-    if (!error || typeof error !== 'object') return null
-    const data = (error as {data?: unknown}).data
-    if (!data || typeof data !== 'object') return null
-    const {code, message: detail} = data as Record<string, unknown>
-    return code === 'BUSY' ? (typeof detail === 'string' ? detail : '') : null
-}
 
 type Props = {
     schedule: Schedule
@@ -54,34 +22,9 @@ type Props = {
 
 export function PlayControl({schedule, variant, blockedHint}: Props) {
     const {t: tEntities} = useI18n('entities')
-    const [generalRequest] = useGeneralRequestMutation()
-    const [pending, setPending] = useState(false)
+    const {run: handleClick, pending} = useRunScheduleNow(schedule.schedulerId)
     const isBlocked = blockedHint != null
     const tooltip = blockedHint ?? tEntities('schedule.start.tooltip')
-
-    const handleClick = async () => {
-        setPending(true)
-        try {
-            await generalRequest({
-                url: `/scheduler/execute/${schedule.schedulerId}`,
-                method: 'GET',
-                options: {ignoreError: true},
-            }).unwrap()
-            message.success(tEntities('schedule.start.success'))
-        } catch (error) {
-            const busy = readBusyMessage(error)
-            if (busy !== null) {
-                notifyError(tEntities('schedule.start.error.busy', {detail: busy}))
-                return
-            }
-            const key = isConcurrentTestForbidden(error)
-                ? 'schedule.start.error.concurrentForbidden'
-                : 'schedule.start.error.failed'
-            notifyError(tEntities(key))
-        } finally {
-            setPending(false)
-        }
-    }
 
     if (variant === 'bare') {
         return (

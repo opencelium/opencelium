@@ -2,7 +2,8 @@ import { CronDate } from "cron-parser";
 import { createQuartzRunIterator } from "@shared/lib/cron/upcomingRuns";
 import type { Schedule } from "../model/types";
 
-export type CalendarView = "day" | "three" | "work" | "week" | "month";
+export type CalendarView = "day" | "week" | "month" | "agenda";
+export type ScheduleView = CalendarView | "list";
 
 export function calendarDays(anchor: number, view: CalendarView, zone: string) {
   const day = new CronDate(anchor, zone);
@@ -10,12 +11,12 @@ export function calendarDays(anchor: number, view: CalendarView, zone: string) {
   day.setMinutes(0);
   day.setSeconds(0);
   day.setMilliseconds(0);
-  if (view === "week" || view === "work") day.setDate(day.getDate() - ((day.getDay() + 6) % 7));
+  if (view === "week") day.setDate(day.getDate() - ((day.getDay() + 6) % 7));
   if (view === "month") day.setDate(1);
   const monthStart = day.getTime();
   const month = day.getMonth();
   if (view === "month") day.setDate(1 - ((day.getDay() + 6) % 7));
-  const length = { day: 1, three: 3, work: 5, week: 7, month: 31 }[view];
+  const length = { day: 1, week: 7, month: 31, agenda: 7 }[view];
   const days = [day.getTime()];
   do {
     day.addDay();
@@ -30,12 +31,12 @@ export function moveCalendarDate(anchor: number, view: CalendarView, step: numbe
     day.setDate(1);
     day.setMonth(day.getMonth() + step);
   } else {
-    day.setDate(day.getDate() + step * (view === "week" || view === "work" ? 7 : view === "three" ? 3 : 1));
+    day.setDate(day.getDate() + step * (view === "day" ? 1 : 7));
   }
   return day.getTime();
 }
 
-type Marker = {
+export type Marker = {
   schedule: Schedule;
   time: number;
   cadence?: number;

@@ -29,7 +29,10 @@ import {NotificationsAction} from "@entities/schedule/ui/NotificationsAction.tsx
 import {SupportLogsAction} from "@entities/schedule/ui/SupportLogsAction.tsx";
 import {BulkNotificationsDialogContent} from "@entities/schedule/ui/BulkNotificationsDialogContent.tsx";
 
-import {ScheduleCalendar, ScheduleViewMenu} from './ui/ScheduleCalendar';
+import {mapScheduleToApi} from "@entities/schedule/model/mapScheduleToApi.ts";
+import {ScheduleCalendar} from './ui/ScheduleCalendar';
+import {ScheduleViewTabs} from './ui/calendar/ScheduleViewTabs';
+import type {CalendarView} from './ui/calendarSlots';
 
 const baseKey = 'schedule';
 
@@ -115,6 +118,7 @@ export const scheduleDefinition: EntityDefinition = {
                 connectionId: connection.connectionId,
             }
         },
+        mapToApi: ({mode, data}) => mapScheduleToApi(mode, data),
     },
     routes: [
         { type: 'create' },
@@ -128,11 +132,11 @@ export const scheduleDefinition: EntityDefinition = {
             listLabelKey: 'schedule.calendar.list',
             render: (rows, showList, mode) => (
                 <ScheduleCalendar schedules={rows as Schedule[]} onShowList={showList}
-                    initialView={mode as import('./ui/calendarSlots').CalendarView | undefined} />
+                    initialView={mode as CalendarView | undefined} />
             ),
             renderListSwitch: showAlternate => (
                 <div className="schedule-calendar-list-switch">
-                    <ScheduleViewMenu view="list" onChange={view => { if (view !== 'list') showAlternate(view); }} />
+                    <ScheduleViewTabs value="list" onChange={view => { if (view !== 'list') showAlternate(view); }} />
                 </div>
             ),
         },
