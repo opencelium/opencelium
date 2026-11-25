@@ -1502,15 +1502,7 @@
       "body": "Body",
       "bodyGenerated": "aus Editor erzeugt",
       "bodyOverridden": "manuell angepasst",
-      "editBody": "In „Nachricht“ bearbeiten",
-      "errorPolicy": "Bei Fehlerstatus (≥ 400)",
-      "errorPolicies": {
-        "stop": "Workflow abbrechen",
-        "continue": "Fehler loggen und fortfahren",
-        "retry": "3× wiederholen, dann abbrechen"
-      },
-      "rateLimits": "Rate-Limits",
-      "retryOn429": "Bei 429 „Retry-After“ abwarten und erneut senden"
+      "editBody": "In „Nachricht“ bearbeiten"
     },
     "response": {
       "tab": "Response",

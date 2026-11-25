@@ -66,3 +66,20 @@ describe('buildMethodPayload joint', () => {
 		expect('jump' in payload).toBe(false);
 	});
 });
+
+describe('buildMethodPayload label', () => {
+	const notificationNode = {
+		id: 'n1', type: 'notification', position: { x: 0, y: 0 },
+		data: { title: 'Notification', subtitle: 'Notification', kind: 'notification',
+			methodConfig: { name: 'POST', method: 'POST', url: 'https://hooks.example.test', headers: {}, body: {} } },
+	} as unknown as WorkflowNodeModel;
+
+	it('sends a notification step its name even when never renamed, as its method name is "POST"', () => {
+		const payload = buildMethodPayload(notificationNode, '0', 0);
+		expect(payload).toMatchObject({ name: 'POST', label: 'Notification' });
+	});
+
+	it('sends no label for an un-renamed method step', () => {
+		expect(buildMethodPayload(connectorNode, '0', 0)).not.toHaveProperty('label');
+	});
+});

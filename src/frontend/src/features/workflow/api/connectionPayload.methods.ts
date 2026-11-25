@@ -1,6 +1,6 @@
 import { ALL_COLORS } from '../constants/colors';
 import { MethodType } from '../types/connection';
-import { isHttpRequestNodeType } from '../utils/methodNodeTypes';
+import { getMethodLabel, isHttpRequestNodeType } from '../utils/methodNodeTypes';
 import type { WorkflowNodeModel } from '../types/workflow.types';
 import {
 	buildPayloadData,
@@ -38,6 +38,7 @@ export const buildMethodPayload = (
 	// finds those only in their wrapped form; unwrapped, it reads the whole string as one
 	// reference. So unlike other methods, header values and body keep the `{%…%}` wrapper.
 	const keepsWrappedReferences = kind === 'notification';
+	const label = getMethodLabel(node);
 	const response = config?.response ?? (isHttpRequest
 		? {
 			responseId: `response-${node.id}`,
@@ -49,7 +50,7 @@ export const buildMethodPayload = (
 	return {
 		id: node.id,
 		name: config?.name ?? node.data.subtitle,
-		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
+		...(label ? { label } : {}),
 		index,
 		methodType: resolveMethodType(node),
 		dataAggregator: node.data.dataAggregator ?? null,

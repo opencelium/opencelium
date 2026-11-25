@@ -1502,15 +1502,7 @@
       "body": "Body",
       "bodyGenerated": "generated from editor",
       "bodyOverridden": "edited by hand",
-      "editBody": "Edit in \"Message\"",
-      "errorPolicy": "On error status (≥ 400)",
-      "errorPolicies": {
-        "stop": "Abort the workflow",
-        "continue": "Log the error and continue",
-        "retry": "Retry 3 times, then abort"
-      },
-      "rateLimits": "Rate limits",
-      "retryOn429": "On 429, wait for \"Retry-After\" and send again"
+      "editBody": "Edit in \"Message\""
     },
     "response": {
       "tab": "Response",

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { createHeader, normalizeNotificationConfig, selectTool, updateActiveDraft } from '../../model/notificationConfig';
 import type {
-	NotificationConfig, NotificationDialogStep, NotificationDialogTarget, NotificationEditMode, NotificationErrorPolicy,
+	NotificationConfig, NotificationDialogStep, NotificationDialogTarget, NotificationEditMode,
 	NotificationFieldValue, NotificationHeader, NotificationRequestSection, NotificationToolId,
 } from '../../model/notification.types';
 import { getBodyText, parseBody } from '../../model/notificationBody';
@@ -68,8 +68,6 @@ export const useNotificationDialog = ({ rawConfig, initialLabel, target }: Args)
 		updateHeader: (id: string, patch: Partial<Omit<NotificationHeader, 'id'>>) =>
 			updateHeaders((headers) => headers.map((header) => header.id === id ? { ...header, ...patch } : header)),
 		removeHeader: (id: string) => updateHeaders((headers) => headers.filter((header) => header.id !== id)),
-		setErrorPolicy: (errorPolicy: NotificationErrorPolicy) => setConfig((current) => ({ ...current, errorPolicy })),
-		setRetryOn429: (retryOn429: boolean) => setConfig((current) => ({ ...current, retryOn429 })),
 		isBodyValid: () => !hasTool || parseBody(getBodyText(config)).ok,
 	};
 };
