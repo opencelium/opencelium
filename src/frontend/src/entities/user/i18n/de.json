@@ -173,5 +173,24 @@
     "deleteProfilePicture": {
       "failed": "Benutzer gespeichert, aber das Entfernen des Profilbilds ist fehlgeschlagen. Sie können es über Bearbeiten erneut versuchen."
     }
+  },
+  "resetLink": {
+    "tooltip": "Einmaligen Link zum Zurücksetzen des Passworts erstellen",
+    "confirm": {
+      "title": "Link zum Zurücksetzen erstellen",
+      "message": "Einen einmaligen Link zum Zurücksetzen des Passworts für \"{{user}}\" erstellen? Früher erstellte Links für diesen Benutzer funktionieren danach nicht mehr."
+    },
+    "dialog": {
+      "title": "Link zum Zurücksetzen des Passworts",
+      "description": "Senden Sie diesen Link an \"{{user}}\". Er öffnet eine Seite, auf der ein neues Passwort festgelegt werden kann.",
+      "expiresAt": "Gültig bis {{expiry}}. Der Link kann nur einmal verwendet werden.",
+      "securityHint": "Jede Person mit diesem Link kann das Passwort für dieses Konto festlegen. Teilen Sie ihn nur über einen vertrauenswürdigen Kanal. Er wird nur jetzt angezeigt und kann später nicht erneut abgerufen werden."
+    },
+    "error": {
+      "ldapAccount": "Dieser Benutzer meldet sich über LDAP an. Sein Passwort wird im Verzeichnis verwaltet und kann hier nicht zurückgesetzt werden.",
+      "userNotFound": "Dieser Benutzer existiert nicht mehr.",
+      "notAvailable": "Links zum Zurücksetzen des Passworts werden von dieser Serverversion noch nicht unterstützt.",
+      "failed": "Der Link zum Zurücksetzen des Passworts konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
+    }
   }
 }

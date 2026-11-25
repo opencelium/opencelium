@@ -6,6 +6,16 @@ export type User = {
   userDetail: UserDetail
   userGroup: UserGroup
   totpEnabled?: boolean
+  // Not sent by the backend yet; until it is, LDAP rows are only caught by the
+  // reset-link endpoint answering LDAP_ACCOUNT.
+  authMethod?: UserAuthMethod
+}
+
+export type UserAuthMethod = 'BASIC' | 'LDAP'
+
+export type PasswordResetLinkDto = {
+  token: string
+  expiresAt: string
 }
 
 export type UserDetail = {

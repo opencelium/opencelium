@@ -89,6 +89,7 @@ export type IconName =
     | 'external-link'
     | 'send'
     | 'image'
+    | 'password-reset'
 
 export type IconColor =
     | 'default'

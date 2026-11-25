@@ -69,6 +69,7 @@ import {
 
 import MouseOutlined from '@mui/icons-material/MouseOutlined';
 import DragIndicator from '@mui/icons-material/DragIndicator';
+import LockOpenOutlined from '@mui/icons-material/LockOpenOutlined';
 import Remove from '@mui/icons-material/Remove';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import FitScreen from '@mui/icons-material/FitScreen';
@@ -169,6 +170,7 @@ const iconMap = {
     'external-link': OpenInNew,
     send: SendOutlined,
     image: ImageOutlined,
+    'password-reset': LockOpenOutlined,
 };
 
 export const MaterialIcon: IconComponent = ({

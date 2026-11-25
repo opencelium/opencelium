@@ -11,6 +11,7 @@ import en from './i18n/en.json';
 import de from './i18n/de.json';
 import {USER_TAG} from "@entities/user/api/user.tags.ts";
 import {TotpToggle} from "@entities/user/ui/TotpToggle.tsx";
+import {PasswordResetLinkAction} from "@entities/user/ui/PasswordResetLinkAction";
 import {apiExecutor} from "@shared/api/apiExecutor.ts";
 import {message} from "antd";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
@@ -62,6 +63,14 @@ export const userDefinition: EntityDefinition = {
         actions: [
             { type: 'view' },
             { type: 'update' },
+            {
+                type: 'custom',
+                key: 'reset-link',
+                permissionAction: 'UPDATE',
+                render: ({ row, iconSize, tooltipPlacement }) => (
+                    <PasswordResetLinkAction user={row as User} iconSize={iconSize} tooltipPlacement={tooltipPlacement} />
+                ),
+            },
             {
                 type: 'delete',
                 confirmMessage: (_value, _entity, row) => {
