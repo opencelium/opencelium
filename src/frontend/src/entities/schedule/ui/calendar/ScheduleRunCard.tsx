@@ -8,7 +8,6 @@ import { useScheduleUpdatePermission } from "../../model/useScheduleUpdatePermis
 import { formatCronLabel, formatDuration, formatRemaining } from "../cronLabel";
 import { formatExecutionDate } from "../formatExecutionDate";
 import { useRunScheduleNow } from "../useRunScheduleNow";
-import { useToggleScheduleStatus } from "../useToggleScheduleStatus";
 import { scheduleName } from "./scheduleName";
 import { useMinuteClock } from "./useMinuteClock";
 import "./ScheduleRunCard.css";
@@ -25,7 +24,6 @@ export function ScheduleRunCard({ schedule, color, onOpen }: Props) {
   const canUpdate = useScheduleUpdatePermission();
   const { issue } = useSubscriptionIssue();
   const runNow = useRunScheduleNow(schedule.schedulerId);
-  const status = useToggleScheduleStatus(schedule);
   const cron = schedule.cronExp?.trim() ?? "";
   const now = useMinuteClock();
   const nextRun = cron ? upcomingRuns(cron, now, 1, getScheduleTimeZone())?.[0] : undefined;
@@ -41,11 +39,7 @@ export function ScheduleRunCard({ schedule, color, onOpen }: Props) {
       <div className="schedule-run-body">
         <div className="schedule-run-when">
           <strong>{cron ? formatCronLabel(cron, t, lang) : "–"}</strong>
-          {!schedule.status ? (
-            <span className="schedule-run-badge" data-tone="neutral">{t("schedule.run.paused")}</span>
-          ) : (
-            <span>{nextRun ? t("schedule.run.nextIn", { duration: formatRemaining(nextRun - now) }) : t("schedule.run.noNext")}</span>
-          )}
+          <span>{nextRun ? t("schedule.run.nextIn", { duration: formatRemaining(nextRun - now) }) : t("schedule.run.noNext")}</span>
         </div>
         <dl>
           <dt>{t("schedule.run.lastRun")}</dt>
@@ -75,11 +69,6 @@ export function ScheduleRunCard({ schedule, color, onOpen }: Props) {
         <Button testId={testId("now")} loading={runNow.pending} disabled={Boolean(issue)} onClick={runNow.run}>
           {t("schedule.run.runNow")}
         </Button>
-        {canUpdate && (
-          <Button testId={testId("status")} loading={status.pending} onClick={status.toggle}>
-            {t(status.isActive ? "schedule.run.pause" : "schedule.run.resume")}
-          </Button>
-        )}
       </div>
     </div>
   );

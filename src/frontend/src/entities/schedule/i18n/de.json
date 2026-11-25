@@ -270,13 +270,8 @@
     "cron": "Cron-Ausdruck",
     "cronHint": "Nur hier angezeigt, falls Sie ihn kopieren möchten.",
     "runNow": "Jetzt ausführen",
-    "pause": "Pausieren",
-    "resume": "Fortsetzen",
-    "paused": "Pausiert",
     "lastOk": "zuletzt ok",
     "lastFailed": "zuletzt Fehler",
-    "pauseSuccess": "Zeitplan pausiert",
-    "resumeSuccess": "Zeitplan fortgesetzt",
     "statusFailed": "Status des Zeitplans konnte nicht geändert werden"
   }
 }

@@ -262,10 +262,6 @@
 	border-inline-start-color: var(--color-status-error-fg);
 }
 
-.schedule-calendar-event[data-disabled] {
-	opacity: 0.6;
-}
-
 .schedule-calendar-event-time {
 	flex: 0 0 auto;
 	font-family: var(--typography-font-family-mono);
@@ -444,10 +440,6 @@
 	background: var(--color-background-hover);
 }
 
-.schedule-calendar-agenda-row[data-disabled] > :not(.schedule-calendar-pill) {
-	opacity: 0.6;
-}
-
 .schedule-calendar-agenda-time {
 	font-family: var(--typography-font-family-mono);
 	font-weight: 500;
@@ -505,11 +497,6 @@
 	border-color: var(--color-status-error-border);
 }
 
-.schedule-calendar-pill[data-tone="neutral"] {
-	color: var(--color-text-secondary);
-	background: var(--color-background-hover);
-	border-color: var(--color-border-default);
-}
 
 .schedule-calendar-empty {
 	margin: 0;

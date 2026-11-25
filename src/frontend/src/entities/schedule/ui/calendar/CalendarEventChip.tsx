@@ -24,7 +24,6 @@ export function CalendarEventChip({ marker, time }: Props) {
         style={styleOf(schedule)}
         title={`${name} · ${formatCronLabel(schedule.cronExp, t, lang)}`}
         data-failed={isFailedMarker(marker) || undefined}
-        data-disabled={!schedule.status || undefined}
         data-testid={`schedule-calendar-event-${schedule.schedulerId}`}
       >
         <span className="schedule-calendar-event-time" data-cadence={cadence ? true : undefined}>
