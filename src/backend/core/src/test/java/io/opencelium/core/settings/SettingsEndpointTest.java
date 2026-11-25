@@ -1,12 +1,18 @@
 package io.opencelium.core.settings;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.bson.Document;
+import org.bson.types.Binary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +25,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import io.opencelium.core.tenant.TenantDocuments;
 import io.opencelium.core.tenant.TenantRunner;
+import io.opencelium.core.testsupport.Bytes;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.LoginRequests;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
@@ -36,7 +43,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @MongoIntegrationTest
 @AutoConfigureMockMvc
+@ExtendWith(OutputCaptureExtension.class)
 class SettingsEndpointTest {
+
+	private static final String PASSWORD = "Br0ker-Pass-7731";
 
 	@TempDir
 	static Path dataDir;
@@ -61,6 +71,7 @@ class SettingsEndpointTest {
 	@BeforeEach
 	void removeTheSettingsOfAnotherTest() {
 		mongo.getCollection("settings").deleteMany(new Document());
+		mongo.getCollection("secrets").deleteMany(new Document());
 	}
 
 	@Test
@@ -233,12 +244,136 @@ class SettingsEndpointTest {
 	}
 
 	@Test
+	void patchShowsTheMaskWhenTheBrokerPasswordIsSet() {
+		MvcTestResult change = SettingsRequests.change(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				passwordBody(PASSWORD));
+
+		assertThat(change).hasStatusOk();
+		assertThat(change).bodyJson().extractingPath(field("broker.password", "value")).isEqualTo("****");
+		assertThat(change).bodyJson().extractingPath(field("broker.password", "default")).isEqualTo(false);
+		assertThat(change).bodyText().doesNotContain(PASSWORD);
+	}
+
+	@Test
+	void getShowsTheMaskWhenTheBrokerPasswordIsSet() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(SettingsRequests.change(mvc, admin, passwordBody(PASSWORD))).as("the change of the password")
+				.hasStatusOk();
+
+		MvcTestResult read = SettingsRequests.read(mvc, admin);
+
+		assertThat(read).bodyJson().extractingPath(field("broker.password", "value")).isEqualTo("****");
+		assertThat(read).bodyText().doesNotContain(PASSWORD);
+	}
+
+	@Test
+	void getShowsNullWhenTheBrokerPasswordIsNotSet() {
+		MvcTestResult read = SettingsRequests.read(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc));
+
+		assertThat(read).hasStatusOk();
+		assertThat(read).bodyJson().extractingPath(field("broker.password", "value")).isNull();
+		assertThat(read).bodyJson().extractingPath(field("broker.password", "default")).isEqualTo(true);
+	}
+
+	@Test
+	void patchDeletesTheCiphertextWhenTheBrokerPasswordIsReset() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(SettingsRequests.change(mvc, admin, passwordBody(PASSWORD))).as("the change of the password")
+				.hasStatusOk();
+
+		MvcTestResult reset = SettingsRequests.change(mvc, admin, "{\"broker.password\": null}");
+
+		assertThat(reset).bodyJson().extractingPath(field("broker.password", "value")).isNull();
+		assertThat(reset).bodyJson().extractingPath(field("broker.password", "default")).isEqualTo(true);
+		assertThat(mongo.getCollection("secrets").countDocuments()).isZero();
+	}
+
+	@Test
+	void patchDeletesTheReplacedCiphertextWhenTheBrokerPasswordChanges() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(SettingsRequests.change(mvc, admin, passwordBody(PASSWORD))).as("the first password")
+				.hasStatusOk();
+
+		MvcTestResult change = SettingsRequests.change(mvc, admin, passwordBody("Another-Pass-2"));
+
+		assertThat(change).hasStatusOk();
+		assertThat(mongo.getCollection("secrets").countDocuments()).isOne();
+		Document secret = mongo.getCollection("secrets").find().first();
+		Document reference = mongo.getCollection("settings").find(new Document("_id", "installation")).first()
+				.get("broker", Document.class).get("password", Document.class);
+		assertThat(reference.getString("id")).isEqualTo(secret.getString("_id"));
+	}
+
+	@Test
+	void patchWritesNoPlaintextToACollectionOrTheLogWhenTheBrokerPasswordIsSet(CapturedOutput output) {
+		MvcTestResult change = SettingsRequests.change(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				passwordBody(PASSWORD));
+
+		assertThat(change).hasStatusOk();
+		assertThat(mongo.getCollection("secrets").countDocuments()).isOne();
+		for (String collection : mongo.getCollectionNames()) {
+			for (Document document : mongo.getCollection(collection).find()) {
+				assertNoPassword(document, collection);
+			}
+		}
+		assertThat(output.getAll()).doesNotContain(PASSWORD);
+	}
+
+	@Test
+	void patchGivesInvalidSettingsWithoutThePasswordWhenThePasswordHasALineFeed() {
+		MvcTestResult change = SettingsRequests.change(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				"{\"broker.password\": \"Br0ker\\nPass\"}");
+
+		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "invalid-settings");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].key").isEqualTo("broker.password");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].problem").isEqualTo("invalid-value");
+		assertThat(change).bodyText().doesNotContain("Br0ker");
+		assertThat(mongo.getCollection("secrets").countDocuments()).isZero();
+	}
+
+	@Test
+	void patchGivesInvalidSettingsWhenThePasswordIsTheMask() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(SettingsRequests.change(mvc, admin, passwordBody(PASSWORD))).as("the change of the password")
+				.hasStatusOk();
+		String secretId = mongo.getCollection("secrets").find().first().getString("_id");
+
+		MvcTestResult change = SettingsRequests.change(mvc, admin, passwordBody("****"));
+
+		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "invalid-settings");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].key").isEqualTo("broker.password");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].problem").isEqualTo("invalid-value");
+		assertThat(mongo.getCollection("secrets").find().first().getString("_id")).as("the kept secret")
+				.isEqualTo(secretId);
+	}
+
+	@Test
 	void getGivesStatus401WithoutABodyWhenTheRequestHasNoToken() {
 		MvcTestResult read = mvc.get().uri(SettingsRequests.PATH).exchange();
 
 		assertThat(read).hasStatus(HttpStatus.UNAUTHORIZED).headers().hasHeaderSatisfying(HttpHeaders.WWW_AUTHENTICATE,
 				values -> assertThat(values).singleElement().asString().startsWith("Bearer"));
 		assertThat(read).bodyText().isEmpty();
+	}
+
+	private static String passwordBody(String password) {
+		return "{\"broker.password\": \"" + password + "\"}";
+	}
+
+	/** Each value of the document, also inside a subdocument, a list or as bytes, does not hold the password. */
+	private static void assertNoPassword(Object value, String place) {
+		if (value instanceof Document document) {
+			document.forEach((key, field) -> assertNoPassword(field, place + "." + key));
+		}
+		else if (value instanceof List<?> list) {
+			list.forEach(item -> assertNoPassword(item, place));
+		}
+		else if (value instanceof String text) {
+			assertThat(text).as(place).doesNotContain(PASSWORD);
+		}
+		else if (value instanceof Binary binary) {
+			assertThat(Bytes.contains(binary.getData(), PASSWORD.getBytes(StandardCharsets.UTF_8))).as(place).isFalse();
+		}
 	}
 
 }

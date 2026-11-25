@@ -33,7 +33,13 @@ public enum SettingType {
 	 * <li>An IPv6 address has no brackets and no zone.</li>
 	 * </ul>
 	 */
-	HOST;
+	HOST,
+
+	/**
+	 * A JSON string with the rule of {@link #TEXT}, but not the mask {@value SettingsService#MASK}: a read shows the
+	 * mask, so a client that sends a read back must not replace the secret with it. The secret storage keeps the value.
+	 */
+	SECRET;
 
 	private static final Pattern HOST_NAME_LABEL = Pattern.compile("[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?");
 
@@ -49,12 +55,17 @@ public enum SettingType {
 	 */
 	boolean validate(Object value, int min, int max) {
 		return switch (this) {
-			case TEXT -> value instanceof String text && inside(text.length(), min, max)
-					&& TerminalText.firstControl(text).isEmpty();
+			case TEXT -> isText(value, min, max);
+			case SECRET -> isText(value, min, max) && !SettingsService.MASK.equals(value);
 			case INTEGER -> isWholeNumber(value) && inside(((Number) value).longValue(), min, max);
 			case HOST -> value instanceof String host && inside(host.length(), min, max)
 					&& (isHostName(host) || isIpv6Address(host));
 		};
+	}
+
+	private static boolean isText(Object value, int min, int max) {
+		return value instanceof String text && inside(text.length(), min, max)
+				&& TerminalText.firstControl(text).isEmpty();
 	}
 
 	private static boolean inside(long value, int min, int max) {

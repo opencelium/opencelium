@@ -35,7 +35,7 @@ The feature declares the settings of the broker connection. They have no effect 
 | `broker.port` | The port of the AMQP broker | `5672` | A number from 1 to 65535 |
 | `broker.virtual-host` | The virtual host of the AMQP broker | `/` | 1 to 255 characters without a control character |
 | `broker.username` | The username of core on the AMQP broker | No value | 1 to 255 characters without a control character |
-| `broker.password` | The password of core on the AMQP broker, a secret setting | No value | 1 to 255 characters without a control character |
+| `broker.password` | The password of core on the AMQP broker, a secret setting | No value | 1 to 255 characters without a control character, and not `****` (SS-08) |
 
 ## Acceptance criteria
 Each criterion has an ID and the form "Given ..., when ..., then ...".
@@ -47,6 +47,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   1. The next read through each core instance returns the new value.
   2. If the new value is the default, core deletes the database value.
   3. For a secret setting, the response shows the value of SS-08.
+  4. For a secret setting, core deletes the ciphertext of the replaced secret.
 - **SS-03** Given an unknown setting key or an incorrect value, when an admin changes settings, then core must change no setting. The response has the status code 400 and names each incorrect setting key. A request with 1 incorrect value changes no setting of that request.
 - **SS-04** Given a setting with a database value, when an admin resets the setting, then core must delete that value. To reset a setting, the request gives the JSON value `null` for its setting key. The next read returns the default. For a secret setting, core also deletes the ciphertext.
 - **SS-05** Given an OpenCelium user without the admin role, when the user sends a settings request, then core must refuse it. The response has the status code 403. A request without a valid session JWT gets the status code 401 (decision 19).
@@ -59,6 +60,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   1. The response to a change of a secret setting also shows `****`.
   2. A secret setting without a secret shows no value.
   3. No API returns the plaintext of a secret.
+  4. A change that gives `****` as the value of a secret setting gives an incorrect value (SS-03). Thus a client that sends back a read does not replace the secret. To keep a secret, a change leaves out its setting key.
 
 ### The build rules
 

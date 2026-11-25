@@ -92,12 +92,13 @@ class SettingsController {
 	 * after the parse, because a value of a change can be a credential.
 	 */
 	private Map<String, Object> changesOf(InputStream body) throws IOException {
-		byte[] json = body.readNBytes(MAX_BODY_BYTES + 1);
+		byte[] json = new byte[MAX_BODY_BYTES + 1];
 		try {
-			if (json.length > MAX_BODY_BYTES) {
+			int length = body.readNBytes(json, 0, json.length);
+			if (length > MAX_BODY_BYTES) {
 				throw new UnreadableChangeException();
 			}
-			Map<String, Object> changes = jsonMapper.readValue(json, CHANGES);
+			Map<String, Object> changes = jsonMapper.readValue(json, 0, length, CHANGES);
 			if (changes == null) {
 				throw new UnreadableChangeException();
 			}

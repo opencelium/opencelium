@@ -37,14 +37,19 @@ public final class RootKeyConfig {
 	}
 
 	@Bean
+	DekAccess dekAccess(MongoTemplate mongo, DekWrapper wrapper, RootKey rootKey) {
+		return new DekAccess(mongo, wrapper, rootKey);
+	}
+
+	@Bean
 	KeyStartupCanary keyStartupCanary(WrappedDekRepository repository, DekWrapper wrapper, RootKey rootKey) {
 		return new KeyStartupCanary(repository, wrapper, rootKey);
 	}
 
 	@Bean
 	SigningKeyLoader signingKeyLoader(MongoTemplate mongo, DekWrapper wrapper, RootKey rootKey,
-			KeyStartupCanary canary, Clock clock) {
-		return new SigningKeyLoader(mongo, wrapper, new SigningKeyCipher(), rootKey, canary, clock);
+			KeyStartupCanary canary, DekAccess dekAccess, Clock clock) {
+		return new SigningKeyLoader(mongo, wrapper, new SigningKeyCipher(), rootKey, canary, dekAccess, clock);
 	}
 
 	@Bean
