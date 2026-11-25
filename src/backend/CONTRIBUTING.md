@@ -165,7 +165,7 @@ The title is the Conventional Commits subject (section 4). The description has 3
 <3 to 4 lines: the change as the diff shows it>
 
 ## Why
-Spec: src/backend/docs/specs/<feature>/spec.md, criteria <IDs>. Task <n> of tasks.md.
+Spec: src/backend/docs/specs/<feature>/spec.md, <the criteria in words>. Task <n> of tasks.md.
 (For a change without a spec: the reason in 1 to 2 lines, and the ticket when one exists.)
 
 ## How to test
@@ -174,6 +174,8 @@ Spec: src/backend/docs/specs/<feature>/spec.md, criteria <IDs>. Task <n> of task
 - Not confirmed: <what was not run and why>, or "nothing"
 - Assumptions and follow-ups: (assumption) <...>; follow-up: <...>   (only when there is one)
 ```
+
+The PR text names a criterion in words, not by its ID. An ID can change, and the PR text stays in the git history. A task number stays, because task numbers do not change.
 
 A fully filled-in example — and a bad counter-example with annotations — is in [docs/pr-and-review-examples.md](docs/pr-and-review-examples.md).
 
@@ -189,6 +191,7 @@ Draft → Ready for Review → In Review → Changes Requested → Approved → 
 - On **Changes Requested**: resolve every `blocking:` comment, answer every `question:`, then re-request review explicitly. Resolve your own threads once addressed.
 - **Do not merge your own PR** without at least one approval from someone else. CI must be green — a red pipeline is a reason to fix the build, not to skip review.
 - Merge strategy: **squash merge** into `next`; `next → prod` release merges are regular merge commits, tagged `vX.Y.Z`. Delete the source branch after merging.
+- The squash commit message is the PR title: the Conventional Commits title of the task (section 4). Set the repository default for squash merges to "Pull request title". A squash merge keeps the red test commit of a task off `next`, so each commit on `next` has a green build.
 - Don't leave a PR open more than 5 business days without a status update.
 
 ## 6. Code review standards

@@ -1,13 +1,15 @@
 # <Feature name>: the plan
 
 ## Approach
-1 paragraph: the shape of the solution.
+1 paragraph with 150 words or less: the shape of the solution.
+The mechanism goes into the code and its Javadoc, not into the plan.
 
 ## Modules and packages
 Which module gets which package, and why a lower module is not possible.
 
 ## Decisions
-Numbered. Each decision has the question, the options, the recommendation,
+Numbered, 8 or less. A decision is only for a real choice between 2 or more
+options. Each decision has the question, the options, the recommendation,
 and the reason. The reviewer confirms each decision before task 1 starts.
 
 1. **<Title>.** <Question.> Options: <a>, <b>. Recommended: <a>, because <reason>.

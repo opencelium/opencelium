@@ -19,7 +19,7 @@ execution, so parallel executions of the same workflow do not interfere.
 
 ## Why
 
-Spec: src/backend/docs/specs/loop-operator/spec.md, criteria LPL-01 to LPL-05. Task 2 of tasks.md.
+Spec: src/backend/docs/specs/loop-operator/spec.md, the criteria for the iteration over a collection and the order of the results. Task 2 of tasks.md.
 
 ## How to test
 

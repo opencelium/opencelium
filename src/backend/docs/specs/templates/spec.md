@@ -12,8 +12,9 @@ What the feature does, in 1 paragraph or in a list. Each sentence has
 25 words or less.
 
 ## Acceptance criteria
-Each criterion has an ID and the form "Given ..., when ..., then ...".
-A criterion has 20 words or less. A tester can answer yes or no.
+A spec has 9 criteria or less. Each criterion has an ID and the form
+"Given ..., when ..., then ...". A criterion has 20 words or less.
+A tester can answer yes or no.
 
 - **<ID>-01** Given <start situation>, when <action>, then <result>.
 - **<ID>-02** Given ..., when ..., then ....
@@ -22,8 +23,8 @@ A criterion has 20 words or less. A tester can answer yes or no.
 - <What the feature does not contain.>
 
 ## Decisions that apply
-- Decision <n> of the architecture document: <how it applies>.
-- A new decision is necessary for <question>. The architect agent drafts it.
+Decisions <n>, <n> of the architecture document.
+A new decision is necessary for <question>. The architect agent drafts it.
 
 ## Open questions
 1. <Question.> Assumption until the answer comes: <assumption> (assumption).
