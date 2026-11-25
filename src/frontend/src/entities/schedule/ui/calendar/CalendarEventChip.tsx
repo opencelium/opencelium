@@ -1,11 +1,10 @@
-import type { CSSProperties } from "react";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import type { Marker } from "../calendarSlots";
 import { formatCronLabel } from "../cronLabel";
 import { isFailedMarker } from "./calendarGrid";
 import { ScheduleRunPopover } from "./ScheduleRunPopover";
 import { scheduleName } from "./scheduleName";
-import { useScheduleColor } from "./useScheduleColor";
+import { useScheduleChipStyle } from "./useScheduleColor";
 
 type Props = {
   marker: Marker;
@@ -14,7 +13,7 @@ type Props = {
 
 export function CalendarEventChip({ marker, time }: Props) {
   const { t, lang } = useI18n("entities");
-  const colorOf = useScheduleColor();
+  const styleOf = useScheduleChipStyle();
   const { schedule, cadence } = marker;
   const name = scheduleName(schedule);
   return (
@@ -22,7 +21,7 @@ export function CalendarEventChip({ marker, time }: Props) {
       <button
         type="button"
         className="schedule-calendar-event"
-        style={{ "--schedule-color": colorOf(schedule) } as CSSProperties}
+        style={styleOf(schedule)}
         title={`${name} · ${formatCronLabel(schedule.cronExp, t, lang)}`}
         data-failed={isFailedMarker(marker) || undefined}
         data-disabled={!schedule.status || undefined}

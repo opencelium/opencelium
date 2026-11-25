@@ -31,13 +31,6 @@ export interface DashboardSchema {
             viewAll: string
             empty: string
         }
-        systemHealth: {
-            title: string
-            healthy: string
-            warning: string
-            critical: string
-            statusHealthy: string
-        }
         executionsChart: {
             title: string
             executions: string

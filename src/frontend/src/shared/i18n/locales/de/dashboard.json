@@ -30,13 +30,6 @@
     "viewAll": "Alle anzeigen",
     "empty": "Keine kürzliche Aktivität"
   },
-  "systemHealth": {
-    "title": "Systemzustand",
-    "healthy": "In Ordnung",
-    "warning": "Warnung",
-    "critical": "Kritisch",
-    "statusHealthy": "In Ordnung"
-  },
   "executionsChart": {
     "title": "Ausführungen & Fehler",
     "executions": "Ausführungen",
