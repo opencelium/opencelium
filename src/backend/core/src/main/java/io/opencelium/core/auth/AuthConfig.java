@@ -1,5 +1,6 @@
 package io.opencelium.core.auth;
 
+import java.net.URI;
 import java.time.Clock;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +13,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.json.ProblemDetailJacksonMixin;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,8 +28,10 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import tools.jackson.databind.json.JsonMapper;
 
 import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.secrets.keys.TokenSignature;
@@ -87,13 +93,17 @@ class AuthConfig {
 	 * {@link #refuse}. The chain is stateless: no server session and no cookie, so it needs no CSRF token. Spring
 	 * Security exists only in a web application, so a start without a web server has no chain.
 	 * <p>
+	 * A request that a permission rule of the access control refuses gets the answer of {@link #denial}: the rules run
+	 * before the code of an endpoint, so the chain writes that response for each endpoint.
+	 * <p>
 	 * The chain adds the bearer-token filter of Spring Security itself. The resource-server configurer of Spring
 	 * Security would also open an endpoint with the metadata of the resource, and core opens no endpoint that a
 	 * feature does not declare.
 	 */
 	@Bean
 	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-	SecurityFilterChain mainSecurityFilterChain(HttpSecurity http, TokenSignature signature) throws Exception {
+	SecurityFilterChain mainSecurityFilterChain(HttpSecurity http, TokenSignature signature, JsonMapper jsonMapper)
+			throws Exception {
 		RequestMatcher login = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, LoginController.PATH);
 		var sessionJwts = new JwtAuthenticationProvider(
 				signature.decoder(SessionTokens.SESSION_JWT_TYPE, SessionTokens.ISSUER));
@@ -107,9 +117,28 @@ class AuthConfig {
 				.authorizeHttpRequests(requests -> requests.requestMatchers(login).permitAll()
 						.requestMatchers(ERROR_PATH).permitAll().anyRequest().authenticated())
 				.addFilter(bearerTokenFilter)
-				.exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(AuthConfig::refuse))
+				.exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(AuthConfig::refuse)
+					.accessDeniedHandler(denial(jsonMapper)))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.csrf(AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable).build();
+	}
+
+	/**
+	 * The answer to a request that a permission rule refuses: the status code 403 and the error {@code access-denied}
+	 * in the problem-details form, the same form as the errors that an endpoint writes: the path of the request is
+	 * the instance, and the JSON mapper of the application writes it with the mix-in that Spring MVC uses for a
+	 * problem detail, so the error code is a field of its own.
+	 */
+	private static AccessDeniedHandler denial(JsonMapper jsonMapper) {
+		JsonMapper problems = jsonMapper.rebuild().addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class)
+			.build();
+		return (request, response, refusal) -> {
+			ProblemDetail problem = AuthError.ACCESS_DENIED.problem();
+			problem.setInstance(URI.create(request.getRequestURI()));
+			response.setStatus(problem.getStatus());
+			response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+			problems.writeValue(response.getOutputStream(), problem);
+		};
 	}
 
 	/**

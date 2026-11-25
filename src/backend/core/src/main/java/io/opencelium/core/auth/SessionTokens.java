@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -16,6 +18,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 
 import io.opencelium.common.tenant.TenantId;
+import io.opencelium.core.authz.Roles;
 
 /**
  * Issues the 2 tokens of a session, and reads the principal from a valid one. Both tokens name the OpenCelium user,
@@ -96,7 +99,9 @@ final class SessionTokens {
 	}
 
 	/**
-	 * The login of a request with a valid session JWT: its principal is the {@link UserPrincipal} of the token.
+	 * The login of a request with a valid session JWT: its principal is the {@link UserPrincipal} of the token, and
+	 * each role of the token is its authority of {@link Roles}. The permission rules of the access control read these
+	 * authorities.
 	 *
 	 * @throws InvalidBearerTokenException when the token lacks a claim of a session JWT, so the request gets the
 	 *                                     status code 401
@@ -107,7 +112,13 @@ final class SessionTokens {
 			throw new InvalidBearerTokenException("The session JWT lacks a claim.");
 		}
 		return UsernamePasswordAuthenticationToken.authenticated(principalOf(sessionJwt, Set.copyOf(roles)), null,
-				List.of());
+				authoritiesOf(roles));
+	}
+
+	private static List<GrantedAuthority> authoritiesOf(List<String> roles) {
+		return new TreeSet<>(roles).stream()
+			.<GrantedAuthority>map(role -> new SimpleGrantedAuthority(Roles.authorityOf(role)))
+			.toList();
 	}
 
 	/**

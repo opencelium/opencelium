@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import io.opencelium.common.tenant.TenantId;
+import io.opencelium.core.authz.Roles;
 import io.opencelium.core.tenant.CurrentTenant;
 import io.opencelium.core.tenant.NoCurrentTenantException;
 
@@ -28,7 +29,7 @@ import io.opencelium.core.tenant.NoCurrentTenantException;
 @Service
 public class UserService {
 
-	public static final String ADMIN_ROLE = "ADMIN";
+	public static final String ADMIN_ROLE = Roles.ADMIN;
 
 	/** How long a generated password may stay unchanged before the user is locked. */
 	static final Duration GENERATED_PASSWORD_LIFETIME = Duration.ofHours(24);

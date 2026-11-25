@@ -5,14 +5,20 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 
 /**
- * The error responses of the authentication endpoints. Each has the problem-details form of RFC 9457 with the extra
- * field {@value #CODE_FIELD}: the HTTP client reads the code, not the text. The text of an error is fixed, so a
- * response never repeats a value of the request.
+ * The error responses of the authentication endpoints, and the response to a refused permission for each endpoint.
+ * Each has the problem-details form of RFC 9457 with the extra field {@value #CODE_FIELD}: the HTTP client reads the
+ * code, not the text. The text of an error is fixed, so a response never repeats a value of the request.
  */
 enum AuthError {
 
 	/** A wrong name or a wrong password, and each login of a deployment mode without a login strategy for it. */
 	INVALID_CREDENTIALS("invalid-credentials", HttpStatus.UNAUTHORIZED, "The name or the password is not correct."),
+
+	/**
+	 * A request that a permission rule of the access control refuses. The access-denied handler of the main chain
+	 * writes it for each endpoint, because the rule refuses the request before the code of the endpoint runs.
+	 */
+	ACCESS_DENIED("access-denied", HttpStatus.FORBIDDEN, "The OpenCelium user has no permission for this request."),
 
 	/** A locked OpenCelium user with the correct password. */
 	USER_LOCKED("user-locked", HttpStatus.FORBIDDEN, "The OpenCelium user is locked."),
@@ -49,9 +55,14 @@ enum AuthError {
 
 	/** The response with a new problem detail: a problem detail is mutable, so no response shares one. */
 	ResponseEntity<ProblemDetail> response() {
+		return ResponseEntity.status(status).body(problem());
+	}
+
+	/** A new problem detail of this error, with the error code. */
+	ProblemDetail problem() {
 		ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
 		problem.setProperty(CODE_FIELD, code);
-		return ResponseEntity.status(status).body(problem);
+		return problem;
 	}
 
 }
