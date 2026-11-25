@@ -5,10 +5,14 @@ import com.becon.opencelium.backend.versionmanager.base.UpdaterType;
 import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.connectionmng.ConnectionMngUpdaterProvider;
 import com.becon.opencelium.backend.versionmanager.template.TemplateUpdaterProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EntityVersionManager {
+
+    private static final Logger log = LoggerFactory.getLogger(EntityVersionManager.class);
 
     private final UpdaterVersion currentVersion;
 
@@ -18,7 +22,11 @@ public class EntityVersionManager {
     public EntityVersionManager(ConnectionMngUpdaterProvider connectionMngUpdaterProvider, TemplateUpdaterProvider templateUpdaterProvider, OpenceliumProps ocProps) {
         this.connectionMngUpdaterProvider = connectionMngUpdaterProvider;
         this.templateUpdaterProvider = templateUpdaterProvider;
-        this.currentVersion = UpdaterVersion.getByVersionOrStartsWith(ocProps.getVersion());
+        this.currentVersion = UpdaterVersion.latestUpTo(ocProps.getVersion());
+        if (currentVersion == UpdaterVersion.NO_VERSION) {
+            log.warn("opencelium.version '{}' matches no entity updater: templates and connections "
+                    + "will not be migrated to the current format", ocProps.getVersion());
+        }
     }
 
     @SuppressWarnings("unchecked")
