@@ -66,6 +66,19 @@ class RootKeyGeneratorTest {
 	}
 
 	@Test
+	void writeLeavesTheKeyInTheNewFileAndZeroesItInMemory() throws Exception {
+		var random = new RecordingSecureRandom();
+		Path file = dir.resolve("master.key");
+
+		new RootKeyGenerator(random).write(file);
+
+		byte[] expected = new byte[32];
+		Arrays.fill(expected, (byte) 42);
+		assertThat(Files.readString(file)).isEqualTo(Base64.getEncoder().encodeToString(expected));
+		assertThat(random.bytes).hasSize(32).containsOnly((byte) 0);
+	}
+
+	@Test
 	void generateNeverOverwritesAnExistingFile() throws Exception {
 		Path file = Files.writeString(dir.resolve("master.key"), "existing");
 
@@ -74,15 +87,18 @@ class RootKeyGeneratorTest {
 		assertThat(Files.readString(file)).isEqualTo("existing");
 	}
 
-	/** Fills every request with 42 and counts the calls. */
+	/** Fills every request with 42, counts the calls and keeps the array of the last call, which is the key. */
 	private static final class RecordingSecureRandom extends SecureRandom {
 
 		int calls;
+
+		byte[] bytes;
 
 		@Override
 		public void nextBytes(byte[] bytes) {
 			calls++;
 			Arrays.fill(bytes, (byte) 42);
+			this.bytes = bytes;
 		}
 
 	}

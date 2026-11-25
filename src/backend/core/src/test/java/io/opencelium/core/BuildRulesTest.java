@@ -15,15 +15,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.mongodb.client.MongoCluster;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaField;
-import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.domain.JavaParameterizedType;
 import com.tngtech.archunit.core.domain.JavaType;
@@ -34,10 +35,24 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ClassesTransformer;
 import com.tngtech.archunit.lang.EvaluationResult;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.core.BulkOperations;
+import org.springframework.data.mongodb.core.ExecutableAggregationOperation;
+import org.springframework.data.mongodb.core.ExecutableFindOperation;
+import org.springframework.data.mongodb.core.ExecutableInsertOperation;
+import org.springframework.data.mongodb.core.ExecutableMapReduceOperation;
+import org.springframework.data.mongodb.core.ExecutableRemoveOperation;
+import org.springframework.data.mongodb.core.ExecutableUpdateOperation;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.convert.ReferenceLoader;
+import org.springframework.data.mongodb.core.convert.ReferenceResolver;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.RepositoryDefinition;
+
+import io.opencelium.core.secrets.keys.DekAccess;
+import io.opencelium.core.secrets.keys.DekWrapper;
+import io.opencelium.core.secrets.keys.RootKey;
 
 import static com.tngtech.archunit.base.DescribedPredicate.describe;
 import static com.tngtech.archunit.base.DescribedPredicate.not;
@@ -69,6 +84,10 @@ class BuildRulesTest {
 		.haveFullyQualifiedName("org.springframework.beans.factory.annotation.Value")
 		.as("No class uses @Value");
 
+	/**
+	 * The types that hold or give the bytes of a key: those of the JDK and of the libraries, and the root key, the DEK
+	 * access and the DEK wrapper of core.secrets.keys, which give the bytes of the root key and of a DEK.
+	 */
 	private static final DescribedPredicate<JavaClass> KEY_MATERIAL = resideInAnyPackage("javax.crypto..",
 			"com.nimbusds.jose.crypto..", "com.nimbusds.jose.jwk..", "com.nimbusds.jose.proc..", "com.nimbusds.jwt.proc..",
 			"org.springframework.security.crypto.encrypt..")
@@ -82,8 +101,13 @@ class BuildRulesTest {
 		.or(equivalentTo(KeyPairGenerator.class))
 		.or(equivalentTo(KeyStore.class))
 		.or(equivalentTo(Signature.class))
+		.or(assignableTo(RootKey.class))
+		.or(assignableTo(DekAccess.class))
+		.or(assignableTo(DekAccess.DekUse.class))
+		.or(assignableTo(DekWrapper.class))
 		.as("key material: javax.crypto, the JOSE keys, signers, verifiers, encrypters, decrypters and processors, the"
-				+ " encryptors of Spring Security, or a key type or the key pair of java.security");
+				+ " encryptors of Spring Security, a key type or the key pair of java.security, or the root key, the"
+				+ " DEK access and the DEK wrapper of core.secrets.keys");
 
 	/** Rule 2: only core.secrets holds key material; a password hash and a random value are no key material. */
 	static final ArchRule CRYPTOGRAPHY_ONLY_IN_SECRETS = noClasses().that()
@@ -98,10 +122,19 @@ class BuildRulesTest {
 	private static final String TENANT_DOCUMENT = "io.opencelium.core.tenant.TenantDocument";
 
 	/**
+	 * The main code of each module on the classpath: an implementation of an interface of a stored field can be in
+	 * another module than core, and the import of core does not hold it.
+	 */
+	private static final JavaClasses OWN_CODE = new ClassFileImporter()
+		.withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+		.importPackages("io.opencelium");
+
+	/**
 	 * The fields that MongoDB stores: the instance fields of each {@code @Document} class and of each tenant document,
-	 * also without the annotation, of their superclasses, and of each type of this code base that they embed, also as
-	 * an element of a collection, a map or an array. A static field is not stored, for example the constant with the
-	 * name of a stored field.
+	 * also without the annotation, of their superclasses, of their subclasses, and of each type of this code base that
+	 * they embed, also as an element of a collection, a map or an array. Spring Data stores the fields of the class of
+	 * the value, so an interface or an abstract class in a field stores the fields of each of its implementations. A
+	 * static field is not stored, for example the constant with the name of a stored field.
 	 */
 	private static final ClassesTransformer<JavaField> STORED_FIELDS = new AbstractClassesTransformer<>(
 			"stored fields") {
@@ -119,6 +152,7 @@ class BuildRulesTest {
 					JavaClass withFields = withFields(type);
 					stored.put(withFields.getName(), withFields);
 					withFields.getRawSuperclass().filter(BuildRulesTest::isOwnCode).ifPresent(open::add);
+					subtypes(type).filter(BuildRulesTest::isOwnCode).forEach(open::add);
 					storedFields(withFields).forEach(field -> field.getType()
 						.getAllInvolvedRawTypes()
 						.stream()
@@ -184,9 +218,30 @@ class BuildRulesTest {
 	private static final DescribedPredicate<JavaClass> NAMED = describe("are named outside the rule",
 			type -> OUTSIDE_THE_TENANT_RULE.contains(type.getName().replaceFirst("\\$.*", "")));
 
-	private static final DescribedPredicate<JavaMethodCall> READ_OR_WRITE = describe(
-			"a read or a write method of the Mongo template",
-			call -> call.getTargetOwner().isAssignableTo(MongoOperations.class) && !"indexOps".equals(call.getName()));
+	/**
+	 * The Mongo template, its fluent operations and its bulk operations. A fluent operation is a supertype of the
+	 * template, and Spring gives the template bean to a field of that type.
+	 */
+	private static final DescribedPredicate<JavaClass> TEMPLATE_TYPES = assignableTo(MongoOperations.class)
+		.or(assignableTo(ExecutableFindOperation.class))
+		.or(assignableTo(ExecutableInsertOperation.class))
+		.or(assignableTo(ExecutableUpdateOperation.class))
+		.or(assignableTo(ExecutableRemoveOperation.class))
+		.or(assignableTo(ExecutableAggregationOperation.class))
+		.or(assignableTo(ExecutableMapReduceOperation.class))
+		.or(assignableTo(BulkOperations.class));
+
+	/** The template types and the types nested in them, for example the terminating find of a fluent query. */
+	private static final DescribedPredicate<JavaClass> TEMPLATE = TEMPLATE_TYPES.or(describe(
+			"a type nested in the template", type -> type.getEnclosingClass().filter(TEMPLATE_TYPES).isPresent()));
+
+	/**
+	 * A call of a method or a constructor of the template, or a method reference to it; the index operations read and
+	 * write no document.
+	 */
+	private static final DescribedPredicate<JavaAccess<?>> TEMPLATE_ACCESS = describe(
+			"a method or a constructor of the Mongo template other than the index operations",
+			access -> TEMPLATE.test(access.getTargetOwner()) && !"indexOps".equals(access.getName()));
 
 	private static final DescribedPredicate<JavaClass> DRIVER = assignableTo(MongoCollection.class)
 		.or(assignableTo(MongoDatabase.class))
@@ -194,14 +249,31 @@ class BuildRulesTest {
 		.as("a collection, a database or a client of the MongoDB driver");
 
 	/**
+	 * The classes of Spring Data MongoDB that read or write a collection for a class that gives them the template or
+	 * the database factory: the repository support, the message listeners of the change streams, GridFS, and the
+	 * readers of a referenced document. The database factory itself gives each database of the driver by its name.
+	 */
+	private static final DescribedPredicate<JavaClass> SPRING_DATA_READERS = resideInAnyPackage(
+			"org.springframework.data.mongodb.repository..", "org.springframework.data.mongodb.core.messaging..",
+			"org.springframework.data.mongodb.gridfs..")
+		.or(assignableTo(ReferenceResolver.class))
+		.or(assignableTo(ReferenceLoader.class))
+		.or(assignableTo(MongoDatabaseFactory.class))
+		.as("a repository, a message listener, GridFS, a reference reader or the database factory of Spring Data"
+				+ " MongoDB");
+
+	/**
 	 * Rule 5: a repository reads and writes a tenant document only through the tenant-document access. No other class
-	 * calls a read or a write of the Mongo template, uses the MongoDB driver, or is a repository of Spring Data.
+	 * calls a method or a constructor of the Mongo template other than the index operations, also through a method
+	 * reference, uses the MongoDB driver or another reader of Spring Data MongoDB, or is a repository of Spring Data.
 	 */
 	static final ArchRule TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS = noClasses().that(not(NAMED))
 		.should()
-		.callMethodWhere(READ_OR_WRITE)
+		.accessTargetWhere(TEMPLATE_ACCESS)
 		.orShould()
 		.dependOnClassesThat(DRIVER)
+		.orShould()
+		.dependOnClassesThat(SPRING_DATA_READERS)
 		.orShould()
 		.beAssignableTo(Repository.class)
 		.orShould()
@@ -249,6 +321,26 @@ class BuildRulesTest {
 	}
 
 	@Test
+	void cryptographyOnlyInSecretsFailsWhenAClassOutsideUsesTheDekAccess() {
+		assertFails(CRYPTOGRAPHY_ONLY_IN_SECRETS, SAMPLES + "DekAccessSample");
+	}
+
+	@Test
+	void cryptographyOnlyInSecretsFailsWhenAClassOutsideImplementsAnOperationWithADek() {
+		assertFails(CRYPTOGRAPHY_ONLY_IN_SECRETS, SAMPLES + "DekUseSample");
+	}
+
+	@Test
+	void cryptographyOnlyInSecretsFailsWhenAClassOutsideUsesTheRootKey() {
+		assertFails(CRYPTOGRAPHY_ONLY_IN_SECRETS, SAMPLES + "RootKeySample");
+	}
+
+	@Test
+	void cryptographyOnlyInSecretsFailsWhenAClassOutsideMakesADekWrapper() {
+		assertFails(CRYPTOGRAPHY_ONLY_IN_SECRETS, SAMPLES + "DekWrapperSample");
+	}
+
+	@Test
 	void cryptographyOnlyInSecretsPassesWhenAClassOutsideHashesAPassword() {
 		CRYPTOGRAPHY_ONLY_IN_SECRETS.check(sample(SAMPLES + "PasswordHashSample"));
 	}
@@ -286,6 +378,11 @@ class BuildRulesTest {
 	@Test
 	void secretFieldsFailWhenADocumentInheritsAPasswordText() {
 		assertFails(SECRET_FIELDS, SAMPLES + "InheritedPasswordDocument", SAMPLES + "PasswordBase");
+	}
+
+	@Test
+	void secretFieldsFailWhenAnImplementationOfAStoredInterfaceHasAPasswordText() {
+		assertFails(SECRET_FIELDS, SAMPLES + "SealedCredentialDocument", SAMPLES + "SealedCredentialDocument$Basic");
 	}
 
 	@Test
@@ -336,6 +433,56 @@ class BuildRulesTest {
 	@Test
 	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassWritesThroughTheClient() {
 		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "ClientBulkWriteSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassReadsThroughTheFluentTemplate() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "FluentTemplateSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassSavesThroughAMethodReference() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "MethodReferenceSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassWritesThroughTheBulkOperations() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "BulkOperationsSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassCompletesTheFluentQueryOfAnotherClass() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "FluentQuerySample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassReadsThroughTheRepositorySupport() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "RepositorySupportSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassStartsAMessageListener() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "MessageListenerSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassReadsThroughGridFs() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "GridFsSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassFetchesAReferencedDocument() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "ReferenceResolverSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassLoadsReferencedDocuments() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "ReferenceLoaderSample");
+	}
+
+	@Test
+	void tenantDocumentsOnlyThroughTheAccessFailsWhenAClassOpensADatabaseOfTheFactory() {
+		assertFails(TENANT_DOCUMENTS_ONLY_THROUGH_THE_ACCESS, SAMPLES + "DatabaseFactorySample");
 	}
 
 	@Test
@@ -400,6 +547,16 @@ class BuildRulesTest {
 		catch (ClassNotFoundException ex) {
 			throw new IllegalStateException("The stored type " + type.getName() + " is not on the classpath.", ex);
 		}
+	}
+
+	/**
+	 * The subclasses and the implementations of a stored type: those of the import that holds the type, and those of
+	 * the main code of each module, for an implementation in another module than the type.
+	 */
+	private static Stream<JavaClass> subtypes(JavaClass type) {
+		Stream<JavaClass> ownCode = OWN_CODE.contain(type.getName())
+				? OWN_CODE.get(type.getName()).getAllSubclasses().stream() : Stream.empty();
+		return Stream.concat(type.getAllSubclasses().stream(), ownCode);
 	}
 
 	/** The fields that MongoDB stores for the type: neither a static field nor a field that the compiler adds. */

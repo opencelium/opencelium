@@ -32,9 +32,18 @@ public final class RootKeyGenerator {
 	}
 
 	/**
+	 * Writes a new root key to {@code file} and zeroes it in memory, for a caller that needs the file and not the key,
+	 * for example the setup wizard: such a caller never holds key material, which stays in this package.
 	 * @throws IOException when {@code file} exists or cannot be written; a partly written file is deleted
 	 */
-	public RootKey generate(Path file) throws IOException {
+	public void write(Path file) throws IOException {
+		generate(file).close();
+	}
+
+	/**
+	 * @throws IOException when {@code file} exists or cannot be written; a partly written file is deleted
+	 */
+	RootKey generate(Path file) throws IOException {
 		byte[] material = new byte[RootKey.LENGTH];
 		random.nextBytes(material);
 		byte[] encoded = Base64.getEncoder().encode(material);

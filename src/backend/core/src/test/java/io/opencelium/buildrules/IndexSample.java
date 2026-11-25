@@ -1,15 +1,14 @@
 package io.opencelium.buildrules;
 
-import java.util.List;
-
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.index.IndexInfo;
+import org.springframework.data.mongodb.core.index.Index;
 
-/** Keeps the rule for the tenant documents: an index operation reads and writes no document. */
+/** Keeps the rule for the tenant documents: an index operation makes an index and reads and writes no document. */
 class IndexSample {
 
-	List<IndexInfo> indexes(MongoTemplate mongo) {
-		return mongo.indexOps("users").getIndexInfo();
+	String tenantIndex(MongoTemplate mongo) {
+		return mongo.indexOps("users").createIndex(new Index().on("tenantId", Sort.Direction.ASC));
 	}
 
 }
