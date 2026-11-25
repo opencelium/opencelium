@@ -24,7 +24,6 @@
       "failed": "Could not send the recovery email. Please try again."
     },
     "setPassword": {
-      "invalidToken": "The reset link is invalid or has expired. Please request a new one.",
       "network": "Could not reach the server. Please try again.",
       "failed": "Could not reset password. Please try again."
     },

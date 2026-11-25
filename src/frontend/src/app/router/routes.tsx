@@ -14,6 +14,7 @@ import CreateSchedulePage from "@pages/SchedulePage/CreateSchedule.tsx";
 import CreateRolePage from "@pages/RolePage/CreateRole.tsx";
 import CheckLdapPage from "@pages/LdapPage/CheckLdapPage.tsx";
 import UIPage from "@pages/UIPage/UIPage.tsx";
+import {ResetPasswordRedirect} from "@pages/SetPasswordPage/ResetPasswordRedirect.tsx";
 
 const LoginPage = lazy(() => import('@pages/LoginPage'))
 const ForgotPasswordPage = lazy(() => import('@pages/ForgotPasswordPage'))
@@ -37,6 +38,7 @@ export function getRoutes(): RouteConfig[] {
                 {path: '/login', element: <LoginPage/>},
                 {path: '/forgot-password', element: <ForgotPasswordPage/>},
                 {path: '/set-password', element: <SetPasswordPage/>},
+                {path: '/reset-password', element: <ResetPasswordRedirect/>},
             ],
         },
         {

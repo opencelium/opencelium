@@ -1,11 +1,12 @@
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '@features/auth/useAuth'
 import { SetPasswordForm } from '@features/auth/ui/SetPasswordForm'
 import { AppLogo } from '@features/branding/AppLogo'
+import { Loading } from '@shared/ui/primitives/Loading/Loading'
+import { useSignOutForReset } from './useSignOutForReset'
 
 export default function SetPasswordPage() {
-    const { isAuthenticated } = useAuth()
-    if (isAuthenticated) return <Navigate to="/" replace />
+    const entry = useSignOutForReset()
+    if (entry === 'nothingToReset') return <Navigate to="/" replace />
 
     return (
         <div
@@ -27,7 +28,7 @@ export default function SetPasswordPage() {
                 }}
             >
                 <AppLogo />
-                <SetPasswordForm />
+                {entry === 'signingOut' ? <Loading size="md" /> : <SetPasswordForm />}
             </div>
         </div>
     )
