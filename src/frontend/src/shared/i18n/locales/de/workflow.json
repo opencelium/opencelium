@@ -861,7 +861,7 @@
   },
   "references": {
     "responseStatus": "Antwort-Status",
-    "rootObject": "Das Wurzelobjekt",
+    "rootObject": "Gesamte Antwort",
     "rootObjectHint": "Der gesamte Antworttext, unverändert.",
     "firstArrayElement": "Erstes Element des Arrays",
     "firstArrayElementHint": "Das erste Element des Arrays als einzelner Wert. Mit einem Feldnamen fortfahren, um ein Feld daraus zu nehmen.",

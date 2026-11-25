@@ -861,7 +861,7 @@
   },
   "references": {
     "responseStatus": "Response Status",
-    "rootObject": "The root object",
+    "rootObject": "Whole response",
     "rootObjectHint": "The whole response body, unchanged.",
     "firstArrayElement": "First element of the array",
     "firstArrayElementHint": "The first element of the array, as a single value. Continue with a field name to take a field from it.",

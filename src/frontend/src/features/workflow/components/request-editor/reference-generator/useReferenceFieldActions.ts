@@ -30,7 +30,7 @@ export function useReferenceFieldActions(params: Params) {
 		if (!value) { params.setSelectedOption(null);
 			return void params.setFilteredOptions(options(params.responseType)); }
 		if (value === '$' || value === '$.') {
-			params.setSelectedOption({ label: 'The root object', value: '$.' });
+			params.setSelectedOption({ label: t('references.rootObject'), value: '$.' });
 			return void params.setFilteredOptions([]);
 		}
 		const term = getReferenceFilterTerm(value);
