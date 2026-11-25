@@ -452,7 +452,7 @@ public final class MasterKeyStep implements SetupStep {
 					madeDirectories.addFirst(dir);
 				}
 				Files.createDirectories(path.getParent());
-				new RootKeyGenerator().generate(path).close();
+				new RootKeyGenerator().write(path);
 				made = true;
 			}
 			catch (FileAlreadyExistsException ex) {

@@ -68,7 +68,7 @@ public final class RootKeyResolver {
 	 * @throws BootstrapPropertyException when both sources are set, or a key is missing or malformed
 	 * @throws KeyStartupException        when no source has a key and the database holds wrapped data keys
 	 */
-	public RootKey resolve(BooleanSupplier wrappedDeksExist) {
+	RootKey resolve(BooleanSupplier wrappedDeksExist) {
 		Optional<RootKey> found = load();
 		if (found.isPresent()) {
 			RootKey key = found.get();
