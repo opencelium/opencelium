@@ -2,6 +2,64 @@
 Changelog
 *********
 
+5.3
+========
+ 
+:Date: November 25, 2026
+
+Features
+--------
+* Global Variables (Constants, Mutable and Script Variables)
+* Request Playground for Single Methods
+* Open Requests in Playground from Execution Logs
+* cURL Export for Single Methods
+* Schedule Calendar with Day, Week, Month and Agenda Views
+* Workflow Check with Problems Panel
+* Edit Workflows as JSON
+* Copy and Paste Nodes Between Workflows
+* Reference Remapping Before Deleting a Step
+* Field Binding Lens
+* Workflow Minimap
+* Method Jumps to Other Workflow Elements
+* JsonPath Operations and Reference Validation
+* Script Playground for Transformations
+* Reworked Notification Node
+* Guided Tours and Interactive Workflow Tutorial
+* Help Menu and Changelog Page
+* Duplicate Connector
+* API Definition Sync with the Service Portal
+* Login with Username for Users without an Email
+
+Fixes
+--------
+
+* Fix SSL setting being inverted on /connection/remoteapi (OC-1692)
+* Fix repeated rows for duplicate keys in the system configuration (OC-1685, OC-1690)
+* Resolve the application.yml location from OPENCELIUM_CONFIG_FILEPATH (OC-1689)
+* Run template and connection upgraders again on update to 5.3 (OC-1679)
+* Keep request URLs as written and encode reference values and square brackets on the backend (OC-1651, OC-1677)
+* Return a non-JSON success response as text with its real status (OC-1598)
+* Escape JSON and XML request bodies and send text bodies as UTF-8 (OC-1598)
+* Answer 409 when a workflow or category title is already in use (OC-1598)
+* Set hasLog once the execution log is stored (OC-1691)
+* Keep list search, filters, sort and page when navigating back (OC-1686)
+* Show only the Sent/Received and Headers tabs in execution log details (OC-1675)
+* Clear the master password when the session ends (OC-1672)
+* Fix the cron picker rewriting expressions and shifting weekdays (OC-1666)
+* Fix typing in the cron field and show one clear error for an invalid cron expression (OC-1580)
+* Show schedule run times in the server time zone (OC-1670)
+* Keep the workflow editor visible while connectors are reloaded (OC-1656)
+* Fix loading workflows with deleted connectors (OC-1646)
+* Fix PKIX errors for trust-any-certificate connectors in the GraphQL body editor (OC-1581)
+* Fix a connector's health status being treated as an API error (OC-1581)
+* Show enhancement values only while debugging a test run (OC-1580)
+* Check file type and size on uploads and allow templates and API definitions up to 1 GB (OC-1580, OC-1634)
+* Allow users without an email address; email or username is required (OC-1575, OC-1660)
+* Explain that accounts without an email address cannot reset their password (OC-1660)
+* Fix user group updates using the wrong endpoints (OC-1568)
+* Show the correct error for a wrong master password instead of "Unknown error" (OC-1517)
+
+
 5.2
 ========
  

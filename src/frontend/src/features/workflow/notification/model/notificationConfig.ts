@@ -2,14 +2,12 @@ import { createShortId } from '@shared/lib/createId';
 import { getNotificationTool, isNotificationToolId } from '../tools/notificationTools';
 import { isRecord } from '../tools/toolValues';
 import type {
-	NotificationConfig, NotificationErrorPolicy, NotificationFact, NotificationFieldValue, NotificationHeader,
+	NotificationConfig, NotificationFact, NotificationFieldValue, NotificationHeader,
 	NotificationMessageValues, NotificationToolDraft, NotificationToolId,
 } from './notification.types';
 
-const ERROR_POLICIES: NotificationErrorPolicy[] = ['stop', 'continue', 'retry'];
-
 export const createNotificationConfig = (): NotificationConfig => ({
-	tool: null, tools: {}, mode: 'editor', extraHeaders: [], errorPolicy: 'stop', retryOn429: true,
+	tool: null, tools: {}, mode: 'editor', extraHeaders: [],
 });
 
 export const createToolDraft = (toolId: NotificationToolId): NotificationToolDraft => {
@@ -91,7 +89,5 @@ export const normalizeNotificationConfig = (value: unknown): NotificationConfig 
 			name: typeof header.name === 'string' ? header.name : '',
 			value: typeof header.value === 'string' ? header.value : '',
 		})) : [],
-		errorPolicy: ERROR_POLICIES.find((policy) => policy === value.errorPolicy) ?? fallback.errorPolicy,
-		retryOn429: typeof value.retryOn429 === 'boolean' ? value.retryOn429 : fallback.retryOn429,
 	};
 };

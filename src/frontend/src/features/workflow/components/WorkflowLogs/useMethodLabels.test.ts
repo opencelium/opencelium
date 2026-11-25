@@ -38,6 +38,13 @@ describe('buildMethodLabels', () => {
 		expect(buildMethodLabels(nodes, edges).has('1')).toBe(false);
 	});
 
+	it('labels an un-renamed notification step, whose method name is always "POST"', () => {
+		const withNotification = nodes.map((node) => node.id === 'method-plain'
+			? { ...node, type: 'notification', data: { ...node.data, subtitle: 'Notification', kind: 'notification' } }
+			: node) as WorkflowNodeModel[];
+		expect(buildMethodLabels(withNotification, edges).get('1')).toBe('Notification');
+	});
+
 	it('ignores a label that is only whitespace', () => {
 		const blank = nodes.map((node) => node.id === 'method-renamed'
 			? { ...node, data: { ...node.data, subtitle: '   ' } }

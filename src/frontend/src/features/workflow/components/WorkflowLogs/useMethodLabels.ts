@@ -2,14 +2,12 @@ import { useMemo } from 'react';
 import type { MethodLabelResolver } from '@features/logs';
 import { buildWorkflowIndexes } from '../../api/connectionPayload';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
+import { getMethodLabel } from '../../utils/methodNodeTypes';
 
 /**
  * Labels the user gave the graph's steps, keyed by the same tree-path index the
  * payload's methods are built with — which is what a log line's `indexPath` is.
- *
- * `labelEdited` is the condition `buildMethodPayload` uses to send a `label` at
- * all: until a node is renamed its subtitle *is* the operation name, so passing
- * it as a label would add nothing.
+ * Same rule as the `label` `buildMethodPayload` sends (`getMethodLabel`).
  */
 export const buildMethodLabels = (
 	nodes: WorkflowNodeModel[],
@@ -19,7 +17,7 @@ export const buildMethodLabels = (
 	const labelByIndex = new Map<string, string>();
 	buildWorkflowIndexes(nodes, edges).forEach((index, nodeId) => {
 		const node = nodeById.get(nodeId);
-		const label = node?.data.labelEdited ? node.data.subtitle?.trim() : undefined;
+		const label = node ? getMethodLabel(node) : undefined;
 		if (label) labelByIndex.set(index, label);
 	});
 	return labelByIndex;
