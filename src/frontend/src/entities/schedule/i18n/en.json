@@ -270,13 +270,8 @@
     "cron": "Cron expression",
     "cronHint": "Shown only here, in case you want to copy it.",
     "runNow": "Run now",
-    "pause": "Pause",
-    "resume": "Resume",
-    "paused": "Paused",
     "lastOk": "last run ok",
     "lastFailed": "last run failed",
-    "pauseSuccess": "Schedule paused",
-    "resumeSuccess": "Schedule resumed",
     "statusFailed": "Could not change the schedule status"
   }
 }

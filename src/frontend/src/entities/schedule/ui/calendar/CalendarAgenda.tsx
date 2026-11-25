@@ -21,7 +21,6 @@ type Props = {
 
 function StatusPill({ schedule }: { schedule: Schedule }) {
   const { t } = useI18n("entities");
-  if (!schedule.status) return <span className="schedule-calendar-pill" data-tone="neutral">{t("schedule.run.paused")}</span>;
   const outcome = lastRunOutcome(schedule);
   if (outcome === null) return null;
   return outcome === "success"
@@ -43,7 +42,6 @@ export function CalendarAgenda({ days, today, slots, formats }: Props) {
         type="button"
         className="schedule-calendar-agenda-row"
         style={{ "--schedule-color": colorOf(schedule) } as CSSProperties}
-        data-disabled={!schedule.status || undefined}
         data-testid={`schedule-calendar-event-${schedule.schedulerId}`}
       >
         <span className="schedule-calendar-agenda-time">{formats.time.format(time)}</span>

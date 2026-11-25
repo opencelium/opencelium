@@ -27,10 +27,6 @@ const runNow = vi.fn();
 vi.mock("./useRunScheduleNow", () => ({
   useRunScheduleNow: () => ({ run: runNow, pending: false }),
 }));
-const toggleStatus = vi.fn();
-vi.mock("./useToggleScheduleStatus", () => ({
-  useToggleScheduleStatus: (schedule: Schedule) => ({ toggle: toggleStatus, pending: false, isActive: Boolean(schedule.status) }),
-}));
 type ButtonMockProps = { testId?: string; onClick?: () => void; children?: React.ReactNode };
 vi.mock("@shared/ui/primitives/Button", () => ({
   Button: ({ testId, onClick, children }: ButtonMockProps) => (
@@ -95,6 +91,7 @@ it("lays out a week with quiet bands, clash hatching, hidden runs and the run po
   fireEvent.click(events(1)[0]);
   const card = screen.getByTestId("schedule-run-card-1");
   expect(within(card).getByText("schedule.cronText.daily")).toBeInTheDocument();
+  expect(within(card).queryByTestId("schedule-run-status-1")).toBeNull();
   fireEvent.click(within(card).getByTestId("schedule-run-open-1"));
   expect(openDialog.mock.calls[0][0].content.props).toMatchObject({
     entityName: "schedule",
@@ -133,10 +130,10 @@ it("switches views, navigates periods and returns to the schedule list", () => {
   expect(events(1)).toHaveLength(42);
   selectView("day");
   expect(events(1)).toHaveLength(1);
-  expect(events(1)[0]).toHaveAttribute("data-disabled", "true");
+  expect(events(1)[0]).not.toHaveAttribute("data-disabled");
   selectView("agenda");
   expect(events(1)).toHaveLength(7);
-  expect(screen.getAllByText("schedule.run.paused")).toHaveLength(7);
+  expect(screen.queryByText("schedule.run.paused")).toBeNull();
   selectView("list");
   expect(showList).toHaveBeenCalledOnce();
 });

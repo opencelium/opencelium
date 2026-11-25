@@ -77,11 +77,6 @@
 	border-color: var(--color-status-warning-border);
 }
 
-.schedule-run-badge[data-tone="neutral"] {
-	color: var(--color-text-secondary);
-	background: var(--color-background-hover);
-	border-color: var(--color-border-default);
-}
 
 .schedule-run details {
 	padding-top: 10px;
