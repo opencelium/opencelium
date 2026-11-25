@@ -8,7 +8,6 @@ import PageWrapper from '@pages/PageWrapper/PageWrapper'
 import { MetricTiles } from './components/MetricTiles'
 import { AttentionRequiredCard } from './components/AttentionRequiredCard'
 import { RecentActivityCard } from './components/RecentActivityCard'
-import { SystemHealthCard } from './components/SystemHealthCard'
 import { ExecutionsChartCard } from './components/ExecutionsChartCard'
 import { ResourceUsageCard } from './components/ResourceUsageCard'
 import { TopConnectorsCard } from './components/TopConnectorsCard'
@@ -85,9 +84,6 @@ export default function DashboardPage() {
                     </ComingSoonOverlay>
                     <ComingSoonOverlay>
                         <RecentActivityCard />
-                    </ComingSoonOverlay>
-                    <ComingSoonOverlay>
-                        <SystemHealthCard />
                     </ComingSoonOverlay>
                 </div>
             </div>
