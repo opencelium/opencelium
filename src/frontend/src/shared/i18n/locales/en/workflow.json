@@ -1638,5 +1638,10 @@
       "webhook": "Webhook",
       "global": "Global"
     }
+  },
+  "runPolicy": {
+    "queue": "Runs one at a time: a second start waits until the running one ends (because of {{names}}).",
+    "refuse": "Runs one at a time: a second start is refused (because of {{names}}).",
+    "hint": "Set by the busy policy of these mutable global variables, not by the workflow."
   }
 }

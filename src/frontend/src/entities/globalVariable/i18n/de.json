@@ -328,6 +328,8 @@
   "mutable": {
     "busyPolicy": {
       "label": "Wenn eine Ausführung eines Workflows, der sie nutzt, noch läuft",
+      "scope": "Das gilt für jeden Workflow, der diese Variable nutzt: den Besitzer-Workflow und jeden Workflow, der sie referenziert. Ein solcher Workflow führt immer nur eine Ausführung gleichzeitig aus, und sagt eine seiner veränderbaren Variablen „Ablehnen“, wird ein zweiter Start für den ganzen Workflow abgelehnt.",
+      "queueLimits": "Die Grenzen der Warteschlange stehen in der application.yml: <code>opencelium.global-variable.queue.max-waiting</code> (wie viele Starts je Workflow warten dürfen, Standard 100) und <code>opencelium.global-variable.queue.max-wait-minutes</code> (wie lange ein Start warten darf, Standard 60). Ein Start über einer der Grenzen wird abgelehnt. Ändern Sie sie in der <page>Systemkonfiguration</page> und starten Sie das Backend neu.",
       "hints": {
         "QUEUE": "Die nächste Ausführung wartet und startet, sobald die laufende endet.",
         "REFUSE": "Die nächste Ausführung startet nicht und wird als fehlgeschlagen protokolliert."

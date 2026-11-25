@@ -175,7 +175,6 @@ export const globalVariableDefinition: EntityDefinition = {
             table: {
                 visible: true, order: 2, width: '20%', sortable: true, searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => <code>{String(value)}</code>,
             },
         },
         {

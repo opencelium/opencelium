@@ -34,3 +34,19 @@ export function parseGlobalReference(text: string): Pick<GlobalReference, 'name'
 export const isGlobalReference = (text: string): boolean => parseGlobalReference(text) !== null
 
 export const buildGlobalReference = (name: string, path = ''): string => `{{global.${name}${path}}}`
+
+// Names referenced anywhere inside arbitrary data (graph nodes, field bindings). Lower-cased,
+// because names are unique whatever their case on the backend.
+export function collectGlobalNames(values: unknown[]): string[] {
+    const names = new Set<string>()
+    values.forEach((value) => {
+        let text: string | undefined
+        try {
+            text = typeof value === 'string' ? value : JSON.stringify(value)
+        } catch {
+            return
+        }
+        if (text) findGlobalReferences(text).forEach((reference) => names.add(reference.name.toLowerCase()))
+    })
+    return [...names].sort()
+}

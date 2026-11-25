@@ -3,9 +3,9 @@ import { WorkflowSchedulesPill } from '../schedules/WorkflowSchedulesPill/Workfl
 import type { WorkflowPageHeaderProps } from './WorkflowPageHeader.types';
 
 export const WorkflowPageHeader = ({ header, connectionId, schedulesOpen,
-	onToggleSchedules }: WorkflowPageHeaderProps) =>
+	onToggleSchedules, runPolicy }: WorkflowPageHeaderProps) =>
 	<WorkflowHeader {...header} schedulesSlot={connectionId
 		? <WorkflowSchedulesPill connectionId={connectionId} open={schedulesOpen}
-			onToggle={onToggleSchedules} />
+			onToggle={onToggleSchedules} runPolicy={runPolicy} />
 		: null}
 		onToggleSchedules={connectionId ? onToggleSchedules : undefined} />;
