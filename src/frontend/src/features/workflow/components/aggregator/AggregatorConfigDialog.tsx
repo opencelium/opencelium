@@ -8,6 +8,7 @@ import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import type { WorkflowNodeModel } from '../../types/workflow.types';
 import { useAggregatorConfigDialog } from './useAggregatorConfigDialog';
 import '../dialogHeader.css';
+import { useMaximizableModal } from '../dialog-maximize/useMaximizableModal';
 import './aggregator-config-dialog.css';
 
 type Props = {
@@ -33,6 +34,11 @@ export function AggregatorConfigDialog({ open, node, onClose, onSave }: Props) {
     handleCreateSubmit,
     handleUpdateSubmit,
   } = useAggregatorConfigDialog({ open, assignedId });
+  const { modalProps, toggle: maximizeToggle } = useMaximizableModal({
+    open: open && !!node,
+    layout: { width: 1000, style: { top: 18 }, className: 'wfDialog' },
+    testId: 'workflow-aggregator-maximize',
+  });
 
   if (!open || !node) return null;
 
@@ -64,15 +70,14 @@ export function AggregatorConfigDialog({ open, node, onClose, onSave }: Props) {
     <Modal
       open={open}
       onCancel={onClose}
-      width={1000}
-      style={{ top: 18 }}
+      {...modalProps}
       destroyOnHidden
       title={t('aggregatorDialog.title')}
-      className="wfDialog"
       closeIcon={<span className="wfDialogClose">×</span>}
       styles={{ body: { paddingTop: 8 } }}
       footer={null}
     >
+      {maximizeToggle}
       <div className="aggregatorDialogHeader" data-testid="workflow-aggregator-dialog">
         <div className="aggregatorDialogSelect">
           <Select

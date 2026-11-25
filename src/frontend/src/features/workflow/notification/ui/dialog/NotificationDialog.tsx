@@ -54,7 +54,7 @@ function NotificationDialogContent({ editor, node, nodes, edges, isReadOnly, onC
 	};
 
 	return (
-		<Dialog open onClose={onClose} width={1180} top={18} testId='notification-dialog'
+		<Dialog open onClose={onClose} width={1180} top={18} maximizable testId='notification-dialog'
 			afterOpenChange={(isOpen) => {
 				if (!isOpen || editor.target.kind !== 'rename') return;
 				labelInputRef.current?.focus();
