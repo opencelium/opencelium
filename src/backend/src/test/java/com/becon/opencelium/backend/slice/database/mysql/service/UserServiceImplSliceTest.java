@@ -16,6 +16,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceImp;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.ServiceUnavailableException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.storage.StorageService;
@@ -33,6 +34,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
@@ -116,6 +118,24 @@ class UserServiceImplSliceTest {
                 .as("changePassword must persist the new password via dirty checking — no explicit save() is performed in production")
                 .isTrue();
         assertThat(encoder.matches("oldPass", refetched.getPassword())).isFalse();
+    }
+
+    @Test
+    void changePasswordThrowsWhenPasswordIsManagedByTheIdentityProvider() {
+        User persisted = UserFixture.anEmptyUser();
+        persisted.setEmail("bob@example.com");
+        persisted.setAuthMethod(AuthMethod.OIDC);
+        em.persistAndFlush(persisted);
+
+        UserDetails principal = new org.springframework.security.core.userdetails.User(
+                "bob@example.com", "irrelevant", List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, "irrelevant", principal.getAuthorities()));
+
+        // Federated accounts have no local password — setting one here would create a second
+        // credential that DaoAuthenticationProvider would happily accept.
+        assertThatThrownBy(() -> userService.changePassword(new ChangePasswordDTO("oldPass", "newPass", "newPass")))
+                .isInstanceOf(ServiceUnavailableException.class);
     }
 
     @Test

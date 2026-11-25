@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @ConfigurationProperties(prefix = "spring.security.ldap")
 public class LdapProperties {
@@ -25,12 +26,12 @@ public class LdapProperties {
     @Value("${logging.level.org.springframework.security.ldap:OFF}")
     private String showLogs;
 
-    public String getRoleByGroup(String groupDN) {
+    /** Role configured for a group, empty when the group is not part of the mapping. */
+    public Optional<String> getRoleByGroup(String groupDN) {
         return groupRoleMapping.stream()
                 .filter(mapping -> Objects.equals(groupDN, mapping.ldapGroup))
                 .map(Group2Role::getOcRole)
-                .findFirst()
-                .orElseThrow();
+                .findFirst();
     }
 
     public List<String> getGroups() {

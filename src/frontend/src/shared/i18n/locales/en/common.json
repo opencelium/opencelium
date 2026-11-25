@@ -27,7 +27,8 @@
     "systemCheck": "System Check",
     "config": "System Configuration",
     "ui": "UI",
-    "backToMain": "Back"
+    "backToMain": "Back",
+    "oidcConfig": "OpenID Connect"
   },
   "commandPalette": {
     "placeholder": "Type a command...",

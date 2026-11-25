@@ -5,7 +5,6 @@ import com.becon.opencelium.backend.constant.props.PasswordResetProperties;
 import com.becon.opencelium.backend.database.mysql.entity.PasswordResetToken;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.repository.PasswordResetTokenRepository;
-import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.ServiceUnavailableException;
 import com.becon.opencelium.backend.exception.TooManyRequestsException;
@@ -64,7 +63,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         User userNotLocked = userService.findByEmail(email)
                 .orElseThrow(() -> new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_NOT_EXISTS, "email does not exists"));
 
-        if (userNotLocked.getAuthMethod() == AuthMethod.LDAP) {
+        if (userNotLocked.getAuthMethod().isPasswordManagedExternally()) {
             throw new ServiceUnavailableException(ExceptionConstant.EMAIL_RECOVERY_FAILED, "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.");
         }
 

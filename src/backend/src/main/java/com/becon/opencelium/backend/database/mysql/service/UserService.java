@@ -43,6 +43,12 @@ public interface UserService {
      */
     Optional<User> findLocalAccount(String identifier);
 
+    /**
+     * Account that is linked to the given identity of an identity provider. Accounts are only ever
+     * matched this way, so that nobody can take over an account by claiming its email address.
+     */
+    Optional<User> findByOidcIdentity(String issuer, String subject);
+
     Optional<User> findById(int id);
 
     /**

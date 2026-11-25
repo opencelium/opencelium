@@ -71,6 +71,19 @@ export interface AuthSchema {
             show: string
             hide: string
         }
+        oidc: {
+            divider: string
+            signInWith: string
+            completing: string
+            backToLogin: string
+            errors: {
+                failed: string
+                notProvisioned: string
+                accountNotLinked: string
+                emailNotVerified: string
+                accessDenied: string
+            }
+        }
         totp: {
             title: string
             hint: string

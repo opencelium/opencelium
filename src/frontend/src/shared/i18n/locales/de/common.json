@@ -27,7 +27,8 @@
     "systemCheck": "Systemprüfung",
     "config": "Systemkonfiguration",
     "ui": "UI",
-    "backToMain": "Zurück"
+    "backToMain": "Zurück",
+    "oidcConfig": "OpenID Connect"
   },
   "commandPalette": {
     "placeholder": "Befehl eingeben...",

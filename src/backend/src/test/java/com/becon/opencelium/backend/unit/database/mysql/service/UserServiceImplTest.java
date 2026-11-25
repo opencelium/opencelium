@@ -548,6 +548,18 @@ class UserServiceImplTest {
     // ── existsByEmail / existsByUsername / existsById / deleteById / findAll ──
 
     @Test
+    void findByOidcIdentityReturnsTheAccountLinkedToTheIdentity() {
+        User linked = new User();
+        when(userRepository.findByOidcIssuerAndOidcSubject("https://idp.example.com", "subject-1"))
+                .thenReturn(Optional.of(linked));
+
+        Optional<User> result = userService.findByOidcIdentity("https://idp.example.com", "subject-1");
+
+        assertThat(result).contains(linked);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
     void existsByEmailReturnsTrueWhenRepositoryReportsExists() {
         when(userRepository.existsByEmail("a@b.com")).thenReturn(true);
 
