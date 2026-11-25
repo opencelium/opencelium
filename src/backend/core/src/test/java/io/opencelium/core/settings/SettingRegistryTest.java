@@ -13,13 +13,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class SettingRegistryTest {
 
-	private static final SettingDefinition PORT = new SettingDefinition("broker.port", SettingType.INTEGER, 5672);
+	private static final SettingDefinition PORT = new SettingDefinition("broker.port", SettingType.INTEGER, 5672, 1,
+			65535);
 
-	private static final SettingDefinition HOST = new SettingDefinition("broker.host", SettingType.HOST, null);
+	private static final SettingDefinition HOST = new SettingDefinition("broker.host", SettingType.HOST, null, 1, 253);
 
 	@Test
 	void constructorStopsWithTheSettingKeyWhenTwoDefinitionsDeclareIt() {
-		var secondPort = new SettingDefinition("broker.port", SettingType.TEXT, "5672");
+		var secondPort = new SettingDefinition("broker.port", SettingType.TEXT, "5672", 1, 255);
 
 		assertThatThrownBy(() -> new SettingRegistry(List.of(PORT, HOST, secondPort)))
 				.isInstanceOf(IllegalStateException.class).hasMessageContaining("broker.port");

@@ -38,6 +38,8 @@ The settings service has these operations:
 ### The settings API
 The settings controller of `core.settings` has the 2 endpoints of "Interfaces and contracts". The response of a read and of a change has the same form: each setting key with its value and its mark for the default. A secret setting with a secret shows `****`, and a secret setting without a secret shows `null` (SS-08). An exception handler of `core.settings` writes the errors of this feature in the problem-details form (decision 19). An error text names a setting key, but never a value of the request.
 
+A change reads its body itself, after the method security passed the rule: Spring MVC reads a request body before the method security runs. Thus a user without the permission gets 403 for each JSON body (SS-05, SS-06), and core reads at most 64 KB of a body. A body of another media type gets 415 from Spring MVC before the rule. Core zeroes the bytes of the body after the parse.
+
 ### The authorization
 `core.auth` gives each role of a session JWT to Spring Security as the authority `ROLE_<role>`. The principal keeps its roles. `core.authz` declares the method security of Spring Security and the rule "installation admin" (plan decision 4):
 
@@ -134,7 +136,7 @@ The reviewer confirms each decision before task 1 starts.
 | Code | Status code | When |
 |---|---|---|
 | `invalid-settings` | 400 | An unknown setting key or an incorrect value (SS-03). The field `errors` holds 1 object for each incorrect key, with `key` and `problem` (plan decision 11). The problem is `unknown-key` or `invalid-value`. |
-| `bad-request` | 400 | A body that is not 1 JSON object |
+| `bad-request` | 400 | A body that is not 1 JSON object, or a body longer than 64 KB |
 | `access-denied` | 403 | A request that does not pass the rule "installation admin" (SS-05, SS-06) |
 
 A request without a valid session JWT gets the status code 401, the header `WWW-Authenticate` and no body (decision 19).
