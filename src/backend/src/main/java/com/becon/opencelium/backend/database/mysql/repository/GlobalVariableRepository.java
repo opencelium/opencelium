@@ -52,9 +52,9 @@ public interface GlobalVariableRepository extends JpaRepository<GlobalVariable, 
     List<GlobalVariable> findAllWithScopeTargets(@Param("kinds") Collection<GlobalVariableKind> kinds);
 
     /**
-     * Finds the mutable variables a workflow uses: the ones it owns, which its runs write, and
-     * the ones an element of the workflow references, as the where-used index records them.
-     * Such a workflow runs one execution at a time.
+     * Finds the mutable variables a workflow uses: the ones it is an owner of, which its runs
+     * write, and the ones an element of the workflow references, as the where-used index records
+     * them. Such a workflow runs one execution at a time.
      *
      * @param connectionId id of the workflow
      */
@@ -65,7 +65,8 @@ public interface GlobalVariableRepository extends JpaRepository<GlobalVariable, 
     @Query("""
             SELECT v FROM GlobalVariable v
              WHERE v.kind = com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind.MUTABLE
-               AND (v.ownerWorkflowId = :connectionId
+               AND (v.id IN (SELECT o.id FROM GlobalVariable o JOIN o.ownerWorkflowIds ownerId
+                              WHERE ownerId = :connectionId)
                     OR v.id IN (SELECT u.variableId FROM GlobalVariableUsage u
                                  WHERE u.sourceType = :workflow AND u.sourceId = :connectionId))
              ORDER BY v.name

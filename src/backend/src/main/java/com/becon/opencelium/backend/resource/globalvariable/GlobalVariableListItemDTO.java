@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -19,8 +20,9 @@ import java.util.Set;
  * @param usageCount    number of places that use the variable; while it is above zero the
  *                      variable can be neither deleted nor renamed
  * @param myPermissions what the calling user may do with this variable
- * @param beingUpdatedBy the run of the owner workflow while one goes, for a mutable variable
- *                      only; {@code null} otherwise
+ * @param beingUpdatedBy the runs of owner workflows that go now, ordered by workflow id, for a
+ *                      mutable variable; several owners may run at the same time. Empty when
+ *                      none runs and for the other kinds
  */
 public record GlobalVariableListItemDTO(
         Long id,
@@ -37,5 +39,9 @@ public record GlobalVariableListItemDTO(
         long version,
         @JsonFormat(shape = JsonFormat.Shape.STRING) Instant updatedAt,
         GlobalVariableDTO.Actor updatedBy,
-        GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
+        List<GlobalVariableDTO.BeingUpdatedBy> beingUpdatedBy) {
+
+    public GlobalVariableListItemDTO {
+        beingUpdatedBy = beingUpdatedBy == null ? List.of() : List.copyOf(beingUpdatedBy);
+    }
 }

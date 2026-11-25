@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.controller.GlobalVariableController;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableService;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
@@ -195,6 +196,22 @@ class GlobalVariableControllerTest {
         verify(service).create(new GlobalVariableRequestDTO("tenants", GlobalVariableKind.CONSTANT, null,
                 json.readTree("[{\"id\":\"acme\"}]"), false,
                 new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.ALL, List.of(), List.of()), null, null, 4L));
+    }
+
+    @Test
+    @DisplayName("create — the owner workflows of a mutable variable reach the service as a list")
+    void createPassesOwnerWorkflowsToServiceWhenBodyNamesSeveral() throws Exception {
+        when(service.create(any())).thenReturn(aDetailDto());
+        String body = """
+                {"name": "lastSync", "kind": "MUTABLE", "value": 0, "scope": {"type": "ALL"},
+                 "busyPolicy": "REFUSE", "ownerWorkflowIds": [42, 43]}""";
+
+        mockMvc.perform(post("/global-variable").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk());
+
+        verify(service).create(new GlobalVariableRequestDTO("lastSync", GlobalVariableKind.MUTABLE, null,
+                json.readTree("0"), null, new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.ALL, null, null),
+                GlobalVariableBusyPolicy.REFUSE, List.of(42L, 43L), null));
     }
 
     @Test
@@ -387,24 +404,28 @@ class GlobalVariableControllerTest {
                 .andExpect(jsonPath("$[0].kind").value("CONSTANT"))
                 .andExpect(jsonPath("$[0].secret").value(false))
                 .andExpect(jsonPath("$[0].valuePreview").value("\"https://cmdb.example\""))
-                .andExpect(jsonPath("$[0].ownerWorkflow").isEmpty())
+                .andExpect(jsonPath("$[0].ownerWorkflows").isEmpty())
                 .andExpect(jsonPath("$[0].writable").value(false));
 
         verify(service).pick(42L, null, null, null);
     }
 
     @Test
-    void pickReturnsOwnerWorkflowAndWritableWhenVariableIsMutable() throws Exception {
+    void pickReturnsOwnerWorkflowsAndWritableWhenVariableIsMutable() throws Exception {
         when(service.pick(42L, null, null, null)).thenReturn(List.of(new GlobalVariablePickerItemDTO(
                 "lastSync", GlobalVariableKind.MUTABLE, "Cursor for the VMware sync", false,
-                "\"2026-11-17T22:00:00Z\"", null, null, new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"),
+                "\"2026-11-17T22:00:00Z\"", null, null, List.of(
+                        new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"),
+                        new GlobalVariableDTO.WorkflowRef(43L, "Ivanti to Slack")),
                 true)));
 
         mockMvc.perform(get("/global-variable/picker").param("connectionId", "42").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].kind").value("MUTABLE"))
-                .andExpect(jsonPath("$[0].ownerWorkflow.id").value(42))
-                .andExpect(jsonPath("$[0].ownerWorkflow.title").value("VMware to i-doit"))
+                .andExpect(jsonPath("$[0].ownerWorkflows.length()").value(2))
+                .andExpect(jsonPath("$[0].ownerWorkflows[0].id").value(42))
+                .andExpect(jsonPath("$[0].ownerWorkflows[0].title").value("VMware to i-doit"))
+                .andExpect(jsonPath("$[0].ownerWorkflows[1].id").value(43))
                 .andExpect(jsonPath("$[0].writable").value(true));
     }
 
@@ -566,7 +587,7 @@ class GlobalVariableControllerTest {
 
     private GlobalVariableValueDTO aValueDto() throws Exception {
         return new GlobalVariableValueDTO(7L, 4L, 0L, json.readTree("[{\"id\":\"acme\"}]"),
-                Instant.parse("2026-11-16T09:12:00Z"), GlobalVariableDTO.Actor.user(1, "admin"), null);
+                Instant.parse("2026-11-16T09:12:00Z"), GlobalVariableDTO.Actor.user(1, "admin"), List.of());
     }
 
     private GlobalVariableDTO aDetailDto() throws Exception {

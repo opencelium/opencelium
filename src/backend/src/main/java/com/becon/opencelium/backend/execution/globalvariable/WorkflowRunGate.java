@@ -43,7 +43,8 @@ import java.util.UUID;
  * the busy policy of its mutable variables: with {@link GlobalVariableBusyPolicy#QUEUE} it waits in
  * a first-in, first-out queue of the workflow, and with {@link GlobalVariableBusyPolicy#REFUSE} it
  * does not start. One variable that says Refuse is enough to refuse. Two different workflows never
- * wait for each other: only the owner workflow writes a mutable variable, the others read it.
+ * wait for each other, not even two owner workflows of the same variable: their runs may write it
+ * at the same time, and the last write wins.
  *
  * <p>A waiting start does not keep a Quartz thread. Its job key and trigger data are parked here,
  * and when the running execution ends, the oldest one is fired again as a one-shot trigger. The
@@ -360,8 +361,9 @@ public class WorkflowRunGate {
     }
 
     /**
-     * Returns the run that holds a workflow. A workflow that writes a mutable variable is held for
-     * as long as one of its runs goes, so this tells whether the variable is being updated.
+     * Returns the run that holds a workflow. An owner workflow of a mutable variable is held for
+     * as long as one of its runs goes, so this tells whether that workflow is updating the
+     * variable.
      *
      * @param connectionId id of the workflow
      * @return the hold; empty if no run holds the workflow

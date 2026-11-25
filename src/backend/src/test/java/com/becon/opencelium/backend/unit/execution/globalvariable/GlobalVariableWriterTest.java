@@ -131,9 +131,21 @@ class GlobalVariableWriterTest {
     }
 
     @Test
+    @DisplayName("write — a run of any of several owner workflows stores its value")
+    void writeStoresValueWhenRunIsOfOneOfSeveralOwnerWorkflows() {
+        GlobalVariable variable = aLastSync();
+        variable.getOwnerWorkflowIds().add(43L);
+        givenVariables(variable);
+
+        writer.forRun(43L, EXECUTION).write("lastSync", "b");
+
+        verify(repository).writeCurrentValue(eq(5L), eq("\"b\""), any(Date.class), eq(EXECUTION));
+    }
+
+    @Test
     void writeThrowsWhenOwnerWorkflowWasDeleted() {
         GlobalVariable variable = aLastSync();
-        variable.setOwnerWorkflowId(null);
+        variable.getOwnerWorkflowIds().clear();
         givenVariables(variable);
         GlobalVariableWriter.Run run = writer.forRun(OWNER_WORKFLOW, EXECUTION);
 
