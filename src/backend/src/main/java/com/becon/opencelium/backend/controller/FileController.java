@@ -17,7 +17,6 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
-import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
@@ -94,7 +93,6 @@ public class FileController {
     private final UserStorageService storageService;
     private final Mapper<Connector, ConnectorResource> connectorMapper;
     private final EntityUpdater<Template> templateUpdater;
-    private final OpenceliumProps ocProps;
 
     @Autowired
     public FileController(
@@ -107,8 +105,7 @@ public class FileController {
             InvokerSyncService invokerSyncService,
             UserStorageService storageService,
             Mapper<Connector, ConnectorResource> connectorMapper,
-            EntityVersionManager versionManager,
-            OpenceliumProps ocProps
+            EntityVersionManager versionManager
     ) {
         this.userDetailService = userDetailService;
         this.userService = userService;
@@ -120,7 +117,6 @@ public class FileController {
         this.storageService = storageService;
         this.connectorMapper = connectorMapper;
         this.templateUpdater = versionManager.getUpdater(Template.class);
-        this.ocProps = ocProps;
     }
 
     @Operation(summary = "Uploads the profile picture of the user identified by 'userId', or by 'email' for clients built before 5.2")
@@ -475,11 +471,11 @@ public class FileController {
 
     private void updateTemplate(Template template){
         try {
+            // The updater stamps the version it migrated to. Overwriting it with the running version
+            // would let an unmigrated file claim the current format and skip every later migration.
             templateUpdater.updateToCurrentVersion(template)
-                    .ifUpdated(temp -> {
-                        log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
-                    });
-            template.setVersion(ocProps.getVersion());
+                    .ifUpdated(temp -> log.info("Template[id={}, name={}] is successfully updated to {} version",
+                            template.getTemplateId(), template.getName(), template.getVersion()));
         } catch (Exception e) {
             log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
             throw new RuntimeException("INVALID_TEMPLATE");
