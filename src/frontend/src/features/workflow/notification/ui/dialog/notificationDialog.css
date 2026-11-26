@@ -538,21 +538,6 @@
   gap: 6px;
 }
 
-.notificationJsonTransforms {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-border-subtle);
-}
-
-.notificationJsonTransformPath {
-  font-family: var(--typography-font-family-mono);
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  overflow-wrap: anywhere;
-}
-
 .notificationJsonEditorBar {
   display: flex;
   align-items: center;
@@ -753,3 +738,67 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* The gutter mark on a JSON line whose text value can be, or is, computed by a script (Ace custom
+   gutter widget, placed in the fold-widget lane). The icon is a mask so it takes the state colour. */
+/* Room for the mark after the line number: the fold lane alone is 13px. */
+.notificationJsonEditorFrame .ace_folding-enabled > .ace_gutter-cell {
+  padding-right: 22px;
+}
+
+.notificationJsonEditorFrame .ace_custom-widget.notificationJsonMark {
+  width: 17px;
+  margin: 0 -20px 0 3px;
+  border-radius: 4px;
+  color: var(--color-action-primary);
+  background-color: var(--color-action-primary-subtle);
+}
+
+.notificationJsonEditorFrame .notificationJsonMark::before {
+  content: '';
+  display: block;
+  height: 100%;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5'/%3E%3C/svg%3E") center / 13px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5'/%3E%3C/svg%3E") center / 13px no-repeat;
+}
+
+.notificationJsonEditorFrame .ace_custom-widget.notificationJsonMark--available:hover {
+  color: var(--color-text-on-action);
+  background-color: var(--color-action-primary-hover);
+}
+
+.notificationJsonEditorFrame .ace_custom-widget.notificationJsonMark--transformed {
+  color: var(--color-text-on-action);
+  background-color: var(--color-action-primary);
+}
+
+.notificationJsonEditorFrame .ace_custom-widget.notificationJsonMark--invalid {
+  color: var(--color-status-warning-fg);
+  background-color: var(--color-status-warning-bg);
+}
+
+.notificationJsonMarkMenu {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 190px;
+}
+
+.notificationJsonMarkMenuItem {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+/* A step reference the backend could not resolve (Ace text marker). */
+.notificationJsonEditorFrame .notificationJsonBrokenReference {
+  position: absolute;
+  border-bottom: 2px dotted var(--color-status-error-fg);
+  background-color: var(--color-status-error-bg);
+}
+

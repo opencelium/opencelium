@@ -8,7 +8,6 @@ import type { NotificationDialogState } from '../../dialog/useNotificationDialog
 import { MessageToolbar } from './MessageToolbar';
 import { MessageFields } from './MessageFields';
 import { MessageJsonEditor } from './MessageJsonEditor';
-import { MessageJsonTransformations } from './MessageJsonTransformations';
 
 type Props = { state: NotificationDialogState; tool: NotificationTool };
 
@@ -44,8 +43,7 @@ export function MessageStep({ state, tool }: Props) {
 						<Alert type='warning' showIcon className='notificationBanner' message={t('notification.message.overriddenBanner')}
 							action={resetButton('notification.message.regenerate')} />
 					)}
-					<MessageJsonEditor value={state.bodyText} onChange={state.setJsonOverride} />
-					{hasJsonOverride && <MessageJsonTransformations bodyText={state.bodyText} onChange={state.setJsonOverride} />}
+					<MessageJsonEditor value={state.bodyText} onChange={state.setJsonOverride} canTransform={hasJsonOverride} />
 				</>
 			)}
 		</section>

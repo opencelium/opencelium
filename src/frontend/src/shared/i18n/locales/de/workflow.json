@@ -1462,8 +1462,18 @@
       "editorHint": "Felder für {{tool}}. Das JSON wird automatisch erzeugt.",
       "jsonHint": "Genau dieser Body wird gesendet. Referenzen sind in allen Strings erlaubt.",
       "jsonReferenceHint": "Referenz an der Cursorposition einfügen.",
+      "jsonTransformHint": "Referenz an der Cursorposition einfügen. Zeilen mit </> enthalten eine Schritt-Referenz: Ein Klick auf das Zeichen berechnet den Wert per Skript.",
       "validJson_one": "Gültiges JSON · {{count}} Referenz",
       "validJson_other": "Gültiges JSON · {{count}} Referenzen",
+      "brokenReferences_one": "Gültiges JSON · {{count}} fehlerhafte Referenz",
+      "brokenReferences_other": "Gültiges JSON · {{count}} fehlerhafte Referenzen",
+      "brokenReference": {
+        "malformed": "Keine gültige Schritt-Referenz. Erwartet wird {%#farbe.(response).body.$.pfad%}.",
+        "direction": "Nach der Schrittfarbe muss (request) oder (response) stehen, nicht ({{direction}}).",
+        "unknownStep": "Kein Schritt in diesem Workflow hat die Farbe {{color}}.",
+        "pathSyntax": "Der JSON-Pfad dieser Referenz hat einen Syntaxfehler.",
+        "pathSyntaxAt": "Der JSON-Pfad dieser Referenz hat einen Syntaxfehler bei „{{character}}“."
+      },
       "invalidJson": "Ungültiges JSON: {{error}}",
       "invalidJsonOnApply": "Der Nachrichten-Body ist kein gültiges JSON. Bitte vor dem Übernehmen korrigieren.",
       "lockedBanner": "Das JSON wurde manuell angepasst und hat Vorrang. Der Editor ist gesperrt.",
@@ -1646,10 +1656,7 @@
         "unused": "Dieses Feld ist noch nicht Teil der Nachricht."
       },
       "json": {
-        "title": "Transformationen",
-        "hint": "Textwerte mit einer Schritt-Referenz. Eine Transformation gehört zur Stelle des Werts im JSON: Wenn Sie den Schlüssel umbenennen oder verschieben, wird sie entfernt.",
-        "empty": "Fügen Sie eine Schritt-Referenz in einen Textwert ein, um ihn mit einem Skript zu berechnen.",
-        "invalid": "Korrigieren Sie das JSON, um die transformierbaren Werte zu sehen."
+        "edit": "Transformation: Skript bearbeiten oder entfernen"
       }
     }
   },

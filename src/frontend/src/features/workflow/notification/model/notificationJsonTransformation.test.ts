@@ -5,7 +5,7 @@ import {
 	buildTransformationResultVar, createTransformationEnhancement, findJsonTransformation, reconcileTransformationBindings,
 } from './notificationBindings';
 import {
-	listJsonReferenceFields, parseBindingPath, toBindingPath, writeJsonPath,
+	listJsonReferenceFields, parseBindingPath, replaceJsonValue, toBindingPath,
 } from './notificationBodyPath';
 import type { NotificationConfig } from './notification.types';
 
@@ -31,20 +31,23 @@ describe('notification body paths', () => {
 		expect(parseBindingPath('matrix[1][2]')).toEqual(['matrix', '1', '2']);
 	});
 
-	it('lists the text values that hold a reference, or null while the JSON does not parse', () => {
-		const body = { text: `Order ${ID}`, plain: 'Hi', count: 3, items: [{ title: 'x', value: STATE }], region: '{{global.region}}' };
-		expect(listJsonReferenceFields(JSON.stringify(body))).toEqual([
+	it('lists the text values that hold a reference with where they stand, or null while the JSON does not parse', () => {
+		const text = JSON.stringify({ text: `Order ${ID}`, plain: 'Hi', count: 3, items: [{ title: 'x', value: STATE }],
+			'a\\"b': '{{global.region}}', empty: [], nested: [[], {}] }, null, 2);
+		const fields = listJsonReferenceFields(text) ?? [];
+		expect(fields.map(({ path, value }) => ({ path, value }))).toEqual([
 			{ path: ['text'], value: `Order ${ID}` },
 			{ path: ['items', '0', 'value'], value: STATE },
-			{ path: ['region'], value: '{{global.region}}' },
+			{ path: ['a\\"b'], value: '{{global.region}}' },
 		]);
+		fields.forEach((field) => expect(JSON.parse(text.slice(field.start, field.end))).toBe(field.value));
 		expect(listJsonReferenceFields('{"text": ')).toBeNull();
 	});
 
-	it('writes one value back and leaves the rest of the JSON as it was', () => {
-		const next = writeJsonPath(JSON.stringify({ a: 1, items: [{ v: 'x' }, { v: 'y' }] }), ['items', '1', 'v'], ID);
-		expect(JSON.parse(next ?? '')).toEqual({ a: 1, items: [{ v: 'x' }, { v: ID }] });
-		expect(writeJsonPath('not json', ['a'], ID)).toBeNull();
+	it('replaces one value in place and keeps the formatting around it', () => {
+		const text = '{\n    "a": 1,\n    "items": [ { "v": "x" }, { "v": "y" } ]\n}';
+		const field = { start: text.lastIndexOf('"y"'), end: text.lastIndexOf('"y"') + 3 };
+		expect(replaceJsonValue(text, field, `say "${ID}"`)).toBe(text.replace('"y"', JSON.stringify(`say "${ID}"`)));
 	});
 });
 

@@ -22,37 +22,74 @@ export const parseBindingPath = (text: string): string[] => text.split('.').filt
 		return match[1] ? [match[1], ...indexes] : indexes;
 	});
 
-export type JsonReferenceField = { path: string[]; value: string };
+/** A text value of the JSON with where its token (quotes included) stands in the text. */
+export type JsonReferenceField = { path: string[]; value: string; start: number; end: number };
 
-const collectReferenceFields = (value: unknown, path: string[]): JsonReferenceField[] => {
-	if (typeof value === 'string') return hasReference(value) ? [{ path, value }] : [];
-	const entries = Array.isArray(value) ? value.map((item, index) => [String(index), item] as const)
-		: value && typeof value === 'object' ? Object.entries(value) : [];
-	return entries.flatMap(([key, nested]) => collectReferenceFields(nested, [...path, key]));
+const isSpace = (char: string) => char === ' ' || char === '\n' || char === '\r' || char === '\t';
+
+/**
+ * Walks JSON that is already known to parse and records every string value (not key) with its
+ * path and offsets, so a value can be found on its line and replaced without re-formatting.
+ */
+const locateStrings = (text: string): JsonReferenceField[] => {
+	const found: JsonReferenceField[] = [];
+	let index = 0;
+	const skipSpace = () => { while (index < text.length && isSpace(text[index])) index += 1; };
+	const readString = () => {
+		const start = index;
+		index += 1;
+		while (text[index] !== '"') index += text[index] === '\\' ? 2 : 1;
+		index += 1;
+		return { start, end: index, value: JSON.parse(text.slice(start, index)) as string };
+	};
+	const readValue = (path: string[]): void => {
+		skipSpace();
+		const char = text[index];
+		if (char === '"') {
+			found.push({ path, ...readString() });
+		} else if (char === '{') {
+			index += 1;
+			skipSpace();
+			while (text[index] !== '}') {
+				if (text[index] === ',') {
+					index += 1;
+					skipSpace();
+				}
+				const key = readString().value;
+				skipSpace();
+				index += 1; // the colon
+				readValue([...path, key]);
+				skipSpace();
+			}
+			index += 1;
+		} else if (char === '[') {
+			index += 1;
+			skipSpace();
+			for (let position = 0; text[index] !== ']'; position += 1) {
+				if (text[index] === ',') index += 1;
+				readValue([...path, String(position)]);
+				skipSpace();
+			}
+			index += 1;
+		} else {
+			while (index < text.length && !/[\s,\]}]/.test(text[index])) index += 1;
+		}
+	};
+	readValue([]);
+	return found;
 };
+
+/** Every text value of hand-edited JSON, or null while the JSON does not parse. */
+export const listJsonStringFields = (text: string): JsonReferenceField[] | null =>
+	parseBody(text).ok ? locateStrings(text) : null;
 
 /** The text values of hand-edited JSON that hold a reference, or null while the JSON does not parse. */
-export const listJsonReferenceFields = (text: string): JsonReferenceField[] | null => {
-	const parsed = parseBody(text);
-	return parsed.ok ? collectReferenceFields(parsed.value, []) : null;
-};
+export const listJsonReferenceFields = (text: string): JsonReferenceField[] | null =>
+	listJsonStringFields(text)?.filter((field) => hasReference(field.value)) ?? null;
+
+/** The JSON with one located value replaced in place; the rest keeps its formatting. */
+export const replaceJsonValue = (text: string, field: Pick<JsonReferenceField, 'start' | 'end'>, value: string) =>
+	`${text.slice(0, field.start)}${JSON.stringify(value)}${text.slice(field.end)}`;
 
 export const readJsonPath = (body: unknown, path: string[]): unknown => path.reduce<unknown>((current, key) =>
 	current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : undefined, body);
-
-const writePath = (current: unknown, path: string[], value: string): unknown => {
-	if (!path.length) return value;
-	const [key, ...rest] = path;
-	if (Array.isArray(current)) return current.map((item, index) => String(index) === key ? writePath(item, rest, value) : item);
-	if (current && typeof current === 'object') {
-		const record = current as Record<string, unknown>;
-		return { ...record, [key]: writePath(record[key], rest, value) };
-	}
-	return current;
-};
-
-/** The JSON with one text value replaced, or null while it does not parse. Re-indented like the generated body. */
-export const writeJsonPath = (text: string, path: string[], value: string): string | null => {
-	const parsed = parseBody(text);
-	return parsed.ok ? JSON.stringify(writePath(parsed.value, path, value), null, 2) : null;
-};
