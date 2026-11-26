@@ -291,6 +291,10 @@ schedules list, and **System Configuration** in the admin menu.
 Changed behaviour to check when you upgrade
 ===========================================
 
+**Requirements.** 5.3 still runs on Java 17. MongoDB 8 and MariaDB 11.8 LTS are
+now the recommended versions; Node.js 20.19 or 22.12 is only needed if you build
+the frontend yourself. See :doc:`../operations/requirements`.
+
 **Location of application.yml.** The default of ``opencelium.config.file-path``
 in ``application_default.yml`` is now ``./application.yml``, resolved against the
 backend's working directory (``/opt/opencelium/src/backend`` with the shipped
