@@ -300,7 +300,7 @@ opencelium:
   ###########################################################################
   debug-mode: true
   forgot-psw:
-    base-url: https://frontend.example.com/reset-password
+    base-url: https://frontend.example.com/set-password # the frontend's set-password page; reset and admin links add ?token=...
     token-activity-time: 240000
     max-email-validation-attempts: 3
     lockout-time: 480000
