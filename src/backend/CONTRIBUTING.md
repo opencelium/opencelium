@@ -237,12 +237,12 @@ Why the backend is shaped this way — modules, deployment shapes, recorded desi
 - A repository is in the package of its feature (decision 16).
 - A REST endpoint has a path under `/api`. Its error response has the problem-details form of RFC 9457 with the field `code`. The plan of the feature lists its error codes ([architecture.md, decision 19](docs/architecture.md#7-architecture-decisions)).
 - Both deployment shapes must keep working: monolith (`oc-app.jar`, in-process `local` transport) and distributed (`oc-app.jar` + `oc-worker.jar`, broker transport via the SPI).
-- Until the ArchUnit rules land, reviewers check the 5 build rules of [architecture.md section 6.9](docs/architecture.md#69-build-checks) by hand:
+- The 5 build rules of [architecture.md section 6.9](docs/architecture.md#69-build-checks) are ArchUnit tests. The `BuildRulesTest` class of each module fails `./gradlew build` when a class breaks a rule, and the report names the rule and the class. Never weaken or skip a rule test to make a build green. Rules 1 and 2 apply to each module, all 5 to `core`:
   - no `@Value`
-  - cryptography only in `core.secrets`
-  - no plaintext secret-named fields on `@Document` classes
+  - cryptography with key material only in `core.secrets`; a password hash and a random value that is not a key are outside the rule
+  - no plaintext secret-named fields on `@Document` classes; a secret reference and a name that ends with `Hash` or `Id` pass
   - the `settings` collection is read only through the settings service
-  - a repository reads and writes a tenant document only through the tenant-document access of `core.tenant`. Section 6.9 lists the 3 exceptions, which are operations of the start.
+  - a class reads and writes a tenant document only through the tenant-document access of `core.tenant`. Section 6.9 names the building blocks outside the rule and the 3 exceptions, which are operations of the start.
 - Code explains itself. Javadoc and comments state what a class does and why, in their own words; they never reference `docs/architecture.md`, its decision numbers, or Jira tickets. The document can change or get lost, the code must stand alone.
 - New code comes with tests — see below.
 
@@ -257,8 +257,8 @@ The placement rule — yml file, secret, or runtime setting — is [architecture
    - Add a description to `META-INF/additional-spring-configuration-metadata.json`.
    - In each case, add one comment line to the sample yml file, [core/src/main/resources/application.yaml](core/src/main/resources/application.yaml).
    - Expect objections in review: this list must not grow.
-2. **Runtime setting (database).** Declare the key (name, type, default, validation) in the setting registry in `core.settings` and read it through the settings service. Subscribe to its change notifications if the component must react at runtime. *(Planned: the registry and the service are not built yet; their story names the classes.)*
-3. **Secret.** Write it through the secret provider SPI and hold only a secret reference (`common.secret`). A `@Document` class never has a plaintext field for a secret. *(Planned.)*
+2. **Runtime setting (database).** Declare a `SettingDefinition` bean in the package of your feature: the setting key, the type, the default, and the limits of a valid value. The setting registry of `core.settings` collects it at the start; a setting key with 2 definitions stops the start. Read the value only through the settings service. A component that must react to a change at runtime needs the change notifications of the settings service, which are an open decision ([architecture.md section 7](docs/architecture.md#open-decisions)).
+3. **Secret.** Write it through the secret provider SPI (`SecretProvider` of `common.secret`) and hold only the `SecretReference` that it returns. A read gives the plaintext as bytes: zero them after use, and never cache or log them. A `@Document` class never has a plaintext field for a secret; build rule 3 enforces it. A runtime setting that is a secret has the type `SECRET`, and the settings service keeps its reference.
 
 ## 9. Testing
 

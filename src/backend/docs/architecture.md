@@ -114,7 +114,7 @@ The module `core` has one package for each feature (modular monolith, decision 1
 | Block | Responsibility | Package |
 |---|---|---|
 | **Security filter chain** | 2 security filter chains authenticate the tokens that core issues (decision 18). The refresh chain applies to the refresh and the logout, and it accepts only a refresh token. The main chain applies to each other request, and it accepts only a session JWT. The session service starts, refreshes, and ends the sessions. The login strategies are plug-ins and depend on the deployment mode: local (with 2FA/TOTP), LDAP, OIDC, and Service Portal (decision 10). | `core.auth` |
-| **Access control** | RBAC and ACL enforcement, with one authorization manager (decision 7). | `core.authz` |
+| **Access control** | RBAC and ACL enforcement, with one authorization manager (decision 7). The method security of Spring Security applies a permission rule to an endpoint, for example the rule "installation admin" (decision 22). | `core.authz` |
 | **Users** | The OpenCelium users of a tenant, with the password hash and never the password. Password changes, the first-admin command, generated passwords, and the lock of a user whose generated password is older than 24 h. The lock runs in the self-host mode only, because the Service Portal owns the users in the cloud mode (decision 10). The user repository is on the tenant-document access (decision 16). | `core.user` |
 | **Current tenant** | The tenant runner binds the current tenant of a request or a background task (decision 15). The request filter, the task decorator and each background task call it. The principal contract gives the tenant of a principal. The tenant-document access is the 1 path from a repository to its tenant documents. | `core.tenant` |
 | **Tenant catalog** | The system database and the per-tenant Mongo connections (decision 11). | `core.tenant` |
@@ -128,9 +128,9 @@ The module `core` has one package for each feature (modular monolith, decision 1
 | **Notifications** | The notification channel SPI: email, Slack, and others. | `core.notification` |
 | **Admin status** | Service and worker status, and the queued jobs. | `core.admin` |
 | **Audit** | Append-only storage and a query API. | `core.audit` |
-| **Settings** | The setting registry, the settings service, and `GET/PATCH /api/settings` (decisions 13, 19). | `core.settings` |
+| **Settings** | The setting registry collects the setting definitions of the features. The settings service reads and changes the installation settings in the `settings` collection. The settings API `GET/PATCH /api/settings` gives them to an installation admin (decisions 13, 19, 22, 24). | `core.settings` |
 | **Keys** | The root key, the DEK wrap and unwrap, the generation guard, and the start canary (decision 14). The system DEK of the first start and the signing key of the installation (decision 17). The token signature: it signs each token that core issues and examines each signature. | `core.secrets.keys` |
-| **Secret storage** | The secret provider implementation (decision 14). | `core.secrets` |
+| **Secret storage** | The secret provider implementation (decision 14). It keeps each secret of the installation as a ciphertext in the `secrets` collection (decision 24). | `core.secrets` |
 | **Bootstrap configuration** | The `opencelium.*` bootstrap properties, the defaults, and the failure analyzer. | `core.config` |
 | **MongoDB connection** | The connection resolver (decision 11), the client factory, and the start ping. | `core.config.mongo` |
 
@@ -162,7 +162,9 @@ This scenario tells what occurs when core starts, in the order of the code. Each
 8. The **key canary** unwraps the oldest wrapped DEK after Spring has made all beans. A wrong key stops the start here, not at the first secret that a workflow uses.
 9. The **signing-key loader** reads the system DEK and the signing key from the database that the yml file names. It decrypts the signing key into memory. On a new installation it generates and stores the 2 keys. A stored signing key that does not decrypt stops the start (decision 17).
 
-Steps 1 to 3 are in `core.config`. Steps 4 to 6 are in `core.config.mongo`. Steps 7 to 9 are in `core.secrets.keys`.
+When Spring makes the beans, the **setting registry** collects the setting definitions of the features (decision 24). A setting key with 2 setting definitions stops the start, and the error names the setting key.
+
+Steps 1 to 3 are in `core.config`. Steps 4 to 6 are in `core.config.mongo`. Steps 7 to 9 are in `core.secrets.keys`. The setting registry is in `core.settings`.
 
 ## 5. Deployment view
 
@@ -244,7 +246,7 @@ In `self-host` mode there is exactly one tenant, with one static MongoDB connect
 
 **The current tenant** is the tenant for which a request or a background task runs (decision 15). Only the tenant runner binds it, for 1 task, in a scoped value. The request filter gives the tenant runner the tenant ID of the authenticated principal, from the principal contract. A background task gives the tenant runner the tenant ID of the record that starts the task. The task decorator carries the bound tenant to a task on another thread. In the self-host mode the same path binds `self-host-tenant`.
 
-A **tenant document** belongs to exactly 1 tenant and holds its ID in the field `tenantId`. The tenant-document access of `core.tenant` is the 1 path from a repository to its tenant documents. It applies the tenant limit to each operation, and an operation without a current tenant stops. The data of the installation itself, for example the tenant catalog, the system DEK, and the signing key, belongs to no tenant.
+A **tenant document** belongs to exactly 1 tenant and holds its ID in the field `tenantId`. The tenant-document access of `core.tenant` is the 1 path from a repository to its tenant documents. It applies the tenant limit to each operation, and an operation without a current tenant stops. The **data of the installation** belongs to no tenant (decision 20). Examples are the tenant catalog, the system DEK, the signing key, the installation settings, and the secrets of the installation.
 
 The log line of a task shows the tenant of the task through the MDC key `tenant`. In the self-host mode each application log line shows `self-host-tenant` ([6.4](#64-configuration-placement)).
 
@@ -277,7 +279,13 @@ A secret is kept in the database, but encrypted through the secret provider SPI.
 
 **3. Not 1 and not 2?** Then: **runtime setting (database).**
 
-A runtime setting is declared in the code, in the setting registry: name, type, default value, and validation rule. The `settings` collection holds **only the values that are different from the defaults**. No document means that the code default applies. Thus a new installation has an empty collection and a complete configuration. "Reset to default" is a delete. Code reads a setting only through the settings service. The API changes a setting through `GET/PATCH /api/settings`. Unknown keys and invalid values are not accepted. A component subscribes to the change notifications of the settings service. It does not read a value one time at the start. This is what makes a change effective without a restart.
+A runtime setting is declared in the code. A feature declares a setting definition in its own package: the setting key, the type, the default value, and the rule for a valid value. The setting registry collects the setting definitions at the start (decision 24).
+
+The `settings` collection holds **only the values that are different from the defaults**, in 1 document for the installation settings. A setting without a field in the document has the default of the code. Thus a new installation has no document and a complete configuration. A reset removes the field of the setting, and the default applies again. 1 change of more than 1 setting is 1 update of the document, so it changes all the settings or none.
+
+Code reads a setting only through the settings service. The API changes a setting through `GET/PATCH /api/settings`. Unknown keys and invalid values are not accepted. A component subscribes to the change notifications of the settings service. It does not read a value one time at the start. This is what makes a change effective without a restart.
+
+**The 2 owners.** A setting and a secret belong to the installation or to 1 tenant (decision 20). An installation setting applies to the whole installation. It is data of the installation, in the database that the yml file names. A tenant setting applies to 1 tenant. It is a tenant document in the database of that tenant. For each setting, the setting registry tells if it is an installation setting or a tenant setting.
 
 **Examples.**
 
@@ -289,8 +297,9 @@ A runtime setting is declared in the code, in the setting registry: name, type, 
 | Data directory (local state, for example the generated `master.key`) | 1 | yml: `opencelium.data-dir`. Default on Linux: `/var/lib/opencelium`, if that directory is available and writable. Default in all other cases: `./data`. Core makes the directory at the start. The directory must be writable. In a container, mount it as a volume. |
 | Master (root) encryption key | 1 | **Outside the yml file and the database.** Core finds the key in this order: the `OC_MASTER_KEY` environment variable, then the file that `opencelium.master-key-file` names, then `master.key` in the data directory. In self-host mode, core generates the file in the data directory on a new installation. In cloud mode a start without a key stops. The key value is not in the yml file at any time. Rules and guards: decision 14. |
 | Tenant ID in the application log lines | 1 | yml: `logging.pattern.correlation` (standard Spring). The pattern applies from the first log line. Default: `[%X{tenant:-self-host-tenant}] ` in self-host mode, `[%X{tenant:--}] ` in cloud mode. It prints the MDC key `tenant`, which holds the current tenant (decision 15). |
-| Broker host name, port, vhost | 3 | Runtime setting |
-| Broker password | 2 | Secret (a secret reference in the broker setting) |
+| Broker host name, port, vhost | 3 | Runtime setting (installation setting) |
+| Broker username | 3 | Runtime setting (installation setting). The broker username gives no access without the broker password. |
+| Broker password | 2 | Secret of the installation (a secret reference in the broker setting, decision 20) |
 | Connector credentials | 2 | Secret |
 | Default LOOP parallelism | 3 | Runtime setting |
 
@@ -304,6 +313,8 @@ Secrets use envelope encryption with 2 key layers (decision 14). One **root key*
 
 Each installation has 1 **system DEK** from the first start, in the 2 deployment modes. The system DEK is kept wrapped in the database that the yml file names. This is the system database in the cloud mode and the 1 database in the self-host mode. The system DEK encrypts the **signing key** of the tokens of core (decision 17). The rules and the guards are in decisions 14 and 17.
 
+The system DEK also encrypts the **secrets of the installation**, for example the broker password (decision 20). The secret storage keeps the secrets of the installation in the `secrets` collection of the database that the yml file names (decision 24).
+
 ```mermaid
 flowchart LR
     subgraph CLOUD["Cloud mode"]
@@ -314,20 +325,22 @@ flowchart LR
         subgraph SYS["System database"]
             DEKS["System DEK<br/>(wrapped)"]
             SECS["Catalog credentials<br/>(ciphertext)"]
+            SECI["Secrets of the installation<br/>(ciphertext)"]
             SIGS["Signing key<br/>(ciphertext)"]
         end
         subgraph TA["Tenant A: its own database"]
             DEKA["DEK A<br/>(wrapped)"]
-            SECA["Secrets<br/>(ciphertext)"]
+            SECA["Secrets of the tenant<br/>(ciphertext)"]
         end
         subgraph TB["Tenant B: its own database"]
             DEKB["DEK B<br/>(wrapped)"]
-            SECB["Secrets<br/>(ciphertext)"]
+            SECB["Secrets of the tenant<br/>(ciphertext)"]
         end
         RK -- wraps --> DEKS
         RK -- wraps --> DEKA
         RK -- wraps --> DEKB
         DEKS -- encrypts --> SECS
+        DEKS -- encrypts --> SECI
         DEKS -- encrypts --> SIGS
         DEKA -- encrypts --> SECA
         DEKB -- encrypts --> SECB
@@ -341,19 +354,21 @@ flowchart LR
         subgraph DB["MongoDB: 1 database"]
             DEKS1["System DEK<br/>(wrapped)"]
             SIG1["Signing key<br/>(ciphertext)"]
+            SECI1["Secrets of the installation<br/>(ciphertext)"]
             DEK1["DEK<br/>(wrapped)"]
-            SEC1["Secrets<br/>(ciphertext)"]
+            SEC1["Secrets of the tenant<br/>(ciphertext)"]
         end
         MK -- wraps --> DEKS1
         MK -- wraps --> DEK1
         DEKS1 -- encrypts --> SIG1
+        DEKS1 -- encrypts --> SECI1
         DEK1 -- encrypts --> SEC1
     end
 
     classDef keymat fill:#EEEDFE,stroke:#534AB7,color:#26215C
     classDef secret fill:#E1F5EE,stroke:#0F6E56,color:#04342C
     class RK,MK,DEKS,DEKA,DEKB,DEK1,DEKS1,SIGS,SIG1 keymat
-    class SECS,SECA,SECB,SEC1 secret
+    class SECS,SECI,SECA,SECB,SEC1,SECI1 secret
 ```
 
 ### 6.6 Persistence
@@ -399,13 +414,23 @@ The intended result: most product logic (the graph walk, IF, LOOP, data mapping)
 
 ### 6.9 Build checks
 
-ArchUnit rules make these 5 rules build failures:
+ArchUnit rules make these 5 rules build failures. Decisions 21 and 25 give the limits of the rules.
 
-- no `@Value`
-- cryptography only in `core.secrets`
-- no plaintext secret-named fields on `@Document` classes
-- the `settings` collection is read only through the settings service
-- a repository reads and writes a tenant document only through the tenant-document access of `core.tenant` (decision 15)
+1. No class uses `@Value`.
+2. Only `core.secrets` uses key material for cryptography (decision 21).
+3. A `@Document` class has no plaintext field with a secret word in its name (decision 25).
+4. Only the settings service reads and writes the `settings` collection.
+5. A class reads and writes a tenant document only through the tenant-document access of `core.tenant` (decisions 15, 25).
+
+Rules 1 and 2 apply to each module. Rules 3 to 5 apply to `core` only, because only `core` has a database.
+
+The rule for the tenant documents does not apply to the data of the installation (decision 20). These building blocks are outside the rule:
+
+- the tenant-document access of `core.tenant`
+- the MongoDB connection of `core.config.mongo`: the client, the client factory, and the start-up ping. They read no document.
+- the data of the installation: the settings repository of `core.settings`, the secret storage of `core.secrets`, and the DEK access of `core.secrets.keys`
+
+The index operations of a feature are also outside the rule.
 
 The rule for the tenant documents has 3 exceptions. They are operations of the start of core:
 
@@ -511,7 +536,7 @@ The decisions are recorded so that they are not discussed again without a reason
 
     *Why:* The effect of a lost key is limited to one tenant. Tenant offboarding becomes crypto-shredding: when the wrapped DEK is deleted, the secrets of that tenant cannot be recovered from the live data. Backups from before the deletion still hold the wrapped DEK. They stay decryptable under the root key until the backup retention period deletes them. A rotation of the root key has a low cost: N small DEKs are wrapped again, and the secrets are not encrypted again.
 
-    - Two key layers. One **root key** (self-hosted name: master key) for each installation. It encrypts only DEKs. One **data-encryption key (DEK)** for each tenant. It encrypts the secrets of that tenant (AES-256-GCM, a new IV for each secret). The system DEK encrypts the catalog credentials (decision 11) and the signing key (decision 17).
+    - Two key layers. One **root key** (self-hosted name: master key) for each installation. It encrypts only DEKs. One **data-encryption key (DEK)** for each tenant. It encrypts the secrets of that tenant (AES-256-GCM, a new IV for each secret). The system DEK encrypts the catalog credentials (decision 11), the signing key (decision 17), and the secrets of the installation (decision 20).
     - The root key is **outside each database**. Core finds it at the start in this order: (1) the `OC_MASTER_KEY` environment variable, (2) the file from `opencelium.master-key-file`, (3) `master.key` in the data directory. In self-host mode, core generates the file there on a new installation (`SecureRandom`, 32 bytes, `chmod 600`, with a backup warning in the log). The key is not made from a passphrase and has no hard-coded default. If the variable and the file property are set together, the start stops with an error.
     - **Generation only in self-host mode, and only on a new installation.** In cloud mode all nodes must use the one key that the operator gives, so a start without a key stops and names `opencelium.master-key-file`. In self-host mode, if the database already holds a wrapped DEK but no source has a key, the application **stops at the start** and names the problem. The same occurs if the found key cannot unwrap the DEK (GCM authentication makes a wrong key a clear, detectable error). The application does not generate a replacement key without a message. Secrets under a lost key are locked, not corrupted. Recovery is "restore the original key" or an explicit secrets reset. The database for this check is the one that the yml file names: the only database in self-hosted mode, the system database in cloud mode.
     - DEKs are **managed by the application only**. A DEK is generated at the first secret of a tenant. It is kept wrapped in the database of that tenant. The system DEK is generated at the first start and is kept wrapped in the database that the yml file names (decisions 11, 17). A DEK is unwrapped in the memory of core at use. No UI, API, or configuration shows a DEK.
@@ -574,14 +599,81 @@ The decisions are recorded so that they are not discussed again without a reason
     - A request without a token that core accepts gets the status code 401, the header `WWW-Authenticate`, and no body (decision 18).
     - Each path of the REST API of core starts with `/api`. For example, the settings endpoint of decision 13 has the path `/api/settings`.
 
-    *(The error response to a request that reaches no endpoint of a feature is on the [open decisions](#open-decisions) list.)*
+    *(The response to a refused permission and the more fields of an error response are in decision 23. The error response to a request that reaches no endpoint of a feature is on the [open decisions](#open-decisions) list.)*
+
+20. **A setting and a secret belong to the installation or to 1 tenant. The system DEK encrypts the secrets of the installation.** *(Extends decisions 11, 13 and 14.)*
+
+    *Why:* Decision 13 gives 1 `settings` collection and 1 secret storage, but it does not say whose they are. In the cloud mode the broker connection is 1 value for all tenants, so it cannot be in the database of 1 tenant. Decision 14 gives a DEK for each tenant, and a secret of the installation has no tenant. The system DEK already encrypts the catalog credentials (decision 11), and it exists from the first start (decision 17). Thus a secret of the installation needs no new key. The data of the installation is not a tenant document ([6.3](#63-tenancy)), so [6.9](#69-build-checks) gets no new exception.
+
+    - **The owner of a setting.** The owner of a setting is the installation or 1 tenant. An installation setting applies to the whole installation, and a tenant setting applies to 1 tenant. For each setting, the setting registry tells if it is an installation setting or a tenant setting.
+    - **The installation settings.** Core keeps the installation settings in the `settings` collection of the database that the yml file names. An installation setting is data of the installation and not a tenant document. The settings service gives an installation setting to each task, with a current tenant or without one.
+    - **The secrets of the installation.** A secret that an installation setting refers to is a secret of the installation, for example the broker password. A secret of the installation is data of the installation and not a tenant document. The system DEK encrypts it, the same as the catalog credentials (decision 11). The secret storage keeps the ciphertext in the database that the yml file names. Its secret reference is a system-scope secret reference.
+    - **The tenant settings and the secrets of a tenant.** A tenant setting is a tenant document in the database of its tenant, on the tenant-document access (decisions 15, 16). The DEK of a tenant encrypts the secrets of that tenant (decision 14).
+    - **The build rules.** The rule for the tenant documents does not apply to the data of the installation, so [6.9](#69-build-checks) gets no new exception. Code reads each setting only through the settings service (decision 13).
+
+    *(Who changes an installation setting in the cloud mode is on the [open decisions](#open-decisions) list. The collection of the tenant settings and of the secrets of a tenant in the self-host mode is also on that list.)*
+
+21. **The cryptography rule of the build applies to key material. A password hash and a random value that is not a key are outside the rule.** *(Extends decisions 13 and 17.)*
+
+    *Why:* [6.9](#69-build-checks) keeps cryptography in `core.secrets`, but no section says what the rule examines. A build rule must have an exact limit, or it stops code that the design accepts. The users block keeps the password hash and generates passwords ([3.4](#34-level-2-core)), and a session gets random IDs (decision 18). None of them uses a key. Decision 17 uses the rule to keep each key out of the other packages. The glossary ties the cryptography of core to its key material.
+
+    - **What the rule examines.** The rule applies to code that uses key material: to encrypt, decrypt, wrap, unwrap, sign, or examine a signature. Only `core.secrets` holds key material and does these operations.
+    - **The password hash.** A password hash is outside the rule. The users block makes the hash, and an admin login compares the password of an OpenCelium user with it.
+    - **Random values.** A random value that is not key material is outside the rule. Examples are a generated password, a session ID and a token ID.
+    - **Other packages.** For an operation with key material, a package calls a building block of `core.secrets`. It holds no key (decision 17).
+
+22. **Core examines a permission in 1 place, the access control. The roles of a session JWT are authorities for it.** *(Extends decisions 7, 10 and 18.)*
+
+    *Why:* Decision 7 gives RBAC and ACLs, and decision 10 keeps permission logic out of the security filters. No decision says where core examines a role. A role check in each feature puts the same logic in many places, and the ACL story then has no 1 place to extend. A rule for a path in a security filter chain is permission logic in a filter. The session JWT already holds the roles (decision 18), so the access control needs no database read.
+
+    - **The authorities.** The authentication gives each role of a session JWT to Spring Security as the authority `ROLE_<role>`. The authentication examines no permission (decision 10).
+    - **The 1 place.** The access control of `core.authz` has each permission rule. The method security of Spring Security applies a rule to an endpoint.
+    - **The features.** A feature names the rule for its endpoint. A feature does not read a role, and a security filter chain has no rule for a role.
+    - **The rule "installation admin".** In the self-host mode, an OpenCelium user with the role `ADMIN` passes the rule. In the cloud mode, no OpenCelium user passes it. The settings API uses this rule.
+    - **The ACL story.** The ACL story adds its rules to the access control. It adds no second place (decision 7).
+
+    *(The other roles, the RBAC table of components and actions, and the permission levels are part of the ACL detailed design. Who changes an installation setting in the cloud mode is also open. The 2 items are on the [open decisions](#open-decisions) list.)*
+
+23. **1 handler writes the response to each refused permission. An error response can have more fields than `code`.** *(Extends decision 19. Changes its clause on the writer of an error response, for a refused permission only.)*
+
+    *Why:* The access control refuses a request before the code of the feature runs (decision 22). Thus the feature cannot write that response, and 1 handler gives each feature the same response with the same error code. Decision 19 gives an error response only the field `code`. An error with more than 1 incorrect item needs a list that the HTTP client reads without the message text.
+
+    - **The refused permission.** A request that the access control refuses gets the status code 403. The body has the problem-details form with the error code `access-denied`.
+    - **The writer.** The access-denied handler of the main chain writes this response for each feature. A feature does not write it.
+    - **More fields.** An error response can have more fields than `code`. The plan of the feature lists each such field with its error code.
+    - **The example.** The error `invalid-settings` has the field `errors`. The field has 1 item for each incorrect setting key, with the key and the problem.
+
+24. **Core keeps the installation settings in 1 document, and each secret of the installation in 1 document of the `secrets` collection. A secret reference names the owner and the secret ID.** *(Extends decisions 13, 14, 17 and 20.)*
+
+    *Why:* Decision 20 gives the owner and the database of a setting and of a secret, but not the form of the data. A change of more than 1 setting must change all of them or none, and 1 update of 1 document gives that without a transaction. When each feature declares its own settings, the settings package knows no feature (decision 1). The wrap of the system DEK already uses `system` as the tenant ID, so this value also names the installation as an owner. The `keys` collection holds only wrapped DEKs, so a ciphertext has its own collection (decision 17). Associated data with the owner and the secret ID stops a ciphertext that a person copies to another secret.
+
+    - **The settings document.** The `settings` collection has 1 document for the installation settings. The document has 1 field for each value that is different from its default.
+    - **A change and a reset.** 1 update of the document applies all the changes of a request, or none. A reset removes the field of the setting, and the default applies again.
+    - **The setting definitions.** A feature declares each of its settings in its own package, as a setting definition. The setting registry collects the setting definitions at the start. A setting key with 2 setting definitions stops the start.
+    - **The secret reference.** A secret reference has the owner and the secret ID, and it shows no value. The owner is a tenant ID. The reserved value `system` is the owner of each secret of the installation.
+    - **The secret provider SPI.** The SPI has 3 operations: it keeps a secret, it reads a secret, and it deletes a secret. A read gives the plaintext as bytes, and the caller zeroes the bytes after use.
+    - **The ciphertext.** The secret storage keeps each secret of the installation as 1 document of the `secrets` collection. The collection is in the database that the yml file names.
+    - **The associated data.** The associated data of a secret has the owner, the secret ID, and the DEK version. Thus a ciphertext under another secret ID or another owner does not decrypt.
+
+    *(The collection of the secrets of a tenant is on the [open decisions](#open-decisions) list. The change notifications of the settings service and how a change reaches another core instance are also on that list.)*
+
+25. **The build rule for the secret fields examines the name and the type of a field. The build rule for the tenant documents examines each read and each write of a collection.** *(Extends decisions 13, 15, 16, 20 and 21.)*
+
+    *Why:* [6.9](#69-build-checks) names the 5 build rules, but it does not say what each rule examines. A rule without an exact limit stops code that the design accepts, or it passes code that breaks the design (decision 21). A field for a password hash or for a token ID has a secret word in its name and holds no secret. An index is not a tenant document, and the data of the installation is outside the tenant rule (decision 20). A permit for a full package also passes the tenant documents that the package gets later.
+
+    - **The secret fields.** The rule examines each text field and each byte field of a `@Document` class. The secret words are `password`, `secret`, `token`, `credential`, `apikey`, `privatekey`, and `passphrase`, in upper case or in lower case.
+    - **The permitted fields.** The rule permits a field with a secret word in 2 cases. The field has the type of the secret reference, or its name ends with `Hash` or `Id`.
+    - **The tenant documents.** The rule examines each read and each write of a collection outside the tenant-document access. A repository interface of Spring Data is also in the rule.
+    - **Outside the tenant rule.** The index operations are outside the rule. The building blocks that keep the data of the installation are outside the rule, and [6.9](#69-build-checks) names each one. The building blocks of the MongoDB connection are also outside the rule.
+    - **The 3 exceptions.** The 3 exceptions of [6.9](#69-build-checks) do not change (decision 16).
+    - **The modules.** The rules for `@Value` and for the cryptography apply to each module. The other 3 rules apply to `core` only, because only `core` has a database.
 
 ### Open decisions
 
 These decisions are open on purpose. The first feature that needs one closes it:
 
 - **Where the transport implementations go.** `local` goes to `execution`. `amqp` goes to `execution` or to its own package, but not to `core`. If it is in `core`, the workers cannot use it.
-- **ACL detailed design:** the exact meaning of each permission level, the extension beyond connectors and workflows, secret encryption, and masked logs.
+- **ACL detailed design:** the roles, the RBAC table of components and actions, and the exact meaning of each permission level. It also contains the extension beyond connectors and workflows, secret encryption, and masked logs.
 - **Job message contract:** the codec interface. JSON first. Protobuf is a possible transport codec, but not the domain model.
 - **Payload encryption and key distribution:** the worker-side key material for encrypted job payloads (preferred option: a separate transport key, see decision 14).
 - **Idempotent job consumption** under at-least-once delivery.
@@ -589,6 +681,10 @@ These decisions are open on purpose. The first feature that needs one closes it:
 - **Default parallelism for each LOOP.**
 - **Database-user model for tenants:** one scoped user for each tenant, or one core login for each cluster. The decision changes the pool sizes and the catalog schema (decision 11).
 - **REST API contract style:** the OpenAPI file of a feature, and the error response that no feature writes. Examples: a request to an unknown path, and an error that no feature handles (decision 19).
+- **The change notifications of the settings service:** how a component gets a changed setting, and how a change reaches another core instance (decision 24).
+- **Who changes an installation setting in the cloud mode.** No OpenCelium user passes the rule "installation admin" in the cloud mode (decision 22), so the operator of a cloud installation must have another path.
+- **The collection of the tenant settings and of the secrets of a tenant in the self-host mode.** In the self-host mode the tenant documents and the data of the installation are in 1 database (decision 20).
+- **The database of the indexes of a tenant collection in the cloud mode.** At the start, core makes the indexes of a tenant collection, for example `sessions`, in the database that the yml file names. In the cloud mode the tenant documents are in the database of each tenant (decision 11).
 
 ## 8. Glossary
 
@@ -603,7 +699,8 @@ These decisions are open on purpose. The first feature that needs one closes it:
 | **Deployment mode** | `self-host`: one tenant, the default. `cloud`: many tenants behind the Service Portal (decision 11). The mode is a bootstrap value in the yml file. Each shape can operate in each mode. |
 | **Tenant** | One customer whose data is kept apart from the data of all other customers. A self-hosted installation has exactly one tenant. |
 | **Current tenant** | The tenant for which a request or a background task runs. Only the tenant runner binds it (decision 15). |
-| **Tenant document** | A database document that belongs to exactly 1 tenant, with its ID in the field `tenantId`. The data of the installation itself, for example the tenant catalog, is not a tenant document. |
+| **Tenant document** | A database document that belongs to exactly 1 tenant, with its ID in the field `tenantId`. The data of the installation is not a tenant document. |
+| **Data of the installation** | The data that belongs to the whole installation and to no tenant (decision 20). Examples are the tenant catalog, the system DEK, the signing key, the installation settings, and the secrets of the installation. It is in the database that the yml file names. |
 | **Service Portal** | The external system that owns the cloud business: tenants, subscriptions, and user accounts. It is not part of the backend. |
 | **OCEL** | The OpenCelium Expression Language. Users write OCEL expressions in node parameters, for example to map data from one node to another node. |
 | **Global Params** | Variables that a workflow can read and write during an execution. Core keeps them between executions. |
