@@ -6,6 +6,7 @@ import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import type { TooltipPlacement } from '@shared/ui/primitives/Tooltip/Tooltip.types'
 import type { User } from '@entities/user/model/types'
+import { PasswordResetLinkConfirmMessage } from './PasswordResetLinkConfirmMessage'
 import { PasswordResetLinkDialogContent } from './PasswordResetLinkDialogContent'
 import { useCreatePasswordResetLink } from './useCreatePasswordResetLink'
 
@@ -22,23 +23,33 @@ export function PasswordResetLinkAction({ user, iconSize, tooltipPlacement = 'to
     const dialog = useDialog()
     const { create, isCreating } = useCreatePasswordResetLink()
 
-    if (!isAdmin || user.authMethod === 'LDAP') return null
+    // The user API does not say whether a user signs in via LDAP; the endpoint
+    // answers PASSWORD_MANAGED_EXTERNALLY for them instead.
+    if (!isAdmin) return null
 
     const userLabel = user.email ?? user.username ?? String(user.userId)
 
     const handleClick = async () => {
+        let sendEmail = false
         const ok = await confirm({
             title: t('user.resetLink.confirm.title'),
-            message: t('user.resetLink.confirm.message', { user: userLabel }),
+            message: (
+                <PasswordResetLinkConfirmMessage
+                    userLabel={userLabel}
+                    onSendEmailChange={(value) => {
+                        sendEmail = value
+                    }}
+                />
+            ),
         })
         if (!ok) return
-        const link = await create(user.userId)
+        const link = await create(user.userId, sendEmail)
         if (!link) return
         dialog.open({
             title: t('user.resetLink.dialog.title'),
             width: 600,
             testId: 'user-reset-link-dialog',
-            content: <PasswordResetLinkDialogContent link={link} userLabel={userLabel} />,
+            content: <PasswordResetLinkDialogContent link={link} userLabel={userLabel} isEmailSent={sendEmail} />,
         })
     }
 
