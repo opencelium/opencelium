@@ -165,8 +165,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     @Override
     @Transactional
     public PasswordLinkResource issueAdminLink(int userId, int issuedBy, boolean sendEmail) {
-        // findById locks the user row, so links issued at the same time for one user queue up
-        User user = userService.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        // findById locks the user row, so links issued at the same time for one user queue up.
+        // Not UserNotFoundException: only the catch-all handler takes that, which answers 500.
+        User user = userService.findById(userId).orElseThrow(() -> new GeneralServiceException(
+                HttpStatus.NOT_FOUND, ExceptionConstant.USER_NOT_EXIST, "User not found."));
 
         if (!isLocalAccount(user)) {
             throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.PASSWORD_MANAGED_EXTERNALLY,

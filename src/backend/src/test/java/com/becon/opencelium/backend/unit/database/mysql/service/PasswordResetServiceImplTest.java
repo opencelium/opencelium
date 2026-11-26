@@ -478,11 +478,14 @@ class PasswordResetServiceImplTest {
     // ── issueAdminLink ────────────────────────────────────────────────────────
 
     @Test
-    void issueAdminLinkThrowsUserNotFoundWhenUserDoesNotExist() {
+    void issueAdminLinkThrowsNotFoundWhenUserDoesNotExist() {
         when(userService.findById(7)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.issueAdminLink(7, ADMIN_ID, false))
-                .isInstanceOf(UserNotFoundException.class);
+                .isInstanceOfSatisfying(GeneralServiceException.class, ex -> {
+                    assertThat(ex.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+                    assertThat(ex.getError()).isEqualTo(ExceptionConstant.USER_NOT_EXIST);
+                });
 
         verifyNoInteractions(tokenRepository, emailService);
     }
