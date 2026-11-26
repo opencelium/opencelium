@@ -168,11 +168,15 @@ backend text; show a translated message chosen by `error` instead.
 
 ## Deployment note
 
-`opencelium.forgot-psw.base-url` must point at the frontend's set-password page, e.g.
-`https://oc.example.com/set-password`. The placeholder used to end in `/reset-password`, which is
-not a route of the current frontend. Installations that kept that path send admin links and
-self-service reset emails to a page that does not exist; their `application.yml` has to be
-corrected by hand, because no upgrade rewrites a configured URL.
+`opencelium.forgot-psw.base-url` should point at the frontend's set-password page, e.g.
+`https://oc.example.com/set-password`.
+
+The placeholder used to end in `/reset-password`, and installations may still have that path:
+no upgrade rewrites a configured URL. Since OC-1660 the frontend forwards `/reset-password` to
+`/set-password` and keeps `?token=…`, so admin links and self-service reset emails built from the
+old path still work. A frontend without OC-1660 has no `/reset-password` route, and such links
+lead to a page that does not exist. Either way, correcting the path in `application.yml` to
+`/set-password` is the clean fix.
 
 ---
 
