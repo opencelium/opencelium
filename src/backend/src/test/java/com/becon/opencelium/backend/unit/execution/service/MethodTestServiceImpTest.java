@@ -10,6 +10,7 @@ import static com.becon.opencelium.backend.testutil.fixture.ConnectorFixture.anI
 import static com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture.aSnapshotOf;
 import static com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture.anOpenEntry;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aConnectorOperation;
+import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aGraphQlOperation;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aMethodDto;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.anHttpOperation;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -212,6 +213,18 @@ class MethodTestServiceImpTest {
         assertThat(references.staticReferences())
                 .containsExactly(new StaticReference("{token}", ReferenceType.REQUEST_DATA));
         verifyNoInteractions(connectorService);
+    }
+
+    @Test
+    @DisplayName("findReferences — the braces of a GraphQL query are syntax, so no test value is asked for them")
+    void findReferencesListsNothingWhenGraphQlQueryHasBraces() {
+        MethodDTO method = givenMethodMappedTo(aGraphQlOperation(Map.of("query", "query { me { id } }")));
+
+        MethodTestReferencesDTO references = service.findReferences(method, null, null);
+
+        assertThat(references.staticReferences()).isEmpty();
+        assertThat(references.connectorReferences()).isEmpty();
+        assertThat(references.globalReferences()).isEmpty();
     }
 
     @Test

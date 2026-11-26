@@ -31,6 +31,7 @@ public class SchemaDTOUtil {
         SchemaDTO result = new SchemaDTO();
         result.setType(schema.getType());
         result.setValue(schema.getValue());
+        result.setLiteral(schema.isLiteral());
 
         Map<String, SchemaDTO> properties = schema.getProperties();
         if (properties != null) {

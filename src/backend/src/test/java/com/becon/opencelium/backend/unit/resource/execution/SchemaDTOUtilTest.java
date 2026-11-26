@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.array;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.bool;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.integer;
+import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.literal;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.number;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.object;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.primitive;
@@ -520,6 +521,18 @@ class SchemaDTOUtilTest {
                 SchemaDTOUtil.fromObject(input),
                 expected
         );
+    }
+
+    // ── copy ──────────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("copy — a literal value stays literal, so the request builder still sends it as written")
+    void copyKeepsLiteralFlagWhenNestedPropertyIsLiteral() {
+        SchemaDTO body = object("query", literal("query { items {url} }"));
+
+        SchemaDTO copy = SchemaDTOUtil.copy(body);
+
+        assertThat(copy.getProperties().get("query").isLiteral()).isTrue();
     }
 
     // ── toJSON ────────────────────────────────────────────────────────────────

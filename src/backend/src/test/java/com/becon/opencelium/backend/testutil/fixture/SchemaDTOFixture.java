@@ -24,6 +24,14 @@ public class SchemaDTOFixture {
         return primitive(DataType.BOOLEAN, value);
     }
 
+    /** A text value sent as written, like the query of a GraphQL body. */
+    public static SchemaDTO literal(String value) {
+        SchemaDTO schema = string(value);
+        schema.setLiteral(true);
+
+        return schema;
+    }
+
     public static SchemaDTO primitive(DataType type, String value) {
         SchemaDTO schema = new SchemaDTO();
         schema.setType(type);

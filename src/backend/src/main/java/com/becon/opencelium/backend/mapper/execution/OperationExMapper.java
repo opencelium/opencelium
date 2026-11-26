@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.mapper.execution;
 
+import com.becon.opencelium.backend.constant.ConnectionConstants;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
@@ -466,13 +467,6 @@ public class OperationExMapper {
 
         Map<String, SchemaDTO> props = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
-            if (body.getData().equals("graphql")) {
-                String queryFieldName = "query"; // Is this the only field that could be used as a query?
-                Map<String, Object> map = body.getFields();
-                if (map.containsKey(queryFieldName) && map.get(queryFieldName) instanceof String query) {
-                    map.put(queryFieldName, query.replaceAll("\\R", " "));
-                }
-            }
             if (body.getFormat().equals("xml")) {
                 String name = entry.getKey();
                 if (name.matches("^[a-zA-Z ]+:.*$")) {
@@ -486,8 +480,23 @@ public class OperationExMapper {
         if (body.getFormat().equals("xml")) {
             schemaDTO.setXml(new XmlObjectDTO());
         }
+        if (ConnectionConstants.GRAPHQL_BODY_DATA.equals(body.getData())
+                && fields.get(ConnectionConstants.GRAPHQL_QUERY_FIELD) instanceof String query) {
+            props.put(ConnectionConstants.GRAPHQL_QUERY_FIELD, toGraphQlQuery(query));
+        }
         schemaDTO.setProperties(props);
         return schemaDTO;
+    }
+
+    /**
+     * The query of a GraphQL body, sent as written: its braces are GraphQL syntax, not
+     * references. Values that change per run belong in the {@code variables} of the body, whose
+     * references are resolved like any other value.
+     */
+    private static SchemaDTO toGraphQlQuery(String query) {
+        SchemaDTO schema = new SchemaDTO(DataType.STRING, query.replaceAll("\\R", " "));
+        schema.setLiteral(true);
+        return schema;
     }
 
     /**

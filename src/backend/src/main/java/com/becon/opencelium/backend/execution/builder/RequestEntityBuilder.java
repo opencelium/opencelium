@@ -404,6 +404,12 @@ public class RequestEntityBuilder {
             for (Map.Entry<String, SchemaDTO> property : properties.entrySet()) {
                 value = property.getValue() == null ? null : property.getValue().getValue();
 
+                // a literal value is sent as written
+                if (property.getValue() != null && property.getValue().isLiteral()) {
+                    formData.add(property.getKey(), value);
+                    continue;
+                }
+
                 if (ReferenceDetector.containsReference((String) value)) {
                     String reference = (String) value;
                     value = references.apply(reference);
@@ -496,7 +502,8 @@ public class RequestEntityBuilder {
     }
 
     private void replaceRefs(SchemaDTO schema) {
-        if (schema == null) {
+        // a literal value, e.g. the query of a GraphQL body, is sent as written
+        if (schema == null || schema.isLiteral()) {
             return;
         }
 

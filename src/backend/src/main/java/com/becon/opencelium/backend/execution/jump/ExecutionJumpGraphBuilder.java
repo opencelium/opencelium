@@ -275,7 +275,8 @@ public final class ExecutionJumpGraphBuilder {
     }
 
     private static void collectSchemaValues(SchemaDTO schema, List<String> result) {
-        if (schema == null) {
+        // a literal value is sent as written, so it reads no other method
+        if (schema == null || schema.isLiteral()) {
             return;
         }
 

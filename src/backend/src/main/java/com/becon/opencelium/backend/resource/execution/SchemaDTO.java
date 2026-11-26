@@ -12,6 +12,12 @@ public class SchemaDTO {
     private List<SchemaDTO> items;
     private XmlObjectDTO xml;
 
+    /**
+     * Whether {@link #value} is sent as written. Nothing in a literal value is read as a
+     * reference, e.g. the query of a GraphQL body, whose braces are GraphQL syntax.
+     */
+    private boolean literal;
+
     public SchemaDTO() {
     }
 
@@ -58,5 +64,13 @@ public class SchemaDTO {
 
     public void setXml(XmlObjectDTO xml) {
         this.xml = xml;
+    }
+
+    public boolean isLiteral() {
+        return literal;
+    }
+
+    public void setLiteral(boolean literal) {
+        this.literal = literal;
     }
 }
