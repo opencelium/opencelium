@@ -17,10 +17,11 @@ export const CustomButton: ButtonComponent =
 		htmlType = 'button',
 		style,
 		testId,
+		ariaLabel,
 		...rest
     }) => {
     return (
-        <button {...rest} type={htmlType} data-testid={testId} style={style} className={`btn btn-${variant}${className ? ` ${className}` : ''}`} onClick={onClick} disabled={disabled || loading}>
+        <button {...rest} type={htmlType} data-testid={testId} aria-label={ariaLabel} style={style} className={`btn btn-${variant}${className ? ` ${className}` : ''}`} onClick={onClick} disabled={disabled || loading}>
             <span className="custom-btn-content">
                 {!loading && iconLeft && (
                     <Icon name={iconLeft} size={16} color="inherit"/>
