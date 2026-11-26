@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnaps
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.execution.oc721.StaticValueExtractor;
+import com.becon.opencelium.backend.execution.rdata.ConnectorTokenCache;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.execution.ConnectorExMapper;
@@ -43,8 +44,12 @@ import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRes
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.ConnectorError;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.ReceivedResponse;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.SentRequest;
+import com.becon.opencelium.backend.resource.connector.BodyDTO;
 import com.becon.opencelium.backend.resource.execution.MethodConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -59,6 +64,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -100,6 +107,17 @@ import org.springframework.web.client.RestTemplate;
  * run, but hides the values of the secret global variables too: nobody may read a secret back,
  * not even its owner, so the user puts it into the command.
  *
+ * <p>A request that writes is only sent when the user confirms it. Anything but {@code GET},
+ * {@code HEAD} and {@code OPTIONS} writes, except a GraphQL request whose operation is a {@code
+ * query}: GraphQL sends every operation with {@code POST}, so its query text tells a read from a
+ * mutation. A GraphQL request whose operation cannot be told counts as a write.
+ *
+ * <p>A connector field computed by an invoker function, such as a token from a login, is kept in
+ * the {@link ConnectorTokenCache}, so repeated tests, like the calls of the GraphQL body editor, do
+ * not log in every time. When the API refuses the request (401, 403, or a GraphQL error caused by
+ * an {@code AccessDeniedException}) and the method's connector has such a field, the cached value
+ * is dropped and the request is sent once more after a new login.
+ *
  * <p>Not transactional on purpose: the connectors are read detached and their decrypted request
  * data must never be flushed back to the database.
  */
@@ -110,6 +128,18 @@ public class MethodTestServiceImp implements MethodTestService {
             Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
     private static final String PUBLIC_VISIBILITY = "public";
 
+    private static final ObjectMapper JSON = new ObjectMapper();
+
+    // the cause jdisc reports for a refused token; the GraphQL body editor checked the same
+    private static final String ACCESS_DENIED_CAUSE = "AccessDeniedException";
+
+    // block strings, strings and comments of a GraphQL document: their text is never syntax
+    private static final Pattern GRAPHQL_IGNORED =
+            Pattern.compile("\"\"\"(?:\\\\\"\"\"|[\\s\\S])*?\"\"\"|\"(?:\\\\.|[^\"\\\\\\r\\n])*\"|#[^\\r\\n]*");
+
+    // the tokens that tell the operations of a GraphQL document apart: names and brackets
+    private static final Pattern GRAPHQL_TOKEN = Pattern.compile("[_A-Za-z][_0-9A-Za-z]*|[{}()]");
+
     private final Environment environment;
     private final MethodMngMapper methodMngMapper;
     private final OperationExMapper operationExMapper;
@@ -118,6 +148,7 @@ public class MethodTestServiceImp implements MethodTestService {
     private final InvokerService invokerService;
     private final GlobalVariableSnapshotService globalVariableSnapshotService;
     private final GlobalVariableService globalVariableService;
+    private final ConnectorTokenCache tokenCache;
 
     public MethodTestServiceImp(
             Environment environment,
@@ -127,7 +158,8 @@ public class MethodTestServiceImp implements MethodTestService {
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("invokerServiceImp") InvokerService invokerService,
             GlobalVariableSnapshotService globalVariableSnapshotService,
-            GlobalVariableService globalVariableService) {
+            GlobalVariableService globalVariableService,
+            ConnectorTokenCache tokenCache) {
         this.environment = environment;
         this.methodMngMapper = methodMngMapper;
         this.operationExMapper = operationExMapper;
@@ -136,6 +168,7 @@ public class MethodTestServiceImp implements MethodTestService {
         this.invokerService = invokerService;
         this.globalVariableSnapshotService = globalVariableSnapshotService;
         this.globalVariableService = globalVariableService;
+        this.tokenCache = tokenCache;
     }
 
     @Override
@@ -176,13 +209,33 @@ public class MethodTestServiceImp implements MethodTestService {
     public MethodTestResultDTO test(MethodTestRequestDTO request, Long connectionId, Integer categoryId) {
         requireOneWorkflow(connectionId, categoryId);
         OperationDTO operation = toOperation(request.method());
-        requireWriteConfirmed(operation, request.confirmWrite());
+        requireWriteConfirmed(request.method(), operation, request.confirmWrite());
 
         PreparedRequest prepared = prepare(operation, request.staticValues(), connectionId, categoryId);
         if (!prepared.connectorErrors().isEmpty()) {
             return MethodTestResultDTO.notSent(prepared.connectorErrors());
         }
 
+        Exchange exchange = send(operation, prepared);
+
+        // a computed token the API refuses is dropped, and the request is sent once more after a
+        // new login; a connector without computed fields would send the same values again
+        Integer ownConnectorId = operation.getConnectorId();
+        if (ownConnectorId != null && isAccessDenied(exchange.response()) && tokenCache.evict(ownConnectorId)) {
+            prepared = prepare(operation, request.staticValues(), connectionId, categoryId);
+            if (!prepared.connectorErrors().isEmpty()) {
+                return MethodTestResultDTO.notSent(prepared.connectorErrors());
+            }
+            exchange = send(operation, prepared);
+        }
+
+        return MethodTestResultDTO.sent(
+                toSentRequest(prepared.request(), prepared.secrets()),
+                toReceivedResponse(exchange.response()),
+                exchange.durationMs());
+    }
+
+    private Exchange send(OperationDTO operation, PreparedRequest prepared) {
         RequestEntity<?> requestEntity = prepared.request();
         Class<?> responseType = OperationExchange.responseTypeOf(operation);
         RestTemplate restTemplate = newRestTemplate(prepared.ownConnector());
@@ -192,8 +245,38 @@ public class MethodTestServiceImp implements MethodTestService {
                 OperationExchange.exchange(restTemplate, requestEntity.getUrl(), requestEntity, responseType);
         long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 
-        return MethodTestResultDTO.sent(
-                toSentRequest(requestEntity, prepared.secrets()), toReceivedResponse(response), durationMs);
+        return new Exchange(response, durationMs);
+    }
+
+    /**
+     * Whether the API refused the request for its credentials: 401, 403, or a GraphQL error whose
+     * first cause is an {@code AccessDeniedException}, which GraphQL APIs such as jdisc answer
+     * with status 200.
+     */
+    private static boolean isAccessDenied(ResponseEntity<?> response) {
+        int status = response.getStatusCode().value();
+        if (status == HttpStatus.UNAUTHORIZED.value() || status == HttpStatus.FORBIDDEN.value()) {
+            return true;
+        }
+
+        return jsonOf(response.getBody())
+                .map(body -> body.path("errors").path(0).path("extensions").path("causes").path(0).path("error"))
+                .filter(cause -> ACCESS_DENIED_CAUSE.equals(cause.asText()))
+                .isPresent();
+    }
+
+    private static Optional<JsonNode> jsonOf(Object body) {
+        try {
+            if (body instanceof String text) {
+                return Optional.ofNullable(JSON.readTree(text));
+            }
+            if (body instanceof Map<?, ?> || body instanceof List<?>) {
+                return Optional.of(JSON.valueToTree(body));
+            }
+        } catch (JsonProcessingException | IllegalArgumentException e) {
+            // not JSON, so no GraphQL error
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -246,7 +329,7 @@ public class MethodTestServiceImp implements MethodTestService {
                     globalSecrets.addAll(openToAll.secretTexts());
                     secrets.addAll(openToAll.secretTexts());
                     return openToAll;
-                });
+                }, tokenCache);
 
                 connectors.put(connectorId, resolved);
                 hiddenFields.stream()
@@ -309,16 +392,91 @@ public class MethodTestServiceImp implements MethodTestService {
                 "Give connectionId for a saved workflow or categoryId for one that is not saved yet, not both.");
     }
 
-    private static void requireWriteConfirmed(OperationDTO operation, boolean confirmWrite) {
+    private static void requireWriteConfirmed(MethodDTO method, OperationDTO operation, boolean confirmWrite) {
         if (confirmWrite || READ_ONLY_METHODS.contains(operation.getHttpMethod())) {
             return;
         }
 
+        Optional<GraphQlOperationType> graphQlOperation = graphQlOperationTypeOf(method);
+        if (graphQlOperation.filter(type -> type == GraphQlOperationType.QUERY).isPresent()) {
+            return;
+        }
+
+        String sent = graphQlOperation
+                .map(type -> "a GraphQL " + type.description)
+                .orElseGet(() -> "a %s request".formatted(operation.getHttpMethod().name()));
         throw new GeneralServiceException(
                 HttpStatus.BAD_REQUEST,
                 ExceptionConstant.METHOD_TEST_WRITE_NOT_CONFIRMED,
-                "The method sends a %s request to the real API. Set confirmWrite to true to send it."
-                        .formatted(operation.getHttpMethod().name()));
+                "The method sends %s to the real API. Set confirmWrite to true to send it.".formatted(sent));
+    }
+
+    /** The type of the GraphQL operation {@code method} runs; empty when its body is not GraphQL. */
+    private static Optional<GraphQlOperationType> graphQlOperationTypeOf(MethodDTO method) {
+        BodyDTO body = method.getRequest().getBody();
+        if (body == null
+                || !ConnectionConstants.GRAPHQL_BODY_DATA.equals(body.getData())
+                || body.getFields() == null) {
+            return Optional.empty();
+        }
+
+        Object query = body.getFields().get(ConnectionConstants.GRAPHQL_QUERY_FIELD);
+        Object operationName = body.getFields().get(ConnectionConstants.GRAPHQL_OPERATION_NAME_FIELD);
+        if (!(query instanceof String document)) {
+            return Optional.of(GraphQlOperationType.UNKNOWN);
+        }
+
+        return Optional.of(operationTypeOf(document, operationName instanceof String name ? name : null));
+    }
+
+    /**
+     * Reads the type of the operation a GraphQL document runs: the one named {@code
+     * operationName}, or else its only operation. Strings and comments are skipped, and only names
+     * outside any bracket are read, so fields, arguments and fragments never count.
+     */
+    private static GraphQlOperationType operationTypeOf(String document, String operationName) {
+        Matcher token = GRAPHQL_TOKEN.matcher(GRAPHQL_IGNORED.matcher(document).replaceAll(" "));
+        List<GraphQlOperation> operations = new ArrayList<>();
+        int depth = 0;
+        GraphQlOperationType declared = null;
+        String name = null;
+        boolean fragment = false;
+
+        while (token.find()) {
+            String text = token.group();
+            if (text.equals("{") || text.equals("(")) {
+                // a selection set opened at the top ends the definition before it
+                if (depth == 0 && text.equals("{")) {
+                    if (declared != null) {
+                        operations.add(new GraphQlOperation(name, declared));
+                    } else if (!fragment) {
+                        // the shorthand "{ ... }" is a query
+                        operations.add(new GraphQlOperation(null, GraphQlOperationType.QUERY));
+                    }
+                    declared = null;
+                    name = null;
+                    fragment = false;
+                }
+                depth++;
+            } else if (text.equals("}") || text.equals(")")) {
+                depth = Math.max(0, depth - 1);
+            } else if (depth == 0 && declared == null && !fragment) {
+                declared = GraphQlOperationType.ofKeyword(text).orElse(null);
+                fragment = text.equals("fragment");
+            } else if (depth == 0 && declared != null && name == null) {
+                name = text;
+            }
+        }
+
+        if (operationName == null || operationName.isBlank()) {
+            return operations.size() == 1 ? operations.get(0).type() : GraphQlOperationType.UNKNOWN;
+        }
+
+        return operations.stream()
+                .filter(operation -> operationName.equals(operation.name()))
+                .map(GraphQlOperation::type)
+                .findFirst()
+                .orElse(GraphQlOperationType.UNKNOWN);
     }
 
     /**
@@ -585,6 +743,34 @@ public class MethodTestServiceImp implements MethodTestService {
     }
 
     private record ConnectorField(int connectorId, String key) {}
+
+    private record Exchange(ResponseEntity<?> response, long durationMs) {}
+
+    private record GraphQlOperation(String name, GraphQlOperationType type) {}
+
+    /** The type of a GraphQL operation; {@link #UNKNOWN} when the query text does not tell it. */
+    private enum GraphQlOperationType {
+        QUERY("query"),
+        MUTATION("mutation"),
+        SUBSCRIPTION("subscription"),
+        UNKNOWN("operation that is not recognised as a query");
+
+        private final String description;
+
+        GraphQlOperationType(String description) {
+            this.description = description;
+        }
+
+        /** The type a definition keyword such as {@code mutation} starts; empty for any other name. */
+        static Optional<GraphQlOperationType> ofKeyword(String keyword) {
+            return switch (keyword) {
+                case "query" -> Optional.of(QUERY);
+                case "mutation" -> Optional.of(MUTATION);
+                case "subscription" -> Optional.of(SUBSCRIPTION);
+                default -> Optional.empty();
+            };
+        }
+    }
 
     /**
      * The request of a method, ready to send.
