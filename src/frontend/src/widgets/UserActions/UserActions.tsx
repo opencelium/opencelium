@@ -3,7 +3,7 @@ import {IconButton} from '@shared/ui/primitives/IconButton'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
 import {EntityAvatar} from '@shared/ui/entity-avatar/EntityAvatar'
-import {useAppLanguage} from '@features/user/language/useAppLanguage'
+import {LanguageToggle} from '@features/user/language/LanguageToggle'
 import {MenuSwitcher} from '@app/layouts/AppLayout/Sidebar/MenuSwitcher'
 import {HelpMenu, type HelpTours} from '@app/layouts/AppLayout/TopBar/HelpMenu'
 import type {NewFeatureId} from '@shared/ui/feedback/NewFeature/newFeatures'
@@ -25,27 +25,11 @@ export const UserActions = ({layout, tours = 'app', newFeatureId}: Props) => {
 
     return (
         <div style={{display: 'flex', alignItems: 'center'}}>
-            <LanguageToggle/>
+            <LanguageToggle testId="topbar-language"/>
             <HelpMenu tours={tours} newFeatureId={newFeatureId}/>
             <MenuSwitcher/>
             <ProfileButton/>
         </div>
-    )
-}
-
-const LanguageToggle = () => {
-    const {lang, changeLanguage} = useAppLanguage()
-    const {t: tCommon} = useI18n('common')
-    return (
-        <Tooltip content={tCommon(lang === 'en' ? 'topbar.switchToGerman' : 'topbar.switchToEnglish')}>
-            <Button
-                type="text"
-                onClick={() => void changeLanguage(lang === 'en' ? 'de' : 'en')}
-                testId="topbar-language"
-            >
-                {lang.toUpperCase()}
-            </Button>
-        </Tooltip>
     )
 }
 

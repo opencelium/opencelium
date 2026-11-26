@@ -12,7 +12,7 @@ export function findUsedMutableNames(items: PickerItem[], connectionId: number, 
     const referenced = new Set(referencedNames.map((name) => name.toLowerCase()))
     return items
         .filter((item) => item.kind === 'MUTABLE'
-            && (item.ownerWorkflow?.id === connectionId || referenced.has(item.name.toLowerCase())))
+            && (item.ownerWorkflows.some((owner) => owner.id === connectionId) || referenced.has(item.name.toLowerCase())))
         .map((item) => item.name)
 }
 

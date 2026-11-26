@@ -32,12 +32,12 @@ export type GlobalVariableFormValues = {
     value: string
     script: ScriptFormValues
     busyPolicy: BusyPolicy
-    ownerWorkflowId: number | null
+    ownerWorkflowIds: number[]
     scope: GlobalVariableScopeDto
 }
 
 export const DEFAULT_BUSY_POLICY: BusyPolicy = 'QUEUE'
-const mutableDefaults = { busyPolicy: DEFAULT_BUSY_POLICY, ownerWorkflowId: null }
+const mutableDefaults = { busyPolicy: DEFAULT_BUSY_POLICY, ownerWorkflowIds: [] }
 
 export type ValueJsonType = 'string' | 'number' | 'boolean' | 'null' | 'array' | 'object'
 
@@ -125,7 +125,7 @@ export function toFormValues(variable: GlobalVariable): GlobalVariableFormValues
                 value: valueToText(variable.value),
                 script: emptyScript(),
                 busyPolicy: variable.mutable.busyPolicy,
-                ownerWorkflowId: variable.mutable.ownerWorkflow?.id ?? null,
+                ownerWorkflowIds: variable.mutable.ownerWorkflows.map((workflow) => workflow.id),
             }
         case 'SCRIPT':
             return {
@@ -175,8 +175,7 @@ export function toSaveDto(values: GlobalVariableFormValues, mode: Mode): GlobalV
                 kind: 'MUTABLE',
                 value: textToValue(values.value),
                 busyPolicy: values.busyPolicy,
-                // isOwnerMissing blocks the submit before this runs without one
-                ownerWorkflowId: values.ownerWorkflowId ?? 0,
+                ownerWorkflowIds: values.ownerWorkflowIds,
             }
         case 'SCRIPT':
             return {
@@ -207,6 +206,6 @@ export const isScopeIncomplete = (scope: GlobalVariableScopeDto | undefined) =>
     && ((scope.type === 'CATEGORIES' && scope.categoryIds.length === 0)
         || (scope.type === 'WORKFLOWS' && scope.workflowIds.length === 0))
 
-// The backend refuses a mutable variable without the workflow whose runs may write it.
+// The backend refuses a mutable variable without at least one workflow whose runs may write it.
 export const isOwnerMissing = (values: Partial<GlobalVariableFormValues>) =>
-    values.kind === 'MUTABLE' && (values.ownerWorkflowId === null || values.ownerWorkflowId === undefined)
+    values.kind === 'MUTABLE' && (values.ownerWorkflowIds ?? []).length === 0

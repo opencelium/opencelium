@@ -1630,6 +1630,21 @@
     "references": {
       "webhook": "Webhook",
       "global": "Global"
+    },
+    "transformation": {
+      "label": "Transformation",
+      "add": "Wert per Skript berechnen (Transformation)",
+      "editScript": "Skript bearbeiten",
+      "remove": "Transformation entfernen",
+      "dialogTitle": "Transformation · {{field}}",
+      "done": "Fertig",
+      "needsStepReference": "Eine Transformation braucht mindestens eine Schritt-Referenz als Eingabe. Ohne sie wird sie nicht gespeichert.",
+      "unavailable": {
+        "noStepReference": "Füge zuerst eine Schritt-Referenz ein. Das Skript erhält jede Referenz als VAR_0, VAR_1, …",
+        "webhookParameter": "Webhook-Parameter können nicht an ein Skript übergeben werden. Entferne sie, um eine Transformation zu nutzen.",
+        "combined": "Dieses Feld wird in der Nachricht mit anderem Text kombiniert, daher kann kein Skript es füllen.",
+        "unused": "Dieses Feld ist noch nicht Teil der Nachricht."
+      }
     }
   },
   "runPolicy": {

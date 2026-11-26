@@ -7,7 +7,7 @@
     },
     "MUTABLE": {
       "label": "Veränderlich",
-      "hint": "Ihr Besitzer-Workflow ändert sie während der Ausführung. Andere Workflows lesen sie."
+      "hint": "Ihre Besitzer-Workflows ändern sie während der Ausführung. Andere Workflows lesen sie."
     },
     "SCRIPT": {
       "label": "Skript",
@@ -47,7 +47,7 @@
   },
   "live": {
     "beingUpdated": "Wird von Ausführung #{{executionId}} aktualisiert",
-    "beingUpdatedHint": "Der Besitzer-Workflow schreibt diese Variable (gestartet {{startedAt}}). Angezeigt wird der zuletzt gespeicherte Wert.",
+    "beingUpdatedHint": "Ein Besitzer-Workflow schreibt diese Variable (gestartet {{startedAt}}). Angezeigt wird der zuletzt gespeicherte Wert.",
     "beingUpdatedStarting": "Wird von einer startenden Ausführung aktualisiert"
   },
   "fields": {
@@ -273,7 +273,7 @@
     "NO_USE_PERMISSION": "Sie dürfen die globale Variable \"{{variable}}\" nicht verwenden.",
     "INVALID_WRITE_TARGET": "Ein Schreibziel muss genau global.<name> sein (\"{{field}}\").",
     "NOT_MUTABLE": "\"{{variable}}\" ist keine veränderliche Variable und kann daher nicht geschrieben werden.",
-    "NOT_OWNER": "Die globale Variable \"{{variable}}\" gehört zu einem anderen Workflow; nur ihr Besitzer-Workflow darf sie schreiben.",
+    "NOT_OWNER": "Die globale Variable \"{{variable}}\" gehört nicht diesem Workflow; nur ihre Besitzer-Workflows dürfen sie schreiben.",
     "SCRIPT_NOT_CALLABLE": "\"{{variable}}\" ist ein Skript: Importieren Sie es in eine Transformation derselben Sprache und rufen Sie es dort auf.",
     "IMPORT_LANGUAGE_MISMATCH": "\"{{variable}}\" ist in einer anderen Sprache geschrieben als diese Transformation.",
     "more": "(+{{count}} weitere)"
@@ -328,7 +328,7 @@
   "mutable": {
     "busyPolicy": {
       "label": "Wenn eine Ausführung eines Workflows, der sie nutzt, noch läuft",
-      "scope": "Das gilt für jeden Workflow, der diese Variable nutzt: den Besitzer-Workflow und jeden Workflow, der sie referenziert. Ein solcher Workflow führt immer nur eine Ausführung gleichzeitig aus, und sagt eine seiner veränderbaren Variablen „Ablehnen“, wird ein zweiter Start für den ganzen Workflow abgelehnt.",
+      "scope": "Das gilt für jeden Workflow, der diese Variable nutzt: ihre Besitzer-Workflows und jeden Workflow, der sie referenziert. Ein solcher Workflow führt immer nur eine Ausführung gleichzeitig aus, und sagt eine seiner veränderbaren Variablen „Ablehnen“, wird ein zweiter Start für den ganzen Workflow abgelehnt.",
       "queueLimits": "Die Grenzen der Warteschlange stehen in der application.yml: <code>opencelium.global-variable.queue.max-waiting</code> (wie viele Starts je Workflow warten dürfen, Standard 100) und <code>opencelium.global-variable.queue.max-wait-minutes</code> (wie lange ein Start warten darf, Standard 60). Ein Start über einer der Grenzen wird abgelehnt. Ändern Sie sie in der <page>Systemkonfiguration</page> und starten Sie das Backend neu.",
       "hints": {
         "QUEUE": "Die nächste Ausführung wartet und startet, sobald die laufende endet.",
@@ -336,12 +336,12 @@
       }
     },
     "owner": {
-      "label": "Besitzer-Workflow",
-      "hint": "Der einzige Workflow, dessen Ausführungen diese Variable schreiben dürfen. Er muss im Gültigkeitsbereich liegen.",
-      "placeholder": "Workflow auswählen"
+      "label": "Besitzer-Workflows",
+      "hint": "Die Workflows, deren Ausführungen diese Variable schreiben dürfen, jeder im Gültigkeitsbereich. Ausführungen verschiedener Besitzer warten nicht aufeinander, daher gewinnt der letzte Schreibvorgang. Eine Ausführung schreibt die Variable, sobald die Methode, die sie setzt, ihre API-Antwort erhält; bis dahin lesen andere Workflows den alten Wert.",
+      "placeholder": "Einen oder mehrere Workflows auswählen"
     },
     "errors": {
-      "ownerRequired": "Wählen Sie den Workflow, dessen Ausführungen diese Variable schreiben dürfen."
+      "ownerRequired": "Wählen Sie mindestens einen Workflow, dessen Ausführungen diese Variable schreiben dürfen."
     }
   },
   "details": {

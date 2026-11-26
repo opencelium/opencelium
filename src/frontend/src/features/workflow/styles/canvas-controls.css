@@ -12,6 +12,13 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  /* The panel is as tall as the Controls column, so the empty space below the
+     shorter debug card would otherwise swallow clicks on nodes underneath. */
+  pointer-events: none;
+}
+
+.canvasTopLeftPanel > * {
+  pointer-events: auto;
 }
 
 /* Neutralize the Controls component's own position:absolute (it always

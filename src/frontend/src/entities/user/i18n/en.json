@@ -179,7 +179,8 @@
     "confirm": {
       "title": "Create password reset link",
       "message": "Create a one-time link with which \"{{user}}\" sets a new password? Any earlier link for this user, including a pending \"forgot password\" link, stops working. The current password stays valid until the link is used.",
-      "sendEmail": "Also send the link to the user by email"
+      "sendEmail": "Also send the link to the user by email",
+      "emailUnavailable": "Email is not available: the server's mail settings are missing or not working. Copy the link and pass it on yourself."
     },
     "dialog": {
       "title": "Password reset link",
