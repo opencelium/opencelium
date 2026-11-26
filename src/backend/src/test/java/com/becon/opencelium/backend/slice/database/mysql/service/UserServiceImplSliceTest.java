@@ -9,6 +9,7 @@
 package com.becon.opencelium.backend.slice.database.mysql.service;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.database.mysql.entity.PasswordResetToken;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl;
@@ -20,6 +21,7 @@ import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.testutil.annotation.SliceTest;
+import com.becon.opencelium.backend.testutil.fixture.PasswordResetTokenFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +53,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * The {@code save} cases run the email uniqueness check against real rows, which
  * the unit test only mocks: a user without an email, and a user re-saving its own.
+ *
+ * The {@code deleteById} case checks against the real foreign key that a user's
+ * password reset tokens are removed with it.
  *
  * Run with: ./gradlew test --tests "*.UserServiceImplSliceTest"
  */
@@ -178,6 +183,35 @@ class UserServiceImplSliceTest {
         User refetched = em.find(User.class, aliceId);
         assertThat(refetched.getEmail()).isEqualTo("alice@example.com");
         assertThat(refetched.getUsername()).isEqualTo("alice");
+    }
+
+    @Test
+    void deleteByIdRemovesUserAndItsPasswordResetTokensWhenUserHasTokens() {
+        User alice = UserFixture.anEmptyUser();
+        alice.setAuthMethod(AuthMethod.BASIC);
+        alice.setEmail("alice@example.com");
+        alice.setPassword(encoder.encode("pass"));
+        em.persistAndFlush(alice);
+        int aliceId = alice.getId();
+        // A used self-service token and a live admin link, both referencing the user row.
+        PasswordResetToken used = PasswordResetTokenFixture.aFreshTokenFor(alice, "a".repeat(64));
+        used.setUsed(true);
+        used.setValid(false);
+        em.persist(used);
+        em.persist(PasswordResetTokenFixture.anAdminLinkFor(alice, "b".repeat(64), 1, 60_000L));
+        em.flush();
+        em.clear();
+
+        // Without removing the tokens first, the flush fails on their foreign key.
+        userService.deleteById(aliceId);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(User.class, aliceId)).isNull();
+        Long tokensLeft = em.getEntityManager()
+                .createQuery("SELECT COUNT(t) FROM PasswordResetToken t", Long.class)
+                .getSingleResult();
+        assertThat(tokensLeft).isZero();
     }
 
     @TestConfiguration
