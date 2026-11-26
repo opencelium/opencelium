@@ -15,10 +15,19 @@ function isHttpUrl(value: string): boolean {
     }
 }
 
-export function isPasswordResetLinkDto(value: unknown): value is PasswordResetLinkDto {
-    if (!value || typeof value !== 'object') return false
+export type PasswordLinkResponse =
+    | { kind: 'ok'; link: PasswordResetLinkDto }
+    // The backend prefixes the token with opencelium.forgot-psw.base-url; when that is
+    // unset the link comes back as "null?token=…".
+    | { kind: 'baseUrlMissing' }
+    | { kind: 'invalid' }
+
+export function parsePasswordLinkResponse(value: unknown): PasswordLinkResponse {
+    if (!value || typeof value !== 'object') return { kind: 'invalid' }
     const { link, expiresAt } = value as Record<string, unknown>
-    return typeof link === 'string' && isHttpUrl(link) && typeof expiresAt === 'string'
+    if (typeof link !== 'string' || typeof expiresAt !== 'string') return { kind: 'invalid' }
+    if (!isHttpUrl(link)) return { kind: 'baseUrlMissing' }
+    return { kind: 'ok', link: { link, expiresAt } }
 }
 
 /**

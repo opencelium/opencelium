@@ -194,6 +194,7 @@
       "emailNotFound": "This user has no email address. Create the link without email and pass it on yourself.",
       "emailFailed": "The email could not be sent, so no link was created. Create the link without email, or check the mail settings.",
       "notAvailable": "Password reset links are not supported by this server version yet.",
+      "baseUrlMissing": "The server returned an unusable link because its set-password address is not configured. Ask an administrator to set opencelium.forgot-psw.base-url to this app's /set-password page, then create the link again.",
       "failed": "Could not create the password reset link. Please try again."
     }
   }

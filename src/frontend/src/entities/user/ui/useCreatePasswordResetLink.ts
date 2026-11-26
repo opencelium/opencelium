@@ -8,7 +8,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { PasswordResetLinkDto } from '@entities/user/model/types'
 import {
     buildPasswordResetLinkUrl,
-    isPasswordResetLinkDto,
+    parsePasswordLinkResponse,
     resolveResetLinkFailure,
 } from '@entities/user/lib/passwordResetLink'
 
@@ -27,9 +27,21 @@ export function useCreatePasswordResetLink() {
                 method: 'POST',
                 options: { ignoreError: true, skipEntityInvalidation: true },
             }).unwrap()
-            if (isPasswordResetLinkDto(result)) return result
-            notifyError(t('user.resetLink.error.failed'))
-            return null
+            const parsed = parsePasswordLinkResponse(result)
+            switch (parsed.kind) {
+                case 'ok':
+                    return parsed.link
+                case 'baseUrlMissing':
+                    notifyError(t('user.resetLink.error.baseUrlMissing'))
+                    return null
+                case 'invalid':
+                    notifyError(t('user.resetLink.error.failed'))
+                    return null
+                default: {
+                    const _exhaustive: never = parsed
+                    return _exhaustive
+                }
+            }
         } catch (error) {
             const failure = resolveResetLinkFailure(error)
             if (failure) notifyError(t(`user.resetLink.error.${failure}`))

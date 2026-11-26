@@ -91,6 +91,12 @@ describe('useCreatePasswordResetLink', () => {
         expect(mocks.notifyError).not.toHaveBeenCalled()
     })
 
+    it('names the missing base-url when the backend returns a null-prefixed link', async () => {
+        respond({ok: {link: 'null?token=abc', expiresAt: '2026-11-26T10:00:00Z'}})
+        expect(await createFor(7)).toBeNull()
+        expect(mocks.notifyError).toHaveBeenCalledWith('user.resetLink.error.baseUrlMissing')
+    })
+
     it('rejects an unexpected success body', async () => {
         respond({ok: {message: 'done'}})
         expect(await createFor(7)).toBeNull()

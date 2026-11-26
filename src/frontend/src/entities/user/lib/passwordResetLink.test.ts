@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest'
 import {
     buildPasswordResetLinkUrl,
-    isPasswordResetLinkDto,
+    parsePasswordLinkResponse,
     resolveResetLinkFailure,
 } from './passwordResetLink'
 
@@ -11,25 +11,27 @@ describe('buildPasswordResetLinkUrl', () => {
     })
 })
 
-describe('isPasswordResetLinkDto', () => {
+describe('parsePasswordLinkResponse', () => {
+    const expiresAt = '2026-11-27T10:15:30Z'
+
     it('accepts the backend shape', () => {
-        expect(isPasswordResetLinkDto({
-            link: 'https://oc.example.com/set-password?token=Hk3v0QpN2xT7bW9cLq4mR8sYv1aD5eF6gH0jK3nP2uZ',
-            expiresAt: '2026-11-27T10:15:30Z',
-        })).toBe(true)
+        const link = 'https://oc.example.com/set-password?token=Hk3v0QpN2xT7bW9cLq4mR8sYv1aD5eF6gH0jK3nP2uZ'
+        expect(parsePasswordLinkResponse({link, expiresAt})).toEqual({kind: 'ok', link: {link, expiresAt}})
     })
 
-    it.each([
-        null,
-        {},
-        {link: '', expiresAt: 'x'},
-        {link: 'https://oc.example.com/set-password?token=t'},
-        {link: 'javascript:alert(1)', expiresAt: '2026-11-27T10:15:30Z'},
-        {link: 'not a url', expiresAt: '2026-11-27T10:15:30Z'},
-        {token: 't', expiresAt: '2026-11-27T10:15:30Z'},
-    ])('rejects %j', (value) => {
-        expect(isPasswordResetLinkDto(value)).toBe(false)
-    })
+    it.each(['null?token=abc', '/set-password?token=abc', 'javascript:alert(1)'])(
+        'reports a missing base-url for %s',
+        (link) => {
+            expect(parsePasswordLinkResponse({link, expiresAt})).toEqual({kind: 'baseUrlMissing'})
+        },
+    )
+
+    it.each([null, {}, {link: 'https://oc.example.com/set-password?token=t'}, {token: 't', expiresAt}])(
+        'rejects %j',
+        (value) => {
+            expect(parsePasswordLinkResponse(value)).toEqual({kind: 'invalid'})
+        },
+    )
 })
 
 describe('resolveResetLinkFailure', () => {
