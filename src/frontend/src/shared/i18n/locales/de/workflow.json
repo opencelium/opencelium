@@ -1039,13 +1039,13 @@
   },
   "requestData": "Anfragedaten",
   "graphqlBody": {
-    "masterPasswordTitle": "Geben Sie das Master-Passwort ein, um auf die GraphQL-API dieses Konnektors zuzugreifen",
     "editorHint": "Strg + Leertaste für die Autovervollständigung. Nur die Abfrage des aktiven Tabs wird ausgeführt, wenn diese Methode läuft — Tabs werden nach dem Operationsnamen der Abfrage benannt (z. B. „query MyQuery {...}“), anonyme Abfragen bleiben daher „<untitled>“.",
-    "connectorFailed": "Der Konnektor konnte nicht geladen werden. Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut.",
-    "loginFailed": "Die Authentifizierung bei der GraphQL-API dieses Konnektors ist fehlgeschlagen. Überprüfen Sie dessen Zugangsdaten und versuchen Sie es erneut.",
-    "masterPasswordNotConfigured": "Es ist kein Master-Passwort konfiguriert",
-    "masterPasswordNotConfiguredDescription": "Bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten, um auf die GraphQL-API dieses Konnektors zugreifen zu können.",
-    "retry": "Erneut versuchen"
+    "confirmMutation": {
+      "title": "Diese Mutation ausführen?",
+      "message": "Eine Mutation ändert Daten im angebundenen System. Sie wird mit den Zugangsdaten des Konnektors an die echte API gesendet."
+    },
+    "mutationCancelled": "Mutation nicht gesendet.",
+    "requestFailed": "Die Anfrage konnte nicht gesendet werden."
   },
   "minimap": {
     "title": "Minimap",
