@@ -6,10 +6,11 @@ export type MinimapRect = { x: number; y: number; width: number; height: number 
 export type MinimapGroup =
 	| { kind: 'connector'; key: string; connectorId: number; label: string; slot: number | 'other' }
 	| { kind: 'system'; key: 'system' }
+	| { kind: 'notification'; key: 'notification' }
 	| { kind: 'trigger'; key: 'trigger' }
 	| { kind: 'operator'; key: 'operator' };
 
-export type MinimapShape = 'start' | 'circle' | 'diamond';
+export type MinimapShape = 'start' | 'circle' | 'bell' | 'diamond';
 
 export type MinimapDot = {
 	id: string;
@@ -71,7 +72,7 @@ const toDot = (node: WorkflowNodeModel): MinimapDot => {
 		}
 		case 'system': return { id: node.id, x, y, shape: 'circle', groupKey: 'system' };
 		case 'trigger-connection': return { id: node.id, x, y, shape: 'circle', groupKey: 'trigger' };
-		case 'notification': return { id: node.id, x, y, shape: 'circle', groupKey: 'system' };
+		case 'notification': return { id: node.id, x, y, shape: 'bell', groupKey: 'notification' };
 		case 'if':
 		case 'loop': return { id: node.id, x, y, shape: 'diamond', groupKey: 'operator' };
 		case 'comment': return { id: node.id, x, y, shape: 'circle', groupKey: null };
@@ -120,6 +121,7 @@ export const buildMinimapModel = (nodes: WorkflowNodeModel[], edges: WorkflowEdg
 	const present = new Set(dots.map((dot) => dot.groupKey));
 	const neutralGroups: MinimapGroup[] = [
 		{ kind: 'system', key: 'system' },
+		{ kind: 'notification', key: 'notification' },
 		{ kind: 'trigger', key: 'trigger' },
 		{ kind: 'operator', key: 'operator' },
 	];

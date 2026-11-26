@@ -173,5 +173,24 @@
     "deleteProfilePicture": {
       "failed": "User saved, but removing the profile picture failed. You can retry from edit."
     }
+  },
+  "resetLink": {
+    "tooltip": "Create one-time password reset link",
+    "confirm": {
+      "title": "Create password reset link",
+      "message": "Create a one-time password reset link for \"{{user}}\"? Any reset link created earlier for this user stops working."
+    },
+    "dialog": {
+      "title": "Password reset link",
+      "description": "Send this link to \"{{user}}\". It opens a page where they can set a new password.",
+      "expiresAt": "Valid until {{expiry}}. The link works only once.",
+      "securityHint": "Anyone with this link can set the password for this account. Share it only through a trusted channel. It is shown only now and cannot be displayed again."
+    },
+    "error": {
+      "ldapAccount": "This user signs in via LDAP. Their password is managed in the directory and cannot be reset here.",
+      "userNotFound": "This user no longer exists.",
+      "notAvailable": "Password reset links are not supported by this server version yet.",
+      "failed": "Could not create the password reset link. Please try again."
+    }
   }
 }

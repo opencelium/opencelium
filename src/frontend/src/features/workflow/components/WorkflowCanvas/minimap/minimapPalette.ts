@@ -16,9 +16,10 @@ export const OTHER_CONNECTOR_COLOR = 'var(--color-text-disabled)';
 export const connectorColor = (slot: number | 'other', mode: ThemeMode): string =>
 	slot === 'other' ? OTHER_CONNECTOR_COLOR : CONNECTOR_HUES[mode][slot];
 
-/** Neutral groups stay out of the categorical range; the shape (circle vs diamond) tells them apart. */
+/** Neutral groups stay out of the categorical range; the shape (circle, bell, diamond) tells them apart. */
 const NEUTRAL_COLOR = {
 	system: 'var(--color-text-secondary)',
+	notification: 'var(--color-text-secondary)',
 	trigger: 'var(--color-border-strong)',
 	operator: 'var(--color-text-secondary)',
 } as const;

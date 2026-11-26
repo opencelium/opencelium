@@ -22,3 +22,9 @@
 	font-weight: 300;
 	line-height: 1;
 }
+
+/* The maximize toggle sits just left of the close icon. */
+.wfDialog .ant-dialog-header-actions {
+	top: 17px;
+	inset-inline-end: 48px;
+}

@@ -41,6 +41,12 @@ describe('buildMinimapModel', () => {
 		expect(groups.map((group) => group.key)).toEqual(['connector-3', 'connector-7', 'operator']);
 	});
 
+	it('keeps notifications apart from HTTP requests, drawn as bells', () => {
+		const model = buildMinimapModel([node('http', 0, 0, { kind: 'system' }), node('bell', 100, 0, { kind: 'notification' })], []);
+		expect(model.groups.map((group) => group.key)).toEqual(['system', 'notification']);
+		expect(model.dots.map((dot) => [dot.groupKey, dot.shape])).toEqual([['system', 'circle'], ['notification', 'bell']]);
+	});
+
 	it('folds connectors past the last colour into a shared swatch', () => {
 		const many = Array.from({ length: CONNECTOR_SLOT_COUNT + 2 }, (_, index) => method(`m${index}`, index * 100, 0, index + 1));
 		const slots = buildMinimapModel(many, []).groups.map((group) => group.kind === 'connector' && group.slot);

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Controller, FormProvider } from 'react-hook-form'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { apiFetchWithHeaders, ApiFetchError, API_TIMEOUT_ERROR_NAME } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { errorBus } from '@shared/errors/api/errorBus'
@@ -10,11 +10,13 @@ import { Button } from '@shared/ui/primitives/Button'
 import { Card } from '@shared/ui/primitives/Card'
 import { Input } from '@shared/ui/primitives/Input'
 import { Typography } from '@shared/ui/primitives/Typography'
+import { InvalidResetLink } from './InvalidResetLink'
+import { PasswordResetDone } from './PasswordResetDone'
 
 const FORM_WIDTH = 400
-const REDIRECT_SECONDS = 5
 
 type AuthKey = Parameters<ReturnType<typeof useI18n<'auth'>>['t']>[0]
+type ResetStatus = 'editing' | 'done' | 'invalidLink'
 
 function isInvalidToken(error: ApiFetchError): boolean {
     if (error.status !== 400) return false
@@ -25,23 +27,11 @@ function isInvalidToken(error: ApiFetchError): boolean {
 export function SetPasswordForm() {
     const form = useSetPasswordForm()
     const { t } = useI18n('auth')
-    const navigate = useNavigate()
     const [searchParams] = useSearchParams()
-    const token = searchParams.get('token') ?? ''
+    const token = searchParams.get('token')?.trim() ?? ''
 
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [isSent, setIsSent] = useState(false)
-    const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS)
-
-    useEffect(() => {
-        if (!isSent) return
-        const id = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000)
-        return () => clearInterval(id)
-    }, [isSent])
-
-    useEffect(() => {
-        if (isSent && secondsLeft === 0) navigate('/login')
-    }, [isSent, secondsLeft, navigate])
+    const [status, setStatus] = useState<ResetStatus>(token ? 'editing' : 'invalidLink')
 
     const onSubmit = async ({ password, repeatPassword }: SetPasswordFormValues) => {
         setIsSubmitting(true)
@@ -51,10 +41,10 @@ export function SetPasswordForm() {
                 body: { token, newPassword: password, confirmPassword: repeatPassword },
                 timeoutMs: 15_000,
             })
-            setIsSent(true)
+            setStatus('done')
         } catch (e) {
             if (e instanceof ApiFetchError && isInvalidToken(e)) {
-                errorBus.emit({ type: 'VALIDATION', messageKey: 'setPassword.invalidToken' })
+                setStatus('invalidLink')
             } else if (e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME) {
                 errorBus.emit({ type: 'NETWORK', messageKey: 'setPassword.network' })
             } else if (e instanceof TypeError) {
@@ -73,14 +63,9 @@ export function SetPasswordForm() {
 
     return (
         <Card style={{ width: FORM_WIDTH }}>
-            {isSent ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-                    <Typography variant="body">{t('setPassword.success.message')}</Typography>
-                    <Typography variant="body" isSubtle>
-                        {t('setPassword.success.redirect', { seconds: secondsLeft })}
-                    </Typography>
-                </div>
-            ) : (
+            {status === 'done' && <PasswordResetDone />}
+            {status === 'invalidLink' && <InvalidResetLink />}
+            {status === 'editing' && (
                 <FormProvider {...form}>
                     <form
                         onSubmit={handleSubmit(onSubmit)}

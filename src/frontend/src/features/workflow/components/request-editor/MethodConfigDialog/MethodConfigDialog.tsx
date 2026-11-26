@@ -6,26 +6,32 @@ import { MethodConfigDialogEditor } from './MethodConfigDialogEditors';
 import type { MethodConfigDialogProps } from './MethodConfigDialog.types';
 import { useMethodConfigDialogState } from './useMethodConfigDialogState';
 import '../../dialogHeader.css';
+import { useMaximizableModal } from '../../dialog-maximize/useMaximizableModal';
 
 export function MethodConfigDialog(props: MethodConfigDialogProps) {
 	const { open, node, mode } = props;
 	const { t } = useI18n('workflow');
 	const { store, persistCurrentConfig } = useMethodConfigDialogState(props);
+	const isUrlMode = mode === 'url';
+	// Body and header already open at almost the full viewport; only the URL editor gets the toggle.
+	const { modalProps, toggle: maximizeToggle } = useMaximizableModal({
+		open: open && !!node,
+		layout: isUrlMode ? { width: 1180, className: 'wfDialog' } : { width: '94vw', style: { top: 18 }, className: 'wfDialog' },
+		testId: 'workflow-method-dialog-maximize',
+		isEnabled: isUrlMode,
+	});
 
 	if (!open || !node) return null;
 	const title = mode === 'body' ? t('methodConfig.body')
 		: mode === 'header' ? t('methodConfig.header') : t('methodConfig.requestUrl');
-	const isUrlMode = mode === 'url';
 
 	return (
 		<Modal
 			open={open}
 			onCancel={persistCurrentConfig}
-			width={isUrlMode ? 1180 : '94vw'}
-			style={!isUrlMode ? { top: 18 } : undefined}
+			{...modalProps}
 			destroyOnHidden
 			title={title}
-			className='wfDialog'
 			closeIcon={<span className='wfDialogClose'>×</span>}
 			styles={{
 				body: {
@@ -40,6 +46,7 @@ export function MethodConfigDialog(props: MethodConfigDialogProps) {
 				</Button>,
 			]}
 		>
+			{maximizeToggle}
 			{/* Flex column rather than the editor owning the fixed height directly:
 			    the hint above it appears only while a run is paused, and the editor
 			    has to give that row its space instead of overflowing the dialog. */}
