@@ -184,7 +184,7 @@ versions:
         path: opencelium.version
       - changeset: 2
         operation: add
-        value: https://frontend.example.com/reset-password
+        value: https://frontend.example.com/set-password
         path: opencelium.forgot-psw.base-url
       - changeset: 3
         operation: add
