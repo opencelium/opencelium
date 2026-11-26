@@ -6,15 +6,11 @@ export type User = {
   userDetail: UserDetail
   userGroup: UserGroup
   totpEnabled?: boolean
-  // Not sent by the backend yet; until it is, LDAP rows are only caught by the
-  // reset-link endpoint answering LDAP_ACCOUNT.
-  authMethod?: UserAuthMethod
 }
 
-export type UserAuthMethod = 'BASIC' | 'LDAP'
-
+// `link` holds a one-time secret: show it once, never log, persist or keep it after the dialog closes.
 export type PasswordResetLinkDto = {
-  token: string
+  link: string
   expiresAt: string
 }
 

@@ -4,16 +4,16 @@ import { Hint } from '@shared/ui/primitives/Hint'
 import { Input } from '@shared/ui/primitives/Input'
 import { Typography } from '@shared/ui/primitives/Typography'
 import type { PasswordResetLinkDto } from '@entities/user/model/types'
-import { buildPasswordResetUrl } from '@entities/user/lib/passwordResetLink'
 
 type Props = {
     link: PasswordResetLinkDto
     userLabel: string
+    isEmailSent: boolean
 }
 
-export function PasswordResetLinkDialogContent({ link, userLabel }: Props) {
+export function PasswordResetLinkDialogContent({ link, userLabel, isEmailSent }: Props) {
     const { t, lang } = useI18n('entities')
-    const url = buildPasswordResetUrl(link.token, window.location.origin)
+    const url = link.link
     const expiresAt = new Date(link.expiresAt)
     const expiry = Number.isNaN(expiresAt.getTime())
         ? link.expiresAt
@@ -21,7 +21,9 @@ export function PasswordResetLinkDialogContent({ link, userLabel }: Props) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <Typography variant="body">{t('user.resetLink.dialog.description', { user: userLabel })}</Typography>
+            <Typography variant="body">{t(isEmailSent ? 'user.resetLink.dialog.descriptionEmailSent' : 'user.resetLink.dialog.description', {
+                    user: userLabel,
+                })}</Typography>
             <Input
                 type="text"
                 value={url}
