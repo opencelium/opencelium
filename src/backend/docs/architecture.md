@@ -131,8 +131,9 @@ The module `core` has one package for each feature (modular monolith, decision 1
 | **Settings** | The setting registry collects the setting definitions of the features. The settings service reads and changes the installation settings in the `settings` collection. The settings API `GET/PATCH /api/settings` gives them to an installation admin (decisions 13, 19, 22, 24). | `core.settings` |
 | **Keys** | The root key, the DEK wrap and unwrap, the generation guard, and the start canary (decision 14). The system DEK of the first start and the signing key of the installation (decision 17). The token signature: it signs each token that core issues and examines each signature. | `core.secrets.keys` |
 | **Secret storage** | The secret provider implementation (decision 14). It keeps each secret of the installation as a ciphertext in the `secrets` collection (decision 24). | `core.secrets` |
-| **Bootstrap configuration** | The `opencelium.*` bootstrap properties, the defaults, and the failure analyzer. | `core.config` |
+| **Bootstrap configuration** | The `opencelium.*` bootstrap properties, the defaults, the env file reader (decision 26), and the failure analyzer. | `core.config` |
 | **MongoDB connection** | The connection resolver (decision 11), the client factory, and the start ping. | `core.config.mongo` |
+| **Setup** | The launcher selects the wizard or the normal start, and it finds the configuration file. The wizard asks the bootstrap values in the terminal, before Spring, and writes the yml file and the env file (decision 26). The admin marker and the completion runner make the first admin (decision 27). | `core.setup` |
 
 **Execution quota.** The total quota comes from the Service Portal in cloud mode, or from a license file in self-hosted mode. Core keeps the current usage encoded in MongoDB. To browse and to build is free at all times. The Execution Dispatcher enforces the quota for each execution. Test executions and debugger sessions also count.
 
@@ -144,7 +145,7 @@ The module `worker` holds the application wiring only. It grows nothing, on purp
 
 ### 4.1 Core starts
 
-This scenario tells what occurs when core starts, in the order of the code. Each step stops the application with the report `APPLICATION FAILED TO START` if its check is not successful. The report names the property or the action.
+This scenario tells what occurs when core starts, in the order of the code. Each step stops the application with the report `APPLICATION FAILED TO START` if its check is not successful. The report names the property or the action. Before step 1, the launcher finds the configuration file, and the env file reader reads the env file next to it (decision 26).
 
 1. The **defaults post-processor** adds the documented defaults for the bootstrap values that are not set:
    - the deployment mode `self-host`
@@ -164,7 +165,9 @@ This scenario tells what occurs when core starts, in the order of the code. Each
 
 When Spring makes the beans, the **setting registry** collects the setting definitions of the features (decision 24). A setting key with 2 setting definitions stops the start, and the error names the setting key.
 
-Steps 1 to 3 are in `core.config`. Steps 4 to 6 are in `core.config.mongo`. Steps 7 to 9 are in `core.secrets.keys`. The setting registry is in `core.settings`.
+As the last step of the start, the **completion runner** makes the first admin of a self-host installation (decision 27).
+
+Steps 1 to 3 and the env file reader are in `core.config`. Steps 4 to 6 are in `core.config.mongo`. Steps 7 to 9 are in `core.secrets.keys`. The setting registry is in `core.settings`. The launcher and the completion runner are in `core.setup`.
 
 ## 5. Deployment view
 
@@ -268,7 +271,7 @@ Two namespaces, one rule:
 - A property that Spring already owns keeps its standard name, for example `server.port` and `spring.mongodb.uri`. The property is not copied into our namespace.
 - `opencelium.*` holds only values that Spring has no concept of: the deployment mode, the data directory, and the master-key file. These values are one typed record of bootstrap properties in `core.config`. The code binds and validates them by hand, not through the automatic binder of Spring. Thus each error names its property.
 
-All bootstrap values are validated at the start. A bad value, or a mandatory value that is not set, stops the application at the start. The error names the property. Cloud mode changes what the URI points at, not the rule. In cloud mode the yml URI is the **system database** of core (the tenant catalog, decision 11). Core finds the per-tenant connections from the catalog at runtime, not from the yml file. The list of bootstrap values is small on purpose. It must grow only in rare cases.
+All bootstrap values are validated at the start. A bad value, or a mandatory value that is not set, stops the application at the start. The error names the property. Cloud mode changes what the URI points at, not the rule. In cloud mode the yml URI is the **system database** of core (the tenant catalog, decision 11). Core finds the per-tenant connections from the catalog at runtime, not from the yml file. The list of bootstrap values is small on purpose. It must grow only in rare cases. A bootstrap value that gives access to something is a bootstrap secret. It is in the env file next to the yml file, and the yml file holds only its placeholder (decision 26).
 
 **2. Does the value give access to something?** Examples: passwords, API tokens, private keys, broker credentials. If yes: **secret.**
 
@@ -292,10 +295,10 @@ Code reads a setting only through the settings service. The API changes a settin
 | Value | Question | Placement |
 |---|---|---|
 | HTTP port | 1 | yml: `server.port` (standard Spring) |
-| MongoDB URI (self-hosted: *the* database, cloud: the system database) | 1 | yml: `spring.mongodb.uri`, or the host-style properties `spring.mongodb.host`, `port`, … (standard Spring, see [6.6 Persistence](#66-persistence)) |
+| MongoDB URI (self-hosted: *the* database, cloud: the system database) | 1 | yml: `spring.mongodb.uri`, or the host-style properties `spring.mongodb.host`, `port`, … (standard Spring, see [6.6 Persistence](#66-persistence)). The wizard writes the placeholder `${OC_MONGO_URI}` there, and the env file gives the whole URI (decision 26). |
 | Deployment mode | 1 | yml: `opencelium.deployment-mode`. Values: `self-host` (the default) or `cloud` |
 | Data directory (local state, for example the generated `master.key`) | 1 | yml: `opencelium.data-dir`. Default on Linux: `/var/lib/opencelium`, if that directory is available and writable. Default in all other cases: `./data`. Core makes the directory at the start. The directory must be writable. In a container, mount it as a volume. |
-| Master (root) encryption key | 1 | **Outside the yml file and the database.** Core finds the key in this order: the `OC_MASTER_KEY` environment variable, then the file that `opencelium.master-key-file` names, then `master.key` in the data directory. In self-host mode, core generates the file in the data directory on a new installation. In cloud mode a start without a key stops. The key value is not in the yml file at any time. Rules and guards: decision 14. |
+| Master (root) encryption key | 1 | **Outside the yml file and the database.** Core finds the key in this order: the `OC_MASTER_KEY` environment variable, then the file that `opencelium.master-key-file` names, then `master.key` in the data directory. In self-host mode, core generates the file in the data directory on a new installation. In cloud mode a start without a key stops. The key value is not in the yml file and not in the env file at any time (decision 26). Rules and guards: decision 14. |
 | Tenant ID in the application log lines | 1 | yml: `logging.pattern.correlation` (standard Spring). The pattern applies from the first log line. Default: `[%X{tenant:-self-host-tenant}] ` in self-host mode, `[%X{tenant:--}] ` in cloud mode. It prints the MDC key `tenant`, which holds the current tenant (decision 15). |
 | Broker host name, port, vhost | 3 | Runtime setting (installation setting) |
 | Broker username | 3 | Runtime setting (installation setting). The broker username gives no access without the broker password. |
@@ -405,7 +408,7 @@ A test is in the module of the code that it tests. But not each module gets each
 |---|---|---|---|---|
 | `common` | ✅ only | — | — | A plain data model. There is nothing to slice and nothing to boot. |
 | `execution` | ✅ only | — | — | A library without an application to start. The engine, IF, and LOOP are tested with `new` and Mockito. External APIs are mocked at the Spring RestClient interface. Promise-graph tests complete the node promises in controlled orders, also in the worst orders. Examples: the right branch before the left branch, or a failure in the middle of a join. The executor and the clock are always injected. If `@SpringBootTest` seems necessary here, the code is in the wrong module. |
-| `core` | ✅ | ✅ | ✅ | The full application. Unit tests for the services. `@WebMvcTest` and `@JsonTest` slices. Each test that touches MongoDB is a full `@SpringBootTest` against a real MongoDB. Do not use `@DataMongoTest`: the core application excludes the Mongo auto-configuration of Boot and uses its own Mongo configuration, and slices ignore that exclusion. Such a test passes against the wrong client. |
+| `core` | ✅ | ✅ | ✅ | The full application. Unit tests for the services. `@WebMvcTest` and `@JsonTest` slices. Each test that touches MongoDB is a full `@SpringBootTest` against a real MongoDB. The 1 exception is the code that runs before Spring, for example the wizard and the start ping: its tests use the real MongoDB without a Spring context. Do not use `@DataMongoTest`: the core application excludes the Mongo auto-configuration of Boot and uses its own Mongo configuration, and slices ignore that exclusion. Such a test passes against the wrong client. |
 | `worker` | ✅ | ✅ | ✅ | The same types as core, but much fewer tests. The worker is only a thin shell for the engine. |
 
 The mechanics of the MongoDB tests, the test helpers, and the commands are in [CONTRIBUTING.md, section 9](../CONTRIBUTING.md#9-testing).
@@ -435,7 +438,7 @@ The index operations of a feature are also outside the rule.
 The rule for the tenant documents has 3 exceptions. They are operations of the start of core:
 
 - The wizard runs before Spring, with its own MongoDB client. Each read and each write of the wizard is outside the tenant-document access.
-- The completion runner of the wizard reads the admin marker by its document ID, which is the tenant ID. It deletes the marker after the admin exists.
+- The completion runner of the wizard reads the admin marker by its document ID, which is the tenant ID. It deletes the marker after the admin exists (decision 27).
 - The start checks of the root key read the `keys` collection of the database that the yml file names, without a tenant (decision 14). The signing-key loader reads and writes only the system DEK and the signing key there. They are data of the installation, not tenant documents (decision 17).
 
 ## 7. Architecture decisions
@@ -530,7 +533,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - **Credentials are database values with 2 more rules.** They are encrypted through the secret provider SPI. The default is a Mongo storage with AES-256-GCM, a new IV for each secret, and key versions. The master key is found outside the yml file and the database (decision 14). No API can read a credential back. Domain documents hold a secret reference. The value is decrypted only at the moment of use. It is not cached in plaintext.
     - The build checks of [6.9](#69-build-checks) enforce this.
 
-    *(The master-key clause is in decision 14. The path rule of the REST API is in decision 19. The placement questions and the examples are in [6.4 Configuration placement](#64-configuration-placement).)*
+    *(The master-key clause is in decision 14. The path rule of the REST API is in decision 19. The env file of a bootstrap secret is in decision 26. The placement questions and the examples are in [6.4 Configuration placement](#64-configuration-placement).)*
 
 14. **Envelope encryption: one root key for each installation, one DEK for each tenant.** *(Changes the master-key clause of decision 13 and extends its secret storage. Diagram: [6.5 Secrets and keys](#65-secrets-and-keys).)*
 
@@ -544,7 +547,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - Self-hosted is the same code path with exactly one tenant.
     - The root key does not leave core: not to the workers, not to the broker, and not to a job message.
 
-    *(The generation of the system DEK and the signing key is in decision 17. The worker-side key material for encrypted job payloads is on the [open decisions](#open-decisions) list.)*
+    *(The generation of the system DEK and the signing key is in decision 17. The env file is not a source of the root key: decision 26. The worker-side key material for encrypted job payloads is on the [open decisions](#open-decisions) list.)*
 
 15. **One current tenant for each request and for each background task. Only the tenant runner binds it, in a scoped value.** *(Extends decision 11.)*
 
@@ -667,6 +670,30 @@ The decisions are recorded so that they are not discussed again without a reason
     - **Outside the tenant rule.** The index operations are outside the rule. The building blocks that keep the data of the installation are outside the rule, and [6.9](#69-build-checks) names each one. The building blocks of the MongoDB connection are also outside the rule.
     - **The 3 exceptions.** The 3 exceptions of [6.9](#69-build-checks) do not change (decision 16).
     - **The modules.** The rules for `@Value` and for the cryptography apply to each module. The other 3 rules apply to `core` only, because only `core` has a database.
+
+26. **A bootstrap secret is in an env file next to the yml file. The yml file holds only a placeholder, and the environment of the process has priority over the 2 files.** *(Extends decisions 13 and 14.)*
+
+    *Why:* Core must have the MongoDB URI before it can reach a database, and the URI holds the database password. Thus the secret storage cannot keep this secret (decision 13). The yml file is readable by a group, so the secret goes to a second file that only its owner can read. A placeholder without a value stops the start, so a lost env file does not start core on the default database ([6.6](#66-persistence)). 1 copied file must not give the master key and the database password together (decision 14). A copy of an environment value in a file applies without a message when the variable is absent at a later start.
+
+    - **The bootstrap secret.** A bootstrap secret is a bootstrap value that gives access to something. The first one is the MongoDB URI, which holds the database password. The env file is a part of the yml place of decision 13, not a third place.
+    - **The 2 files.** The wizard writes `spring.mongodb.uri: ${OC_MONGO_URI}` into the yml file. The env file `opencelium.env` is in the same directory and gives the whole URI, with its percent-encoding, in `OC_MONGO_URI`. The wizard writes the env file with permissions for its owner only. On a file system without such permissions, the wizard prints a warning.
+    - **The start.** At each start, core reads the env file next to the configuration file that has the highest priority. Its entries apply as environment variables, with the name rules of Spring Boot. A start without a `spring.config.*` location looks for the configuration file in `./config/`, then in `./`, then in `/etc/opencelium/` on Linux and macOS.
+    - **The priority.** A value has 5 sources. The first source with the value applies: (1) a command-line argument, (2) a system property, (3) the environment of the process, (4) the env file, (5) the yml file.
+    - **The form.** Core accepts only the form that the wizard writes: a comment, an empty line, `KEY=value`, or `KEY="value"`. A line in another form, or a file that core cannot read, stops the start. The error names the file and the line number, and it shows no value. When `OC_MONGO_URI` has no value, core stops, and the error names the variable and the env file.
+    - **The master key.** The env file is not a source of the root key. `OC_MASTER_KEY` in the env file stops the start, and core reads this variable only from the environment of the process (decision 14).
+    - **No copy.** The wizard takes a bootstrap value from an environment variable of its process and does not ask for it. It writes no line in the yml file and no entry in the env file for that value. Thus the environment stays the only source of the value.
+
+27. **Core makes the first admin of a self-host installation at the start. The admin marker gives the admin username of the wizard to the first start.** *(Extends decision 10.)*
+
+    *Why:* A new self-host installation has no OpenCelium user, so nobody can log in through the local strategy (decision 10). The wizard runs before Spring, so the users block of the start makes the password hash and the user document, in 1 place. Another process can do the first start, and a first start can fail, so the handover is a document in the database. The marker is data for 1 start and not a configuration value, and a bootstrap property stays in the files after that start. A start without a terminal, for example in a container, does not see the wizard and must also have an admin. A setup token is a second login path with its own end time and its own cleanup.
+
+    - **The admin marker.** The admin marker is 1 document of the `admin_marker` collection, in the database that the first start uses. Its document ID is the tenant ID. It holds the admin username and no secret. The wizard writes it after the files and before the start.
+    - **The start with a marker.** The completion runner is the last step of the start. It makes the admin of the marker through the users block, then it deletes the marker. When an admin exists, it only deletes the marker. Thus a start that stops before it deletes the marker loses no admin and makes no second admin.
+    - **The start without a marker.** When the tenant has no OpenCelium user, the completion runner makes the default admin with the admin username `admin`. A tenant with an OpenCelium user and no admin gets no default admin. Thus a deleted admin does not come back.
+    - **The admin password.** The first admin gets the fixed admin password of the documentation, without a forced change and without a lock. Each reader of the documentation knows this password until the admin changes it. Thus core writes a warning with the admin username to the log when it makes the default admin. The log does not show the admin password.
+    - **Each process.** Each process that starts core runs the completion runner. When 2 processes make the admin at the same time, the users block accepts only 1 admin, and the other process continues. When the admin username belongs to an OpenCelium user that is not an admin, the start stops and keeps the marker.
+    - **The mode and the tenant.** The completion runner runs in the self-host mode only, and it binds `self-host-tenant` through the tenant runner (decision 15). In the cloud mode the Service Portal owns the OpenCelium users, so core makes no admin (decision 10). The operations on the marker are in the exceptions of [6.9](#69-build-checks).
+    - **No setup token and no setup state.** The first admin logs in through the local strategy, with the normal admin login. Core keeps no setup state after the first start, and the API has no block for a new installation.
 
 ### Open decisions
 
