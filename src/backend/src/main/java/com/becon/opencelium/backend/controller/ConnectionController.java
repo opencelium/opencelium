@@ -16,8 +16,6 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
-import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
@@ -42,7 +40,6 @@ import com.becon.opencelium.backend.resource.connection.referencevalidation.Refe
 import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationResultDTO;
 import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
@@ -71,11 +68,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -89,7 +81,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -113,7 +104,6 @@ public class ConnectionController {
             + "when that workflow is not saved yet. Without connectionId and categoryId, only global variables "
             + "open to all workflows are read.";
 
-    private final Environment environment;
     private final ConnectionService connectionService;
     private final ConnectorService connectorService;
     private final ConnectionMngService connectionMngService;
@@ -128,7 +118,6 @@ public class ConnectionController {
     private final ReferenceValidationService referenceValidationService;
 
     public ConnectionController(
-            Environment environment,
             SchedulerService schedulerService,
             ConnectorService connectorService,
             Connection2WebSocketChannelMapping connection2ChannelMapping,
@@ -142,7 +131,6 @@ public class ConnectionController {
             MethodTestService methodTestService,
             ReferenceValidationService referenceValidationService
     ) {
-        this.environment = environment;
         this.schedulerService = schedulerService;
         this.connection2ChannelMapping = connection2ChannelMapping;
         this.connectionService = connectionService;
@@ -862,43 +850,6 @@ public class ConnectionController {
         return ResponseEntity.ok().body(errorResource);
     }
 
-
-    @Operation(summary = "Sends request to remote api by accepting api data in request body.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Returns json string. Structure of json could be different depending on api.",
-                    content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PostMapping(path = "/remoteapi", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) {
-        HttpHeaders headers = new HttpHeaders();
-        if (apiDataResource.getHeader() != null) {
-            headers.setAll(apiDataResource.getHeader());
-        }
-
-        HttpEntity<Object> requestEntity = new HttpEntity<>(apiDataResource.getBody(), headers);
-
-        String proxyHost = environment.getProperty(AppYamlPath.PROXY_HOST, "");
-        String proxyPort = environment.getProperty(AppYamlPath.PROXY_PORT, "");
-        RestTemplateBuilder restTemplateBuilder =
-                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, apiDataResource.isSslOn()));
-        RestTemplate restTemplate = restTemplateBuilder.build();
-
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
-                apiDataResource.getUrl(),
-                HttpMethod.valueOf(apiDataResource.getMethod()),
-                requestEntity,
-                String.class
-        );
-
-        return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
-    }
 
     @Operation(summary = "Deletes a list of connections based on the provided list of their corresponding IDs")
     @ApiResponses(value = {
