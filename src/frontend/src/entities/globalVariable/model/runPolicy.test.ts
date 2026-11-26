@@ -2,16 +2,16 @@ import { describe, expect, it } from 'vitest'
 import type { PickerItem } from './types'
 import { findUsedMutableNames, resolveRunPolicy } from './runPolicy'
 
-const mutable = (name: string, ownerId: number | null): PickerItem => ({
+const mutable = (name: string, ...ownerIds: number[]): PickerItem => ({
     kind: 'MUTABLE', name, description: '', secret: false, valuePreview: null,
-    ownerWorkflow: ownerId === null ? null : { id: ownerId, title: `wf ${ownerId}` }, writable: false,
+    ownerWorkflows: ownerIds.map((id) => ({ id, title: `wf ${id}` })), writable: false,
 })
 
 describe('findUsedMutableNames', () => {
     const items: PickerItem[] = [
         mutable('lastSync', 42),
-        mutable('cursor', 7),
-        mutable('Counter', null),
+        mutable('cursor', 7, 99),
+        mutable('Counter'),
         { kind: 'CONSTANT', name: 'tenant', description: '', secret: false, valuePreview: null },
     ]
 
@@ -20,7 +20,11 @@ describe('findUsedMutableNames', () => {
     })
 
     it('returns nothing for a workflow that neither owns nor references a mutable variable', () => {
-        expect(findUsedMutableNames(items, 99, ['tenant'])).toEqual([])
+        expect(findUsedMutableNames(items, 100, ['tenant'])).toEqual([])
+    })
+
+    it('counts a workflow that is any one of several owners', () => {
+        expect(findUsedMutableNames(items, 99, [])).toEqual(['cursor'])
     })
 })
 

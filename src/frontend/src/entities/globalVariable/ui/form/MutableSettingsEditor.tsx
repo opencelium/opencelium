@@ -7,6 +7,7 @@ import { FormControl } from '@shared/ui/form/FormControl'
 import { Radio } from '@shared/ui/primitives/Radio'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { Hint } from '@shared/ui/primitives/Hint'
+import { EntityText } from '@shared/ui/primitives/Text'
 import { useFetchEntitiesQuery } from '@shared/api/genericApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { ConnectionMeta } from '@entities/connection/command/connectionCache'
@@ -36,20 +37,21 @@ function ChoiceGroup<T extends string>({ name, values, labelKey, isReadOnly }: {
     )
 }
 
-function OwnerWorkflowSelect({ isReadOnly }: { isReadOnly: boolean }) {
+function OwnerWorkflowsSelect({ isReadOnly }: { isReadOnly: boolean }) {
     const { t } = useI18n('entities')
     const { control, getFieldState, formState } = useFormContext()
-    const { field } = useController({ name: 'ownerWorkflowId', control })
-    const error = getFieldState('ownerWorkflowId', formState).error?.message
+    const { field } = useController({ name: 'ownerWorkflowIds', control })
+    const error = getFieldState('ownerWorkflowIds', formState).error?.message
     const { data } = useFetchEntitiesQuery('/connection/all/meta')
     const options = ((data ?? []) as ConnectionMeta[]).map((workflow) => ({ value: workflow.id, label: workflow.title }))
     return (
         <FormControl label="global-variable.mutable.owner.label" hint="global-variable.mutable.owner.hint" error={error} style={{ width: '100%' }}>
             <Select
+                mode="multiple"
                 showSearch
                 optionFilterProp="label"
-                value={field.value ?? undefined}
-                onChange={(value: number) => field.onChange(value)}
+                value={(field.value as number[] | undefined) ?? []}
+                onChange={(value: number[]) => field.onChange(value)}
                 options={options}
                 disabled={isReadOnly}
                 status={error ? 'error' : undefined}
@@ -72,11 +74,11 @@ function SystemConfigLink({ children }: { children?: ReactNode }) {
 
 const QUEUE_LIMITS_COMPONENTS = { code: <code />, page: <SystemConfigLink /> }
 
+// Plain text styled like a FormControl hint (e.g. the owner hint), not an info box.
 function BusyPolicyScopeHint() {
-    const { t } = useI18n('entities')
     return (
-        <div data-testid="global-variable-busy-policy-scope-hint">
-            <Hint noPrefix>{t('global-variable.mutable.busyPolicy.scope')}</Hint>
+        <div className="form-control__hint" data-testid="global-variable-busy-policy-scope-hint">
+            <EntityText i18nKey="global-variable.mutable.busyPolicy.scope" />
         </div>
     )
 }
@@ -97,7 +99,7 @@ export function MutableSettingsEditor({ mode }: { mode: Mode }) {
     const isReadOnly = mode === 'view'
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
-            <OwnerWorkflowSelect isReadOnly={isReadOnly} />
+            <OwnerWorkflowsSelect isReadOnly={isReadOnly} />
             <ChoiceGroup name="busyPolicy" values={BUSY_POLICIES} labelKey="busyPolicy" isReadOnly={isReadOnly} />
             <BusyPolicyScopeHint />
             <QueueLimitsHint />

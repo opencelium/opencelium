@@ -24,7 +24,7 @@ const toAllScopeItems = (page: PagedResponse<GlobalVariableListItem>): PickerIte
     .map((item): PickerItem => {
         const base = { name: item.name, description: item.description, secret: item.secret, valuePreview: item.valuePreview }
         // Nothing here names a saved workflow, so none of these can be written (the backend says the same).
-        return item.kind === 'MUTABLE' ? { ...base, kind: 'MUTABLE', ownerWorkflow: null, writable: false } : { ...base, kind: 'CONSTANT' }
+        return item.kind === 'MUTABLE' ? { ...base, kind: 'MUTABLE', ownerWorkflows: [], writable: false } : { ...base, kind: 'CONSTANT' }
     })
 
 function request(scope: PickerScope): Promise<PickerItem[] | null> {

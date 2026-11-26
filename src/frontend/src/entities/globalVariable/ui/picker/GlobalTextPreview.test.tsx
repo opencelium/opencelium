@@ -7,7 +7,7 @@ import { GlobalTextPreview } from './GlobalTextPreview'
 const items: PickerItem[] = [
     { kind: 'CONSTANT', name: 'baseUrl', description: '', secret: false, valuePreview: '"https://api.example.com"' },
     { kind: 'CONSTANT', name: 'apiKey', description: '', secret: true, valuePreview: null },
-    { kind: 'MUTABLE', name: 'lastSync', description: '', secret: false, valuePreview: '5', ownerWorkflow: null, writable: false },
+    { kind: 'MUTABLE', name: 'lastSync', description: '', secret: false, valuePreview: '5', ownerWorkflows: [], writable: false },
 ]
 
 // Provider-free stand-ins: the real primitives need SystemProvider and are not what is tested.

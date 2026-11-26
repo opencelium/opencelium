@@ -99,10 +99,10 @@ export const globalVariableDefinition: EntityDefinition = {
             path: 'value',
         },
         {
-            fields: ['ownerWorkflowId'],
+            fields: ['ownerWorkflowIds'],
             validate: (data) => !isOwnerMissing(data as Partial<GlobalVariableFormValues>),
             message: `${baseKey}.mutable.errors.ownerRequired`,
-            path: 'ownerWorkflowId',
+            path: 'ownerWorkflowIds',
         },
         {
             fields: ['script'],
@@ -216,7 +216,7 @@ export const globalVariableDefinition: EntityDefinition = {
             ui: { component: 'input' },
         },
         { name: 'busyPolicy', type: 'string', defaultValue: DEFAULT_BUSY_POLICY, ui: { component: 'input' } },
-        { name: 'ownerWorkflowId', type: 'other', defaultValue: null, ui: { component: 'input' } },
+        { name: 'ownerWorkflowIds', type: 'other', defaultValue: null, ui: { component: 'input' } },
         {
             name: 'valuePreview',
             type: 'string',
@@ -315,7 +315,7 @@ export const globalVariableDefinition: EntityDefinition = {
                 header: `${baseKey}.wizard.steps.value.header`,
                 subheader: `${baseKey}.wizard.steps.value.subheader`,
                 sectionIds: ['value'],
-                validateFields: ['secret', 'value', 'script', 'busyPolicy', 'ownerWorkflowId'],
+                validateFields: ['secret', 'value', 'script', 'busyPolicy', 'ownerWorkflowIds'],
             },
             {
                 id: 'visibility',
