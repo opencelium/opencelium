@@ -182,8 +182,8 @@ public class GlobalReferenceValidator {
 
     /**
      * Says why this workflow may not write a variable, or nothing if it may: only a mutable
-     * variable is written, and only by its owner workflow. A workflow saved for the first time
-     * owns nothing yet.
+     * variable is written, and only by its owner workflows. A workflow saved for the first time
+     * is the owner of nothing yet.
      */
     private static Optional<Violation> checkWrite(GlobalVariable variable, Found reference, long workflowId) {
         if (variable.getKind() != GlobalVariableKind.MUTABLE) {
@@ -191,9 +191,9 @@ public class GlobalReferenceValidator {
                     "Global variable '%s' is a %s; a method can only write a mutable variable"
                             .formatted(reference.variable(), variable.getKind())));
         }
-        if (!Objects.equals(variable.getOwnerWorkflowId(), workflowId)) {
+        if (!variable.isWritableBy(workflowId)) {
             return Optional.of(violation(Code.NOT_OWNER, reference,
-                    "Only the owner workflow of global variable '%s' may write it, and this workflow is not its owner"
+                    "Only the owner workflows of global variable '%s' may write it, and this workflow is not one of them"
                             .formatted(reference.variable())));
         }
 

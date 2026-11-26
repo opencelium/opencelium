@@ -8,6 +8,7 @@ public class PasswordResetProperties {
     private long tokenActivityTime = 60_000; // 1 minute
     private int maxEmailValidationAttempts = 2;
     private long lockoutTime = 180_000; // 3 minutes
+    private long adminLinkActivityTime = 86_400_000; // 24 hours: lifetime of a link an admin issues
 
     public String getBaseUrl() {
         return baseUrl;
@@ -39,5 +40,13 @@ public class PasswordResetProperties {
 
     public void setLockoutTime(long lockoutTime) {
         this.lockoutTime = lockoutTime;
+    }
+
+    public long getAdminLinkActivityTime() {
+        return adminLinkActivityTime;
+    }
+
+    public void setAdminLinkActivityTime(long adminLinkActivityTime) {
+        this.adminLinkActivityTime = adminLinkActivityTime;
     }
 }

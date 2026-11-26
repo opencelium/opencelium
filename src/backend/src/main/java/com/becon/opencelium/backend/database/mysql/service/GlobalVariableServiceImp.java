@@ -243,7 +243,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             variable.setCurrentSetAt(new Date());
             variable.setCurrentSetByUser(caller.userId());
             variable.setBusyPolicy(mutable.busyPolicy());
-            variable.setOwnerWorkflowId(mutable.ownerWorkflowId());
+            variable.setOwnerWorkflowIds(new HashSet<>(mutable.ownerWorkflowIds()));
         }
 
         try {
@@ -352,10 +352,10 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             after.put("busyPolicy", mutable.busyPolicy().name());
             variable.setBusyPolicy(mutable.busyPolicy());
         }
-        if (mutable != null && !mutable.ownerWorkflowId().equals(variable.getOwnerWorkflowId())) {
-            before.put("ownerWorkflowId", variable.getOwnerWorkflowId());
-            after.put("ownerWorkflowId", mutable.ownerWorkflowId());
-            variable.setOwnerWorkflowId(mutable.ownerWorkflowId());
+        if (mutable != null && !mutable.ownerWorkflowIds().equals(variable.getOwnerWorkflowIds())) {
+            before.set("ownerWorkflowIds", workflowIdsToJson(variable.getOwnerWorkflowIds()));
+            after.set("ownerWorkflowIds", workflowIdsToJson(mutable.ownerWorkflowIds()));
+            replace(variable.getOwnerWorkflowIds(), mutable.ownerWorkflowIds());
         }
         if (!Objects.equals(newValue, oldValue)) {
             variable.setValue(newValue);
@@ -559,19 +559,23 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     }
 
     /**
-     * Returns the run that updates a mutable variable now: a run of its owner workflow, the only
-     * one that writes it. A test run writes its own copy and does not count.
+     * Returns the runs that update a mutable variable now: the runs of its owner workflows, the
+     * only ones that write it. Each owner workflow runs one execution at a time, but different
+     * owners may run at once. A test run writes its own copy and does not count.
      *
-     * @return the run, or {@code null} for another kind, a variable without an owner workflow or
-     *         an owner workflow that does not run
+     * @return the runs ordered by workflow id; empty for another kind, a variable without an
+     *         owner workflow or owner workflows that do not run
      */
-    private GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy(GlobalVariable variable) {
-        if (variable.getKind() != GlobalVariableKind.MUTABLE || variable.getOwnerWorkflowId() == null) {
-            return null;
+    private List<GlobalVariableDTO.BeingUpdatedBy> beingUpdatedBy(GlobalVariable variable) {
+        if (variable.getKind() != GlobalVariableKind.MUTABLE) {
+            return List.of();
         }
-        return runGate.holdOf(variable.getOwnerWorkflowId())
+        return variable.getOwnerWorkflowIds().stream()
+                .sorted()
+                .map(runGate::holdOf)
+                .flatMap(Optional::stream)
                 .map(hold -> new GlobalVariableDTO.BeingUpdatedBy(hold.workflowId(), hold.executionId(), hold.startedAt()))
-                .orElse(null);
+                .toList();
     }
 
     // not read-only: usages of sources that no longer exist are removed before they are read
@@ -1250,10 +1254,10 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
      * @param kind       kind of the variable
      * @param current    the saved variable on an update, whose fields a request that leaves
      *                   them out keeps; {@code null} on a create
-     * @param scope      the scope the request asks for, which must hold the owner workflow
+     * @param scope      the scope the request asks for, which must hold every owner workflow
      * @param scopeValid whether {@code scope} passed its checks; if not, whether it holds the
-     *                   owner workflow is not judged
-     * @return the busy policy and the owner workflow; {@code null} for the other kinds
+     *                   owner workflows is not judged
+     * @return the busy policy and the owner workflows; {@code null} for the other kinds
      */
     private MutableSpec validateMutable(GlobalVariableKind kind, GlobalVariableRequestDTO request,
             GlobalVariable current, ScopeSpec scope, boolean scopeValid, List<Violation> violations) {
@@ -1262,9 +1266,9 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                 violations.add(new Violation("busyPolicy", Code.MUTABLE_ONLY,
                         "Only a mutable variable has a busy policy"));
             }
-            if (request.ownerWorkflowId() != null) {
-                violations.add(new Violation("ownerWorkflowId", Code.MUTABLE_ONLY,
-                        "Only a mutable variable has an owner workflow"));
+            if (request.ownerWorkflowIds() != null) {
+                violations.add(new Violation("ownerWorkflowIds", Code.MUTABLE_ONLY,
+                        "Only a mutable variable has owner workflows"));
             }
             return null;
         }
@@ -1272,22 +1276,33 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         GlobalVariableBusyPolicy busyPolicy = request.busyPolicy() != null ? request.busyPolicy()
                 : current == null || current.getBusyPolicy() == null ? GlobalVariableBusyPolicy.QUEUE
                 : current.getBusyPolicy();
-        // the saved owner is null once its workflow is deleted, and then a new one is needed
-        Long ownerWorkflowId = request.ownerWorkflowId() != null ? request.ownerWorkflowId()
-                : current == null ? null : current.getOwnerWorkflowId();
-
-        if (ownerWorkflowId == null) {
-            violations.add(new Violation("ownerWorkflowId", Code.OWNER_WORKFLOW_REQUIRED,
-                    "Choose the workflow whose runs may write the variable"));
-        } else if (!connectionRepository.existsById(ownerWorkflowId)) {
-            violations.add(new Violation("ownerWorkflowId", Code.OWNER_WORKFLOW_INVALID,
-                    "Workflow " + ownerWorkflowId + " does not exist"));
-        } else if (scopeValid && !covers(scope, ownerWorkflowId)) {
-            violations.add(new Violation("ownerWorkflowId", Code.OWNER_WORKFLOW_INVALID,
-                    "Workflow " + ownerWorkflowId + " is outside the scope of the variable"));
+        // a deleted workflow drops out of the saved owners; once none is left, a new one is needed
+        Set<Long> ownerWorkflowIds = new HashSet<>();
+        if (request.ownerWorkflowIds() != null) {
+            ownerWorkflowIds.addAll(request.ownerWorkflowIds());
+        } else if (current != null) {
+            ownerWorkflowIds.addAll(current.getOwnerWorkflowIds());
         }
 
-        return new MutableSpec(busyPolicy, ownerWorkflowId);
+        if (ownerWorkflowIds.isEmpty()) {
+            violations.add(new Violation("ownerWorkflowIds", Code.OWNER_WORKFLOW_REQUIRED,
+                    "Choose at least one workflow whose runs may write the variable"));
+        }
+        // sorted, so the violations come in a stable order
+        ownerWorkflowIds.stream().sorted(Comparator.nullsFirst(Comparator.naturalOrder())).forEach(id -> {
+            if (id == null) {
+                violations.add(new Violation("ownerWorkflowIds", Code.OWNER_WORKFLOW_INVALID,
+                        "An owner workflow is given without an id"));
+            } else if (!connectionRepository.existsById(id)) {
+                violations.add(new Violation("ownerWorkflowIds", Code.OWNER_WORKFLOW_INVALID,
+                        "Workflow " + id + " does not exist"));
+            } else if (scopeValid && !covers(scope, id)) {
+                violations.add(new Violation("ownerWorkflowIds", Code.OWNER_WORKFLOW_INVALID,
+                        "Workflow " + id + " is outside the scope of the variable"));
+            }
+        });
+
+        return new MutableSpec(busyPolicy, ownerWorkflowIds);
     }
 
     private static String validateDescription(String description, List<Violation> violations) {
@@ -1415,8 +1430,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
 
     // ------------------------------------------------------------------ helpers
 
-    /** What a mutable variable is saved with: the busy policy and the owner workflow. */
-    private record MutableSpec(GlobalVariableBusyPolicy busyPolicy, Long ownerWorkflowId) {
+    /** What a mutable variable is saved with: the busy policy and the owner workflows. */
+    private record MutableSpec(GlobalVariableBusyPolicy busyPolicy, Set<Long> ownerWorkflowIds) {
     }
 
     /** Scope of a variable as one comparable value. */
@@ -1442,6 +1457,13 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                     (category ? categoryIds : workflowIds).add(target.getTargetId());
                 });
 
+        return json;
+    }
+
+    /** Returns workflow ids as a JSON array in ascending order, as the change log keeps them. */
+    private ArrayNode workflowIdsToJson(Set<Long> workflowIds) {
+        ArrayNode json = objectMapper.createArrayNode();
+        workflowIds.stream().sorted().forEach(json::add);
         return json;
     }
 

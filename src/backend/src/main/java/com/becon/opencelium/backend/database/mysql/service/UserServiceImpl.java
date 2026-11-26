@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
+import com.becon.opencelium.backend.database.mysql.repository.PasswordResetTokenRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.enums.AuthMethod;
@@ -73,6 +74,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -222,8 +226,14 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsById(id);
     }
 
+    /*
+    The user's password reset tokens go first: they reference the user row, and the User entity
+    does not map them, so the delete would not cascade to them.
+    */
     @Override
+    @Transactional
     public void deleteById(int id) {
+        passwordResetTokenRepository.deleteAllByUserId(id);
         userRepository.deleteOneById(id);
     }
 

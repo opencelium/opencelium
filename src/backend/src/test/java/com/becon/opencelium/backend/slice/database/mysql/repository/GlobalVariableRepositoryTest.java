@@ -15,7 +15,9 @@ import com.becon.opencelium.backend.testutil.annotation.SliceTest;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -163,18 +165,21 @@ class GlobalVariableRepositoryTest {
     // ── findMutableUsedByWorkflow ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("findMutableUsedByWorkflow — owned or referenced by the workflow, mutable only")
+    @DisplayName("findMutableUsedByWorkflow — owned, alone or with others, or referenced by the workflow, mutable only")
     void findMutableUsedByWorkflowReturnsOwnedAndReferencedMutablesWhenWorkflowUsesThem() {
         long workflow = 42L;
         long otherWorkflow = 43L;
         GlobalVariable owned = aTransientMutable("lastSync", "0");
-        owned.setOwnerWorkflowId(workflow);
+        owned.setOwnerWorkflowIds(new HashSet<>(Set.of(workflow)));
         em.persist(owned);
+        GlobalVariable coOwned = aTransientMutable("sharedCursor", "0");
+        coOwned.setOwnerWorkflowIds(new HashSet<>(Set.of(otherWorkflow, workflow)));
+        em.persist(coOwned);
         GlobalVariable referenced = aTransientMutable("cursor", "0");
-        referenced.setOwnerWorkflowId(otherWorkflow);
+        referenced.setOwnerWorkflowIds(new HashSet<>(Set.of(otherWorkflow)));
         em.persist(referenced);
         GlobalVariable usedElsewhere = aTransientMutable("pageToken", "0");
-        usedElsewhere.setOwnerWorkflowId(otherWorkflow);
+        usedElsewhere.setOwnerWorkflowIds(new HashSet<>(Set.of(otherWorkflow)));
         em.persist(usedElsewhere);
         GlobalVariable constant = GlobalVariableFixture.aTransientConstant("idoitUrl", ALICE);
         em.persist(constant);
@@ -188,7 +193,69 @@ class GlobalVariableRepositoryTest {
 
         List<GlobalVariable> variables = repository.findMutableUsedByWorkflow(workflow);
 
-        assertThat(variables).extracting(GlobalVariable::getName).containsExactly("cursor", "lastSync");
+        assertThat(variables).extracting(GlobalVariable::getName).containsExactly("cursor", "lastSync", "sharedCursor");
+    }
+
+    @Test
+    void findMutableUsedByWorkflowReturnsVariableOnceWhenWorkflowOwnsAndReferencesIt() {
+        long workflow = 42L;
+        GlobalVariable owned = aTransientMutable("lastSync", "0");
+        owned.setOwnerWorkflowIds(new HashSet<>(Set.of(workflow, 43L)));
+        em.persist(owned);
+        em.persist(GlobalVariableUsage.readByWorkflow(owned.getId(), workflow,
+                GlobalVariableUsage.ElementType.METHOD, "0", "#FFCFB5", "GetItems", "body.since"));
+        em.flush();
+        em.clear();
+
+        List<GlobalVariable> variables = repository.findMutableUsedByWorkflow(workflow);
+
+        assertThat(variables).extracting(GlobalVariable::getName).containsExactly("lastSync");
+    }
+
+    // ── owner workflows ───────────────────────────────────────────────────────
+
+    @Test
+    void saveKeepsEveryOwnerWorkflowWhenVariableHasSeveral() {
+        GlobalVariable variable = aTransientMutable("lastSync", "0");
+        variable.getOwnerWorkflowIds().addAll(List.of(13L, 14L));
+        long id = repository.saveAndFlush(variable).getId();
+        em.clear();
+
+        GlobalVariable found = repository.findById(id).orElseThrow();
+
+        assertThat(found.getOwnerWorkflowIds()).containsExactlyInAnyOrder(12L, 13L, 14L);
+    }
+
+    @Test
+    @DisplayName("findByNameIn — the owner workflows are loaded with the variable, as a run reads them without a session")
+    void findByNameInLoadsOwnerWorkflowsWhenVariableIsDetachedAfterwards() {
+        GlobalVariable variable = aTransientMutable("lastSync", "0");
+        variable.getOwnerWorkflowIds().add(13L);
+        em.persist(variable);
+        em.flush();
+        em.clear();
+
+        List<GlobalVariable> found = repository.findByNameIn(List.of("lastSync"));
+        em.clear();
+
+        assertThat(found).singleElement()
+                .satisfies(detached -> assertThat(detached.getOwnerWorkflowIds()).containsExactlyInAnyOrder(12L, 13L));
+    }
+
+    @Test
+    void saveRemovesOwnerWorkflowWhenItIsTakenOutOfTheSet() {
+        GlobalVariable variable = aTransientMutable("lastSync", "0");
+        variable.getOwnerWorkflowIds().add(13L);
+        long id = repository.saveAndFlush(variable).getId();
+        em.clear();
+        GlobalVariable saved = repository.findById(id).orElseThrow();
+        saved.getOwnerWorkflowIds().remove(12L);
+        repository.saveAndFlush(saved);
+        em.clear();
+
+        GlobalVariable found = repository.findById(id).orElseThrow();
+
+        assertThat(found.getOwnerWorkflowIds()).containsExactly(13L);
     }
 
     // ── findUsableWithScopeTargets ────────────────────────────────────────────
@@ -477,7 +544,7 @@ class GlobalVariableRepositoryTest {
         variable.setKind(GlobalVariableKind.MUTABLE);
         variable.setCurrentValue(currentJson);
         variable.setBusyPolicy(GlobalVariableBusyPolicy.QUEUE);
-        variable.setOwnerWorkflowId(12L);
+        variable.setOwnerWorkflowIds(new HashSet<>(Set.of(12L)));
         return variable;
     }
 }

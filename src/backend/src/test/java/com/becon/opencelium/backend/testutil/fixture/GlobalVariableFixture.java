@@ -16,7 +16,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Named test objects for global variables and for what references them outside a workflow: the
@@ -76,7 +78,9 @@ public final class GlobalVariableFixture {
      *
      * @param initialJson     the initial value as JSON text
      * @param currentJson     the current value as JSON text
-     * @param ownerWorkflowId the workflow whose runs may write it, {@code null} once it is deleted
+     * @param ownerWorkflowId the only owner workflow, whose runs may write it; {@code null} for no
+     *                        owner, as once every owner workflow is deleted. Add further owners to
+     *                        {@link GlobalVariable#getOwnerWorkflowIds()}
      */
     public static GlobalVariable aMutable(
             long id, String name, String initialJson, String currentJson, Long ownerWorkflowId) {
@@ -85,20 +89,21 @@ public final class GlobalVariableFixture {
         variable.setCurrentValue(currentJson);
         variable.setCurrentRevision(1);
         variable.setBusyPolicy(GlobalVariableBusyPolicy.QUEUE);
-        variable.setOwnerWorkflowId(ownerWorkflowId);
+        variable.setOwnerWorkflowIds(ownerWorkflowId == null ? new HashSet<>() : new HashSet<>(Set.of(ownerWorkflowId)));
         return variable;
     }
 
     /**
      * Request for a mutable variable with scope ALL, no description and no busy policy.
      *
-     * @param ownerWorkflowId the workflow whose runs may write it, {@code null} to leave it out
+     * @param ownerWorkflowId the only owner workflow, whose runs may write it; {@code null} to
+     *                        leave the owner workflows out
      * @param version         the version the form loaded; {@code null} for a create
      */
     public static GlobalVariableRequestDTO aMutableRequest(
             String name, JsonNode value, Long ownerWorkflowId, Long version) {
         return new GlobalVariableRequestDTO(name, GlobalVariableKind.MUTABLE, null, value, null, aScopeOfAll(),
-                null, ownerWorkflowId, version);
+                null, ownerWorkflowId == null ? null : List.of(ownerWorkflowId), version);
     }
 
     /**

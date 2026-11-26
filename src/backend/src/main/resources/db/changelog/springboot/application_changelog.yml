@@ -184,7 +184,7 @@ versions:
         path: opencelium.version
       - changeset: 2
         operation: add
-        value: https://frontend.example.com/reset-password
+        value: https://frontend.example.com/set-password
         path: opencelium.forgot-psw.base-url
       - changeset: 3
         operation: add
@@ -358,3 +358,7 @@ versions:
         operation: add
         value: 5.3
         path: opencelium.version
+      - changeset: 7
+        operation: add
+        value: 86400000
+        path: opencelium.forgot-psw.admin-link-activity-time

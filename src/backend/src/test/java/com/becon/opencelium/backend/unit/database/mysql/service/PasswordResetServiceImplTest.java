@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.exception.ServiceUnavailableException;
 import com.becon.opencelium.backend.exception.TooManyRequestsException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
+import com.becon.opencelium.backend.resource.user.PasswordLinkResource;
 import com.becon.opencelium.backend.testutil.fixture.PasswordResetTokenFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -44,6 +46,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,7 +61,8 @@ import static org.mockito.Mockito.when;
  * deterministic by controlling the token's {@code createdAt} timestamp.
  * The end-to-end invariant — token stored as SHA-256, raw token mailed to
  * the user — is pinned by hashing the captured email body and comparing it
- * against the captured persisted token.
+ * against the captured persisted token. The same is done for admin-issued
+ * links, whose raw token is returned to the admin instead.
  */
 @ExtendWith(MockitoExtension.class)
 class PasswordResetServiceImplTest {
@@ -67,6 +71,8 @@ class PasswordResetServiceImplTest {
     private static final long TOKEN_ACTIVITY_MS = 60_000L;
     private static final int MAX_ATTEMPTS = 2;
     private static final long LOCKOUT_MS = 60_000L;
+    private static final long ADMIN_LINK_MS = 86_400_000L;
+    private static final int ADMIN_ID = 1;
 
     @Mock
     private UserService userService;
@@ -92,6 +98,7 @@ class PasswordResetServiceImplTest {
         props.setTokenActivityTime(TOKEN_ACTIVITY_MS);
         props.setMaxEmailValidationAttempts(MAX_ATTEMPTS);
         props.setLockoutTime(LOCKOUT_MS);
+        props.setAdminLinkActivityTime(ADMIN_LINK_MS);
 
         service = new PasswordResetServiceImpl(
                 userService, sessionService, tokenRepository, rateLimiter, props, emailService);
@@ -200,7 +207,7 @@ class PasswordResetServiceImplTest {
         when(tokenRepository.findByUserIdAndValidTrue(7)).thenReturn(Optional.of(expired));
 
         // Only one token in the latest-N — below the cap, so the lockout branch is skipped.
-        when(tokenRepository.findLatestTokensByUserId(7, MAX_ATTEMPTS))
+        when(tokenRepository.findLatestSelfServiceTokensByUserId(7, MAX_ATTEMPTS))
                 .thenReturn(List.of(expired));
         when(emailService.sendMessage(eq("a@b.com"), eq("Reset Password"), anyString()))
                 .thenReturn(true);
@@ -226,7 +233,7 @@ class PasswordResetServiceImplTest {
 
         // size == max AND oldest.createdAt = now → lockoutEnds is far in the future.
         PasswordResetToken oldestInWindow = PasswordResetTokenFixture.aFreshTokenFor(user, "old-hash");
-        when(tokenRepository.findLatestTokensByUserId(7, MAX_ATTEMPTS))
+        when(tokenRepository.findLatestSelfServiceTokensByUserId(7, MAX_ATTEMPTS))
                 .thenReturn(List.of(oldestInWindow, oldestInWindow));
 
         assertThatThrownBy(() -> service.requestReset("a@b.com", "1.1.1.1"))
@@ -253,7 +260,7 @@ class PasswordResetServiceImplTest {
         long longAgo = (TOKEN_ACTIVITY_MS * MAX_ATTEMPTS) + LOCKOUT_MS + 60_000L;
         PasswordResetToken oldestOutOfWindow =
                 PasswordResetTokenFixture.aTokenCreatedMillisAgo(user, "old-hash", longAgo);
-        when(tokenRepository.findLatestTokensByUserId(7, MAX_ATTEMPTS))
+        when(tokenRepository.findLatestSelfServiceTokensByUserId(7, MAX_ATTEMPTS))
                 .thenReturn(List.of(oldestOutOfWindow, oldestOutOfWindow));
         when(emailService.sendMessage(eq("a@b.com"), eq("Reset Password"), anyString()))
                 .thenReturn(true);
@@ -314,6 +321,28 @@ class PasswordResetServiceImplTest {
         verify(tokenRepository).save(any(PasswordResetToken.class));
     }
 
+    @Test
+    void requestResetStoresSelfServiceTokenExpiringAfterActivityTimeWhenSuccessful() {
+        User user = userWith(7, "a@b.com", AuthMethod.BASIC);
+        when(userService.findByEmail("a@b.com")).thenReturn(Optional.of(user));
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+        when(tokenRepository.findByUserIdAndValidTrue(7)).thenReturn(Optional.empty());
+        when(emailService.sendMessage(eq("a@b.com"), eq("Reset Password"), anyString()))
+                .thenReturn(true);
+        long before = System.currentTimeMillis();
+
+        service.requestReset("a@b.com", "1.1.1.1");
+
+        ArgumentCaptor<PasswordResetToken> saved = ArgumentCaptor.forClass(PasswordResetToken.class);
+        verify(tokenRepository).save(saved.capture());
+        assertThat(saved.getValue().getPurpose()).isEqualTo(PasswordResetToken.Purpose.SELF_SERVICE);
+        assertThat(saved.getValue().getCreatedBy()).isNull();
+        // Truncated to whole seconds, the precision of the column.
+        assertThat(saved.getValue().getExpiresAt().getTime() % 1_000L).isZero();
+        assertThat(saved.getValue().getExpiresAt().getTime())
+                .isBetween(before + TOKEN_ACTIVITY_MS - 1_000L, System.currentTimeMillis() + TOKEN_ACTIVITY_MS);
+    }
+
     // ── resetPassword ─────────────────────────────────────────────────────────
 
     @Test
@@ -349,6 +378,7 @@ class PasswordResetServiceImplTest {
         User user = userWith(7, "a@b.com", AuthMethod.BASIC);
         PasswordResetToken token = PasswordResetTokenFixture.aFreshTokenFor(user, "stored-hash");
         when(tokenRepository.findByTokenAndValidTrue(anyString())).thenReturn(Optional.of(token));
+        when(tokenRepository.consumeValidToken(anyString())).thenReturn(1);
         when(userService.getById(7)).thenReturn(user);
         when(userService.encodePassword("newPw")).thenReturn("$2a$encoded");
 
@@ -366,6 +396,7 @@ class PasswordResetServiceImplTest {
         User user = userWith(7, "a@b.com", AuthMethod.BASIC);
         PasswordResetToken token = PasswordResetTokenFixture.aFreshTokenFor(user, "stored-hash");
         when(tokenRepository.findByTokenAndValidTrue(anyString())).thenReturn(Optional.of(token));
+        when(tokenRepository.consumeValidToken(anyString())).thenReturn(1);
         when(userService.getById(7)).thenReturn(user);
         when(userService.encodePassword(anyString())).thenReturn("$2a$encoded");
 
@@ -383,6 +414,7 @@ class PasswordResetServiceImplTest {
         String hashed = DigestUtils.sha256Hex(raw);
         PasswordResetToken token = PasswordResetTokenFixture.aFreshTokenFor(user, hashed);
         when(tokenRepository.findByTokenAndValidTrue(hashed)).thenReturn(Optional.of(token));
+        when(tokenRepository.consumeValidToken(hashed)).thenReturn(1);
         when(userService.getById(7)).thenReturn(user);
         when(userService.encodePassword(anyString())).thenReturn("$2a$encoded");
 
@@ -391,6 +423,190 @@ class PasswordResetServiceImplTest {
         // The raw token is never used as a lookup key — only its hash.
         verify(tokenRepository).findByTokenAndValidTrue(hashed);
         verify(tokenRepository, never()).findByTokenAndValidTrue(raw);
+        verify(tokenRepository).consumeValidToken(hashed);
+    }
+
+    @Test
+    void resetPasswordThrowsBadRequestWhenTokenWasUsedConcurrently() {
+        // Found valid, but another request used it up before this one could.
+        User user = userWith(7, "a@b.com", AuthMethod.BASIC);
+        PasswordResetToken token = PasswordResetTokenFixture.aFreshTokenFor(user, "stored-hash");
+        when(tokenRepository.findByTokenAndValidTrue(anyString())).thenReturn(Optional.of(token));
+        when(tokenRepository.consumeValidToken(anyString())).thenReturn(0);
+
+        assertThatThrownBy(() -> service.resetPassword("rawToken", "newPw"))
+                .isInstanceOfSatisfying(GeneralServiceException.class, ex -> {
+                    assertThat(ex.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(ex.getError()).isEqualTo(ExceptionConstant.INVALID_TOKEN);
+                });
+
+        // The password is left alone and the session survives.
+        verifyNoInteractions(userService, sessionService);
+    }
+
+    @Test
+    void resetPasswordAcceptsAdminLinkOlderThanSelfServiceActivityTimeWhenNotExpired() {
+        // Created long before a self-service token would expire, but its own expiry is still ahead.
+        User user = userWith(7, "a@b.com", AuthMethod.BASIC);
+        PasswordResetToken link = PasswordResetTokenFixture.anAdminLinkFor(user, "stored-hash", ADMIN_ID, 60_000L);
+        link.setCreatedAt(new Date(System.currentTimeMillis() - TOKEN_ACTIVITY_MS * 10));
+        when(tokenRepository.findByTokenAndValidTrue(anyString())).thenReturn(Optional.of(link));
+        when(tokenRepository.consumeValidToken(anyString())).thenReturn(1);
+        when(userService.getById(7)).thenReturn(user);
+        when(userService.encodePassword("newPw")).thenReturn("$2a$encoded");
+
+        service.resetPassword("rawToken", "newPw");
+
+        assertThat(user.getPassword()).isEqualTo("$2a$encoded");
+        verify(sessionService).deleteByUserId(7);
+    }
+
+    @Test
+    void resetPasswordThrowsBadRequestWhenAdminLinkExpired() {
+        User user = userWith(7, "a@b.com", AuthMethod.BASIC);
+        PasswordResetToken link = PasswordResetTokenFixture.anAdminLinkFor(user, "stored-hash", ADMIN_ID, -1_000L);
+        when(tokenRepository.findByTokenAndValidTrue(anyString())).thenReturn(Optional.of(link));
+
+        assertThatThrownBy(() -> service.resetPassword("rawToken", "newPw"))
+                .isInstanceOfSatisfying(GeneralServiceException.class, ex ->
+                        assertThat(ex.getError()).isEqualTo(ExceptionConstant.INVALID_TOKEN));
+
+        verify(tokenRepository, never()).consumeValidToken(anyString());
+        verifyNoInteractions(userService, sessionService);
+    }
+
+    // ── issueAdminLink ────────────────────────────────────────────────────────
+
+    @Test
+    void issueAdminLinkThrowsNotFoundWhenUserDoesNotExist() {
+        when(userService.findById(7)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.issueAdminLink(7, ADMIN_ID, false))
+                .isInstanceOfSatisfying(GeneralServiceException.class, ex -> {
+                    assertThat(ex.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+                    assertThat(ex.getError()).isEqualTo(ExceptionConstant.USER_NOT_EXIST);
+                });
+
+        verifyNoInteractions(tokenRepository, emailService);
+    }
+
+    @Test
+    void issueAdminLinkThrowsBadRequestWhenUserSignsInThroughLdap() {
+        User user = localUserWith(7, "a@b.com");
+        user.setAuthMethod(AuthMethod.LDAP);
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> service.issueAdminLink(7, ADMIN_ID, false))
+                .isInstanceOfSatisfying(GeneralServiceException.class, ex -> {
+                    assertThat(ex.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(ex.getError()).isEqualTo(ExceptionConstant.PASSWORD_MANAGED_EXTERNALLY);
+                });
+
+        verifyNoInteractions(tokenRepository, emailService);
+    }
+
+    @Test
+    void issueAdminLinkThrowsBadRequestWhenBasicUserHasNoPassword() {
+        // A BASIC row without a password is an LDAP user from before auth_method existed:
+        // a local password would take its login away from the directory.
+        User user = userWith(7, "a@b.com", AuthMethod.BASIC);
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> service.issueAdminLink(7, ADMIN_ID, false))
+                .isInstanceOfSatisfying(GeneralServiceException.class, ex ->
+                        assertThat(ex.getError()).isEqualTo(ExceptionConstant.PASSWORD_MANAGED_EXTERNALLY));
+
+        verifyNoInteractions(tokenRepository, emailService);
+    }
+
+    @Test
+    void issueAdminLinkThrowsBadRequestWhenEmailRequestedButUserHasNone() {
+        User user = localUserWith(7, null);
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> service.issueAdminLink(7, ADMIN_ID, true))
+                .isInstanceOfSatisfying(GeneralServiceException.class, ex -> {
+                    assertThat(ex.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(ex.getError()).isEqualTo(ExceptionConstant.EMAIL_NOT_FOUND);
+                });
+
+        // Rejected before any token is touched, so the user's current link keeps working.
+        verifyNoInteractions(tokenRepository, emailService);
+    }
+
+    @Test
+    void issueAdminLinkInvalidatesUsersValidTokensBeforeSavingNewOneWhenIssued() {
+        User user = localUserWith(7, "a@b.com");
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+
+        service.issueAdminLink(7, ADMIN_ID, false);
+
+        InOrder order = inOrder(tokenRepository);
+        order.verify(tokenRepository).invalidateValidTokensByUserId(7);
+        order.verify(tokenRepository).save(any(PasswordResetToken.class));
+    }
+
+    @Test
+    void issueAdminLinkSavesHashedAdminTokenAndReturnsLinkWithRawTokenWhenIssued() {
+        User user = localUserWith(7, null);
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+        long before = System.currentTimeMillis();
+
+        PasswordLinkResource result = service.issueAdminLink(7, ADMIN_ID, false);
+
+        ArgumentCaptor<PasswordResetToken> saved = ArgumentCaptor.forClass(PasswordResetToken.class);
+        verify(tokenRepository).save(saved.capture());
+        PasswordResetToken token = saved.getValue();
+
+        // Only the hash is stored; the raw token exists only in the returned link.
+        assertThat(result.link()).startsWith(BASE_URL + "?token=");
+        String rawToken = result.link().substring((BASE_URL + "?token=").length());
+        assertThat(rawToken).isNotBlank();
+        assertThat(token.getToken()).isEqualTo(DigestUtils.sha256Hex(rawToken));
+
+        assertThat(token.getUser()).isSameAs(user);
+        assertThat(token.getPurpose()).isEqualTo(PasswordResetToken.Purpose.ADMIN_LINK);
+        assertThat(token.getCreatedBy()).isEqualTo(ADMIN_ID);
+        assertThat(token.isValid()).isTrue();
+        assertThat(token.isUsed()).isFalse();
+        assertThat(token.getExpiresAt().getTime())
+                .isBetween(before + ADMIN_LINK_MS - 1_000L, System.currentTimeMillis() + ADMIN_LINK_MS);
+        // The admin is told exactly the expiry that is stored.
+        assertThat(result.expiresAt()).isEqualTo(token.getExpiresAt().toInstant());
+    }
+
+    @Test
+    void issueAdminLinkLeavesPasswordAndSessionUntouchedWhenIssued() {
+        User user = localUserWith(7, "a@b.com");
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+
+        service.issueAdminLink(7, ADMIN_ID, false);
+
+        assertThat(user.getPassword()).isEqualTo("$2a$current");
+        verifyNoInteractions(sessionService, emailService);
+    }
+
+    @Test
+    void issueAdminLinkMailsReturnedLinkWhenEmailRequested() {
+        User user = localUserWith(7, "a@b.com");
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+        when(emailService.sendMessage(eq("a@b.com"), eq("Set Password"), anyString())).thenReturn(true);
+
+        PasswordLinkResource result = service.issueAdminLink(7, ADMIN_ID, true);
+
+        verify(emailService).sendMessage("a@b.com", "Set Password", result.link());
+    }
+
+    @Test
+    void issueAdminLinkThrowsServiceUnavailableWhenEmailSendFails() {
+        User user = localUserWith(7, "a@b.com");
+        when(userService.findById(7)).thenReturn(Optional.of(user));
+        when(emailService.sendMessage(eq("a@b.com"), eq("Set Password"), anyString())).thenReturn(false);
+
+        // The exception rolls the transaction back, undoing the invalidation and the save.
+        assertThatThrownBy(() -> service.issueAdminLink(7, ADMIN_ID, true))
+                .isInstanceOfSatisfying(ServiceUnavailableException.class, ex ->
+                        assertThat(ex.getError()).isEqualTo(ExceptionConstant.EMAIL_RECOVERY_FAILED));
     }
 
     // ── isExpired ─────────────────────────────────────────────────────────────
@@ -411,6 +627,24 @@ class PasswordResetServiceImplTest {
         assertThat(service.isExpired(token)).isFalse();
     }
 
+    @Test
+    void isExpiredReturnsTrueWhenExpiresAtIsBeforeNowEvenIfCreatedRecently() {
+        PasswordResetToken token = new PasswordResetToken();
+        token.setCreatedAt(new Date());
+        token.setExpiresAt(new Date(System.currentTimeMillis() - 1_000L));
+
+        assertThat(service.isExpired(token)).isTrue();
+    }
+
+    @Test
+    void isExpiredReturnsFalseWhenExpiresAtIsAheadEvenIfCreatedLongAgo() {
+        PasswordResetToken token = new PasswordResetToken();
+        token.setCreatedAt(new Date(System.currentTimeMillis() - TOKEN_ACTIVITY_MS * 10));
+        token.setExpiresAt(new Date(System.currentTimeMillis() + 60_000L));
+
+        assertThat(service.isExpired(token)).isFalse();
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private static User userWith(int id, String email, AuthMethod authMethod) {
@@ -418,6 +652,13 @@ class PasswordResetServiceImplTest {
         user.setId(id);
         user.setEmail(email);
         user.setAuthMethod(authMethod);
+        return user;
+    }
+
+    /** A BASIC user with a password, the only kind an admin can issue a link for. */
+    private static User localUserWith(int id, String email) {
+        User user = userWith(id, email, AuthMethod.BASIC);
+        user.setPassword("$2a$current");
         return user;
     }
 

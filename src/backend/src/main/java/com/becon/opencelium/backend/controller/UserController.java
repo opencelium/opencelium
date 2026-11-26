@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.service.PasswordResetService;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
@@ -30,6 +31,7 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
+import com.becon.opencelium.backend.resource.user.PasswordLinkResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.security.UserPrincipals;
@@ -43,9 +45,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,6 +58,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -85,6 +90,9 @@ public class UserController {
 
     @Autowired
     private LanguageService languageService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
 
 
     @Operation(summary = "Retrieves user data from the database based on the provided user 'id'")
@@ -415,6 +423,43 @@ public class UserController {
     public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDTO dto) {
         userService.changePassword(dto);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Creates a one-time link with which an OC user sets a new password. Admins only. "
+            + "The link is returned once and can't be fetched again; creating a new one invalidates the "
+            + "user's earlier links. It is used up on the frontend's set-password page via /auth/reset-password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "The link and its expiry. With sendEmail=true it has also been mailed to the user",
+                    content = @Content(schema = @Schema(implementation = PasswordLinkResource.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "The user signs in through LDAP (PASSWORD_MANAGED_EXTERNALLY), or sendEmail=true "
+                            + "but the user has no email (EMAIL_NOT_FOUND)",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "The caller is not an admin",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "No user has this ID (USER_NOT_EXIST)",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "503",
+                    description = "The email could not be sent (EMAIL_RECOVERY_FAILED); no link was created",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PreAuthorize("hasAuthority('Admin')")
+    @PostMapping("/{id}/password-link")
+    public ResponseEntity<PasswordLinkResource> createPasswordLink(
+            @PathVariable("id") int id,
+            @RequestParam(name = "sendEmail", defaultValue = "false") boolean sendEmail) {
+        PasswordLinkResource link = passwordResetService.issueAdminLink(id, getCurrentUserId(), sendEmail);
+        // the body carries a secret, which no cache may keep
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(link);
     }
 
     /*

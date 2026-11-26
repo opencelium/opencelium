@@ -5,7 +5,10 @@ import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompat
 
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
@@ -26,6 +30,8 @@ import org.springframework.web.client.RestTemplate;
  */
 public final class OperationExchange {
 
+    private static final ObjectMapper JSON = new ObjectMapper();
+
     private OperationExchange() {}
 
     /**
@@ -33,7 +39,7 @@ public final class OperationExchange {
      *
      * <p>The media type comes from the operation's {@code success} response and defaults to JSON:
      * JSON is read into {@link Object}, binary content into {@code byte[]}, anything else into
-     * {@link String}.
+     * {@link String}. {@link Object} is what is expected, not a promise: see {@link #exchange}.
      */
     public static Class<?> responseTypeOf(OperationDTO operation) {
         MediaType mediaType = MediaType.APPLICATION_JSON;
@@ -57,15 +63,59 @@ public final class OperationExchange {
      *
      * <p>Never throws on a failed call: an error status, an unreachable host or any other client
      * failure is returned as a response, so the caller can report it like a regular response.
+     *
+     * <p>A response expected as JSON ({@code responseType} is {@link Object}) is read by what it
+     * holds, not by what was expected: a body that is not JSON, such as the {@code ok} a webhook
+     * answers with, is returned as text with the status and headers the API sent.
      */
     public static ResponseEntity<?> exchange(
             RestTemplate restTemplate, URI uri, RequestEntity<?> request, Class<?> responseType) {
         HttpEntity<Object> httpEntity = new HttpEntity<>(request.getBody(), withCharset(request));
 
         try {
-            return restTemplate.exchange(uri, request.getMethod(), httpEntity, responseType);
+            if (!Object.class.equals(responseType)) {
+                return restTemplate.exchange(uri, request.getMethod(), httpEntity, responseType);
+            }
+
+            // the request is built for the expected type, so the Accept header stays the same
+            return restTemplate.execute(
+                    uri,
+                    request.getMethod(),
+                    restTemplate.httpEntityCallback(httpEntity, responseType),
+                    OperationExchange::readJsonOrText);
         } catch (Exception e) {
             return toResponse(e);
+        }
+    }
+
+    /**
+     * Reads a successful response whose body is expected to be JSON. An error status never gets
+     * here: the client turns it into an exception before the body is read.
+     */
+    private static ResponseEntity<Object> readJsonOrText(ClientHttpResponse response) throws IOException {
+        byte[] body = response.getBody().readAllBytes();
+
+        return ResponseEntity.status(response.getStatusCode())
+                .headers(response.getHeaders())
+                .body(body.length == 0 ? null : jsonOrText(body, response.getHeaders().getContentType()));
+    }
+
+    /**
+     * Parses {@code body} as JSON whatever its content type says, because an API may label JSON
+     * as {@code text/html}. A body that is not JSON is returned as text.
+     */
+    private static Object jsonOrText(byte[] body, MediaType contentType) {
+        Charset charset = contentType != null && contentType.getCharset() != null
+                ? contentType.getCharset()
+                : StandardCharsets.UTF_8;
+
+        try {
+            // Jackson detects the Unicode encodings itself; any other charset is decoded first
+            return charset.name().startsWith("UTF-") || StandardCharsets.US_ASCII.equals(charset)
+                    ? JSON.readValue(body, Object.class)
+                    : JSON.readValue(new String(body, charset), Object.class);
+        } catch (IOException e) {
+            return new String(body, charset);
         }
     }
 

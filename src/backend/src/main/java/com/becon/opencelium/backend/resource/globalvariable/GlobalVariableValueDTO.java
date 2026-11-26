@@ -21,8 +21,9 @@ import java.util.stream.Collectors;
  *                 variable, the last saved value otherwise; always {@code null} for a secret
  * @param updatedAt when {@code value} was set
  * @param updatedBy the user who set {@code value}; {@code null} when a run wrote it
- * @param beingUpdatedBy the run of the owner workflow while one goes, for a mutable variable
- *                  only; {@code null} otherwise
+ * @param beingUpdatedBy the runs of owner workflows that go now, ordered by workflow id, for a
+ *                  mutable variable; several owners may run at the same time. Empty when none
+ *                  runs and for the other kinds
  */
 public record GlobalVariableValueDTO(
         Long id,
@@ -31,7 +32,11 @@ public record GlobalVariableValueDTO(
         JsonNode value,
         @JsonFormat(shape = JsonFormat.Shape.STRING) Instant updatedAt,
         GlobalVariableDTO.Actor updatedBy,
-        GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
+        List<GlobalVariableDTO.BeingUpdatedBy> beingUpdatedBy) {
+
+    public GlobalVariableValueDTO {
+        beingUpdatedBy = beingUpdatedBy == null ? List.of() : List.copyOf(beingUpdatedBy);
+    }
 
     /**
      * Returns the entity tag of a list of values: it is built from the ids, the versions, the
@@ -53,7 +58,11 @@ public record GlobalVariableValueDTO(
     }
 
     private static String runOf(GlobalVariableValueDTO value) {
-        GlobalVariableDTO.BeingUpdatedBy run = value.beingUpdatedBy();
-        return run == null ? "-" : run.workflowId() + "@" + run.executionId() + "@" + run.startedAt();
+        if (value.beingUpdatedBy().isEmpty()) {
+            return "-";
+        }
+        return value.beingUpdatedBy().stream()
+                .map(run -> run.workflowId() + "@" + run.executionId() + "@" + run.startedAt())
+                .collect(Collectors.joining("+"));
     }
 }

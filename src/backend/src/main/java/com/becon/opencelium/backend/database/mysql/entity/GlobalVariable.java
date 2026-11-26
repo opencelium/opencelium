@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,6 +19,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
@@ -106,9 +108,14 @@ public class GlobalVariable {
     @Column(name = "busy_policy", length = 16)
     private GlobalVariableBusyPolicy busyPolicy;
 
-    // the one workflow whose runs may write the variable; null once that workflow is deleted
-    @Column(name = "owner_workflow_id")
-    private Long ownerWorkflowId;
+    // the workflows whose runs may write the variable; a deleted workflow drops out of the set.
+    // Loaded with the variable, because a running execution checks it outside any transaction;
+    // the sets of a list of variables are loaded in batches rather than one query each
+    @ElementCollection(fetch = FetchType.EAGER)
+    @BatchSize(size = 100)
+    @CollectionTable(name = "global_variable_owner_workflow", joinColumns = @JoinColumn(name = "variable_id"))
+    @Column(name = "workflow_id", nullable = false)
+    private Set<Long> ownerWorkflowIds = new HashSet<>();
 
     // primitive and preset, so the first saved version is 1 and Spring Data still tells a new
     // variable by its missing id
@@ -289,12 +296,22 @@ public class GlobalVariable {
         this.busyPolicy = busyPolicy;
     }
 
-    public Long getOwnerWorkflowId() {
-        return ownerWorkflowId;
+    public Set<Long> getOwnerWorkflowIds() {
+        return ownerWorkflowIds;
     }
 
-    public void setOwnerWorkflowId(Long ownerWorkflowId) {
-        this.ownerWorkflowId = ownerWorkflowId;
+    public void setOwnerWorkflowIds(Set<Long> ownerWorkflowIds) {
+        this.ownerWorkflowIds = ownerWorkflowIds;
+    }
+
+    /**
+     * Tells whether runs of a workflow may write this variable: it is mutable and the workflow is
+     * one of its owners.
+     *
+     * @param workflowId id of the workflow; for a test run, the workflow it is a copy of
+     */
+    public boolean isWritableBy(long workflowId) {
+        return kind == GlobalVariableKind.MUTABLE && ownerWorkflowIds.contains(workflowId);
     }
 
     /**

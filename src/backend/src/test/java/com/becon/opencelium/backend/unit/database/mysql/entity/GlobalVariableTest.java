@@ -11,7 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit tests for the scope rule of {@link GlobalVariable}: which workflows may use a variable.
+ * Unit tests for the scope rule of {@link GlobalVariable}, which workflows may use a variable, and
+ * for its write rule, which workflows may write it.
  *
  * <p>Run with: ./gradlew test --tests "*.GlobalVariableTest"
  */
@@ -84,6 +85,39 @@ class GlobalVariableTest {
                 GlobalVariableScopeTarget.workflow(3));
 
         assertThat(variable.isInScopeOf(WORKFLOW, Set.of(3L))).isFalse();
+    }
+
+    @Test
+    @DisplayName("isWritableBy — each of several owner workflows may write")
+    void isWritableByReturnsTrueWhenWorkflowIsOneOfSeveralOwners() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", 99L);
+        variable.getOwnerWorkflowIds().add(WORKFLOW);
+
+        assertThat(variable.isWritableBy(WORKFLOW)).isTrue();
+        assertThat(variable.isWritableBy(99L)).isTrue();
+    }
+
+    @Test
+    void isWritableByReturnsFalseWhenWorkflowIsNoOwner() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", 99L);
+
+        assertThat(variable.isWritableBy(WORKFLOW)).isFalse();
+    }
+
+    @Test
+    void isWritableByReturnsFalseWhenVariableHasNoOwnerLeft() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", null);
+
+        assertThat(variable.isWritableBy(WORKFLOW)).isFalse();
+    }
+
+    @Test
+    @DisplayName("isWritableBy — only a mutable variable is written, whatever its owner set holds")
+    void isWritableByReturnsFalseWhenVariableIsConstant() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        variable.getOwnerWorkflowIds().add(WORKFLOW);
+
+        assertThat(variable.isWritableBy(WORKFLOW)).isFalse();
     }
 
     private static GlobalVariable aVariableScopedTo(GlobalVariableScopeType type, GlobalVariableScopeTarget... targets) {
