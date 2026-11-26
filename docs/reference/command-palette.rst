@@ -144,6 +144,12 @@ offered by the palette:
      - yes
      - — / yes
      - ``id``, ``name``
+   * - ``global-variable`` *(5.3)*
+     - yes
+     - yes
+     - yes
+     - — / yes
+     - ``id``, ``name``
    * - ``invoker`` (the *API Definitions* page)
      - yes
      - yes
@@ -195,6 +201,18 @@ offered by the palette:
    uploaded, or saved from the workflow editor
    (see :ref:`guide-templates`).
 
+.. versionadded:: 5.3
+   ``list global-variables``, ``create global-variable``, ``search
+   global-variable by id|name <value>`` and ``update global-variable by
+   id|name <value>``. There is no ``delete`` command for global variables —
+   delete them from the **Global Variables** list (see
+   :doc:`../guides/global-variables`). The commands need the matching
+   permissions on the ``GLOBAL_VARIABLE`` component.
+
+.. versionchanged:: 5.3
+   ``list`` commands open the list with the search, filters, sort order and page
+   you last used on it.
+
 System commands
 """""""""""""""
 
@@ -235,6 +253,9 @@ System commands
      - Download a workflow template file.
    * - ``download invoker by name <name>``
      - Download an API definition file.
+   * - ``changelog``
+     - Open the **Changelog** page with what is new in each release. *(5.3)*
+       Aliases: ``whats-new``, ``release-notes``.
    * - ``help``
      - Open the command reference dialog.
    * - ``help onboarding``

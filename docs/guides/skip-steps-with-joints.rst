@@ -82,7 +82,8 @@ accepts is a jump that will save and run.
      - Why
    * - Both ends must be **methods**
      - An ``If`` or ``Loop`` block can be neither the source nor the target of
-       a jump. Aim at the method inside the branch instead.
+       a jump. Aim at the method inside the branch instead. A Send Notification
+       step counts as a method *(5.3)*, see :doc:`send-notifications`.
    * - The target must run **after** the source
      - A jump points forward only. It is a skip, not a goto — there are no
        backwards jumps and therefore no accidental infinite loops.

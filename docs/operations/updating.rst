@@ -66,6 +66,78 @@ Compatibility Matrix
 .. contents::
    :local:
 
+Updating to 5.3
+"""""""""""""""
+
+Update with the method for your installation type, described under
+*From OC 4.x to 5.0* below (Update Assistant, package manager or Docker Compose).
+What is new is in :doc:`../start/whats-new-5-3`. This section lists what happens
+automatically and what you should check afterwards.
+
+What happens automatically
+==========================
+
+* **Database.** The new database changesets run on the first start. They add the
+  global variable tables and the ``GLOBAL_VARIABLE`` permission component (the
+  Admin role gets it; other roles must be granted it under **Roles**), keep only
+  one session per user, extend password reset tokens and clean up usernames and
+  email addresses (see below). On MariaDB older than 10.10 the global variable
+  tables keep the collation ``utf8mb4_general_ci``.
+* **Configuration.** The startup configuration migration adds the new 5.3 keys to
+  ``application.yml``, including ``opencelium.global-variable.*`` and
+  ``opencelium.forgot-psw.admin-link-activity-time``. It does not add
+  ``secret-key`` and does not change existing values. It now migrates the file
+  that ``OPENCELIUM_CONFIG_FILEPATH`` points at; if the file is not found, the log
+  says *YAML migration skipped: '<path>' does not exist*.
+* **Older workflows and templates** are upgraded on read again, including
+  templates imported from very old versions. An imported template keeps the
+  version its upgrade reached.
+* **Changelog page.** The frontend build (``npm run build``) now also generates
+  the **Changelog** page from ``CHANGELOG.rst`` in the repository root. Without
+  the file the build still succeeds and the page shows no entries.
+
+What to check after updating
+============================
+
+#. **Configuration file path.** Make sure the **System Configuration** page can
+   save. Check ``opencelium.config.file-path`` in ``application.yml``, or set
+   ``OPENCELIUM_CONFIG_FILEPATH`` to the location of ``application.yml`` — see
+   :ref:`ref-config-file`.
+#. **Reset link URL.** Set ``opencelium.forgot-psw.base-url`` to
+   ``https://<your host>/set-password``. Old ``/reset-password`` links keep
+   working, but admin-created reset links need the URL — see
+   :ref:`ref-config-forgot-psw`.
+#. **Secret key for global variables.** Set
+   ``opencelium.global-variable.secret-key`` (or
+   ``OPENCELIUM_GLOBALVARIABLE_SECRETKEY``) to a long random string **before
+   anyone saves the first secret global variable**. The built-in fallback key is
+   the same on every installation, and there is no key rotation — see
+   :ref:`ref-config-global-variable`.
+#. **Server time zone.** Add ``"serverTimeZone"`` (for example
+   ``"Europe/Berlin"``, the zone the backend runs in) to the frontend's
+   ``config.json``. The build does not write it, so add it by hand after every
+   frontend build or update. Without it, schedule times are shown in each
+   browser's zone — see :ref:`ref-config-server-time-zone`.
+#. **Upload size.** The shipped nginx configuration still sets
+   ``client_max_body_size 200M``, while uploads of templates, API definitions and
+   offline update packages may be up to 1 GB. If you need bigger uploads, raise
+   it, for example to ``1G``, and reload nginx.
+#. **Usernames.** The database update removes usernames that contain ``@`` from
+   non-LDAP accounts and resolves duplicates. Check the user list — see
+   :doc:`../guides/users-and-permissions`.
+#. **Roles.** Grant ``GLOBAL_VARIABLE`` to roles other than Admin that should
+   work with global variables.
+
+.. note::
+   The master password is no longer kept in the browser. After the update,
+   users enter it again after every page reload and every new sign-in.
+
+.. note::
+   Request URLs are now sent as typed, and reference values are encoded as
+   data. Methods that relied on the old behaviour — pre-encoded reference values,
+   or values containing ``&`` — may send different URLs. See
+   :doc:`../reference/api` (section *URL encoding*).
+
 From OC 4.x to 5.0
 """"""""""""""""""
 
@@ -131,6 +203,12 @@ Update Docker Compose
         | Before updating, do a backup of your configuraton files (conf folder and .env file) 
         | to preserve your own settings! 
 
+
+.. warning::
+   ``docker compose down -v`` also **deletes the named volumes** of the
+   project. If your database data is kept in named volumes, it is deleted with
+   them. Back up the databases first, and check your ``docker-compose.yml``
+   before you run the command.
 
 .. code-block:: sh
 	:linenos:

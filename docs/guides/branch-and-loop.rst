@@ -40,7 +40,11 @@ condition builder opens.
   dropping it on that group's header. The grips appear once there are at least two
   rows or groups.
 * Each side of a row takes its value from **Constant**, **Method** (an earlier
-  step's *Body*, *Header* or *Status*) or **Webhook**.
+  step's *Body*, *Header* or *Status*), **Webhook** or **Global variable**.
+
+.. versionchanged:: 5.3
+   **Global variable** was added as a value source. See
+   :doc:`global-variables`.
 
 Pick the comparison from the operator select — the full catalogue with arguments
 and examples is in :doc:`../reference/operators`.
@@ -87,10 +91,20 @@ Inside the loop, append the iterator to a reference so each pass reads its own
 element. For iterator ``i`` and parameter ``result``:
 
 * ``result[i]`` — the current element,
-* ``result[1]`` — always the first element,
+* ``result[0]`` — always the first element (indexes start at ``0``),
 * ``result[*]`` — the whole array.
 
 An empty array performs no iterations — that is not an error.
+
+Loop over a global variable
+---------------------------
+
+.. versionadded:: 5.3
+
+A loop can also walk a global variable: choose **Global variable** as the source
+of its input. ``For`` walks a list, ``ForIn`` the keys of a map (or the indexes of
+a list), ``SplitString`` the parts of a text. Inside the loop, use for example
+``{{global.tenants[i].id}}``. See :doc:`global-variables`.
 
 Nesting
 =======

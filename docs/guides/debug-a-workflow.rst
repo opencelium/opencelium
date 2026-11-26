@@ -131,13 +131,35 @@ and speed have no meaning in Live mode and their panel disappears.
 Read the log tree
 =================
 
-The tree mirrors the workflow. Expand a step to get its call:
+The tree mirrors the workflow. Expand a step to get its call: HTTP method,
+endpoint URL, status code and execution time, and two tabs with what was
+exchanged:
 
-* HTTP method, endpoint URL, status code and execution time,
-* request and response headers,
-* request and response body.
+* **Sent / Received** — the request body and the response body side by side,
+* **Headers** — the request headers and the response headers side by side.
+
+.. versionchanged:: 5.3
+   Bodies and headers are grouped into the two tabs **Sent / Received** and
+   **Headers**.
+
+.. deprecated:: 5.3
+   Removed in 5.3: the separate request header and response header tabs. Up to
+   5.2 each had a tab of its own; both are now in the **Headers** tab.
 
 The copy icon puts a header, body or URL on the clipboard.
+
+A notification step appears in the tree under its step name, like any other
+step.
+
+To try a logged call again with different values, click **Open in Playground**
+in the method details. The step opens in the Request Playground, prefilled with
+the values this run used — see :ref:`guide-request-playground-logs`.
+
+If the workflow uses global variables, a **Global variables** section shows
+what the run did with them, for example the values it read at the start
+(*Values read at start*). These come from ``GLOBAL_SNAPSHOT`` lines in the log,
+one per variable; secret values are logged as ``****``, and large values are
+logged with their size only. See :doc:`global-variables`.
 
 .. image:: ../img/schedule/OC5_execution-log-tree.png
    :align: center
@@ -156,12 +178,12 @@ Historical runs
 ===============
 
 Scheduled executions use the same viewer. In the schedule list, **Last Success**
-and **Last Fail** carry a **see logs** link. It opens the *Execution Logs* dialog,
+and **Last failure** carry a **View logs** link. It opens the *Execution Logs* dialog,
 which first asks you to pick an execution from a drop-down — the retained runs of
 that schedule — and then renders its tree.
 
 .. note::
-   Logs only exist for schedules with logging enabled (**Debug** column).
+   Logs only exist for schedules with logging enabled (**Debug mode** column).
    Retention defaults to the 2 most recent successful and 3 most recent failed runs
    per workflow, configurable under ``log.retention.per-connection`` — see
    :ref:`ref-configuration`.
@@ -274,4 +296,6 @@ Where to go next
 * :doc:`skip-steps-with-joints` — a jump is only visible on the canvas during a
   run, which makes debug mode the way to confirm one fires.
 * :doc:`undo-and-history` — take back the change the run just proved wrong.
+* :doc:`request-playground` — send one step on its own and change its values.
+* :doc:`script-playground` — test a transformation script without a run.
 * :doc:`schedule-and-notify` — run it regularly once it works.

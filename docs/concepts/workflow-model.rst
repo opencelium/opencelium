@@ -36,6 +36,13 @@ step as its *method type*:
      - Starts another workflow's schedule through its webhook. Asynchronous —
        this workflow does not wait for the other one to finish.
 
+A fourth step kind in the editor, **Send Notification** *(5.3)*, posts a
+message to Slack, Microsoft Teams or another incoming webhook. It has no method
+type of its own: it is stored as an ``HTTP_REQUEST`` that sends a JSON ``POST``,
+and only the saved editor layout (the ``ui`` blob) marks it as a notification.
+The engine runs it like any other HTTP request. See
+:doc:`../guides/send-notifications`.
+
 Two more node types control the flow rather than calling anything:
 
 * **If** — branches into a ``true`` and a ``false`` path.
@@ -132,6 +139,23 @@ The REST API and the Java packages still say *connection*: the endpoints are
 ``/connection``, the identifier is ``connectionId``, and the permission
 component is ``CONNECTION``. Only the UI and this documentation say *workflow*.
 See :doc:`../reference/api`.
+
+Writes to global variables
+--------------------------
+
+.. versionadded:: 5.3
+
+A method can carry ``globalWrites``: a map from a mutable global variable to the
+value written into it after the method has responded — a constant or a
+reference.
+
+.. code-block:: json
+
+   { "index": "0", "name": "getToken", "methodType": "CONNECTOR",
+     "globalWrites": { "global.lastToken": "<value or reference>" } }
+
+Only an owner workflow of the variable may write it; a save that tries otherwise
+is refused. See :doc:`../guides/global-variables`.
 
 Order of execution
 ==================

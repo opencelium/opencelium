@@ -191,9 +191,12 @@ Duplicate workflows and connectors
 ==================================
 
 The workflow list's **Duplicate** icon copies a workflow in one click, names it
-``<title> (copy)`` and opens it in the editor. The connector list has the same
-icon; it opens the connector wizard pre-filled from the original, so credentials
-can be adjusted before saving.
+``<title> (copy)`` and opens it in the editor.
+
+.. note::
+   Duplicating a **connector** was listed here in earlier versions of this page,
+   but it shipped with 5.3, and the copy does not take over the URL and the
+   credentials. See :doc:`whats-new-5-3`.
 
 Profile pictures and role icons
 ===============================

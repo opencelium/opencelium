@@ -10,6 +10,23 @@ Screens
 A map of the interface. The guides explain what to *do*; this page says where
 things are.
 
+Sign-in page
+============
+
+The sign-in page asks for **Email/Username** and **Password**. You can sign in
+with your email address or with your username. **Forgot password?** leads to the
+self-service reset, which works only with an email address — see
+:doc:`../guides/users-and-permissions`.
+
+.. image:: ../img/login/OC5_login.png
+   :align: center
+   :width: 800
+
+.. versionchanged:: 5.3
+   Sign in, Forgot password and Set password share one layout with the logo,
+   the form in the middle and a footer. The footer has a language toggle left of
+   its links: a text button showing the current language (*EN* or *DE*).
+
 Layout
 ======
 
@@ -24,7 +41,8 @@ Layout
   GitHub, the OpenCelium website and the Service Portal *(5.2)*.
 
 The **Help** menu starts the onboarding and dashboard tours (administrators) and
-opens the documentation and the Service Portal; see :doc:`../start/guided-tours`.
+opens the documentation, the **Changelog** *(5.3)* and the Service Portal; see
+:doc:`../start/guided-tours`.
 For administrators a **Setup** checklist pill sits in the bottom-right corner
 until it is dismissed.
 
@@ -48,7 +66,8 @@ Main menu
    * - **Workflows**
      - Workflow list; the editor opens from here.
    * - **Schedules**
-     - Schedule list, executions, webhooks, notifications, support logs.
+     - Schedule list and calendar *(5.3)*, executions, webhooks, notifications,
+       support logs.
 
 Admin menu
 ==========
@@ -59,15 +78,21 @@ Admin menu
 
    * - Group
      - Entries
+   * - **Back** *(5.3)*
+     - Returns to the main menu.
    * - **Users & Access**
      - Users, Roles, LDAP Check
    * - **Configurations**
-     - API Definitions, Workflow Templates, Data Aggregators, Notification Templates,
-       Categories, Support Files
+     - API Definitions, Workflow Templates, Data Aggregators,
+       **Global Variables** *(5.3)*, Notification Templates, Categories,
+       Support Files
    * - **License & System**
      - License Management, Update Assistant, System Check, System Configuration
    * - *(top level)*
      - UI
+
+**Global Variables** is shown only to roles with *read* on the
+``GLOBAL_VARIABLE`` component; see :doc:`../guides/global-variables`.
 
 .. note::
    **External Applications** and the 3.x **Migration** card no longer exist.
@@ -85,12 +110,22 @@ detail.
 Destructive actions confirm first. The confirm dialog focuses **Cancel** and shows
 a loading state, so a slow delete cannot fire twice.
 
+.. versionchanged:: 5.3
+   A list keeps its search, filters, sort order, page and page size in the
+   address (``q``, ``sort``, ``page``, ``size``, ``f.<filter>``). Coming back from
+   a view or update page — or with **Back to list** — restores them, and the
+   address can be bookmarked or shared.
+
+Some lists have extra row actions. On **Users**, administrators find **Create
+one-time password reset link** *(5.3)*; see
+:doc:`../guides/users-and-permissions`.
+
 Wizards
 =======
 
 Create, update and view all use one wizard: named steps with their own header and
-subtitle, per-step validation, conditional sections, step actions such as *Test
-connection* that can gate the submit, ``Ctrl+Enter`` to advance, and a success
+subtitle, per-step validation, conditional sections, step actions such as **Test
+connector** that can gate the submit, ``Ctrl+Enter`` to advance, and a success
 screen recommending follow-ups.
 
 Workflow editor
@@ -99,6 +134,19 @@ Workflow editor
 Its own header replaces the application header. See
 :doc:`../guides/build-a-workflow` for the areas and
 :ref:`ref-shortcuts` for the canvas shortcuts.
+
+.. versionchanged:: 5.3
+   The editor header now also carries the language toggle, the **Help** menu,
+   the menu switcher and your profile, as in the application's top bar. In the
+   editor, **Help** offers **Start workflow tutorial** (administrators) instead
+   of the two tours, followed by Documentation, Changelog and Service Portal. On
+   windows up to 1600 px wide these entries fold behind your profile picture;
+   below 700 px they are dropped and **Schedules** moves into the header menu.
+
+Next to **Save** sits the **problems badge** *(5.3)*: a check mark when the
+workflow is clean, otherwise a warning icon with the number of steps that have
+errors or warnings. Clicking it opens the **Problems** panel — see
+:doc:`../guides/check-a-workflow`.
 
 Header menu entries: Assign Category, Version History, **Change History**,
 Download as Template, Save as Template, Load Template, **Edit as JSON** *(5.2)*,
@@ -126,6 +174,15 @@ Panels and overlays, and what opens each:
      - Header menu → Change History. *(5.1)*
    * - **Schedules** (right)
      - The schedules pill in the header.
+   * - **Problems** (right)
+     - The problems badge in the header. ``Esc`` closes it. *(5.3)*
+   * - **Request Playground** (dialog)
+     - Context menu of a method step → **Try Request…**, or **Open in
+       Playground** in the execution logs. *(5.3)* See
+       :doc:`../guides/request-playground`.
+   * - **Script Playground** (beside a transformation)
+     - The flask button in the header of a JavaScript transformation. *(5.3)*
+       See :doc:`../guides/script-playground`.
    * - **Minimap** (bottom right)
      - Always shown; collapsible. Hidden while the field links lens is on.
        *(5.2)*
@@ -149,6 +206,70 @@ Panels and overlays, and what opens each:
    (:doc:`../guides/skip-steps-with-joints`), and **comment boxes**, anchored
    notes that minimise to a badge on their step
    (:doc:`../guides/annotate-a-workflow`).
+
+Execution log details
+---------------------
+
+.. versionchanged:: 5.3
+   The details of a method in the execution logs have two tabs instead of four:
+   **Sent / Received** shows the request body (*Request*) and the response body
+   (*Response*) side by side, **Headers** shows the request and response headers
+   side by side. The panes can be copied, bodies maximised. **Open in
+   Playground** sits at the right of the tab bar. A failed run opens at the
+   step where it stopped.
+
+The same view is used in the schedule logs dialog, the test-run panel of the
+editor and the response dialog. See :doc:`../guides/debug-a-workflow`.
+
+Schedules calendar
+==================
+
+.. versionadded:: 5.3
+
+Above the schedules list a switch offers **List**, **Day**, **Week**,
+**Month** and **Agenda**. The calendar views draw the runs of the schedules the
+list currently shows — the search applies — with arrows and **Today** to move
+in time, and the time zone as *Times in <zone>* (see
+:ref:`ref-config-server-time-zone`).
+
+.. image:: ../img/schedule/OC5_schedule-calendar-week.png
+   :align: center
+   :width: 1000
+
+* **Week** and **Day** show hours as rows. Three or more quiet hours in a row
+  fold into one band; frequent schedules are condensed into one *Every N min*
+  chip, and a full cell ends in *+N more*.
+* **Month** shows the days with a small load bar per day; the day number opens
+  the Day view.
+* **Agenda** lists the runs of the next seven days, grouped by day.
+
+Clicking a run opens its card: the cron in plain words, the next run, the last
+run and the last failure, the average duration, **Edit** or **View**, and
+**Run now**. Only schedules with a cron expression are drawn; a paused schedule
+looks the same as an active one.
+
+.. image:: ../img/schedule/OC5_schedule-run-card.png
+   :align: center
+   :width: 640
+
+The schedule form shows a **Schedule Preview** under the cron field with the next
+five runs.
+
+Changelog
+=========
+
+.. versionadded:: 5.3
+
+**Help → Changelog**, or the palette command ``changelog``, opens ``/changelog``:
+*What's new in OpenCelium: features and fixes for every release.* The installed
+release comes first, split into **New features** and **Fixes**; earlier releases
+are listed below under **Previous versions**.
+
+.. image:: ../img/start/OC5_changelog-page.png
+   :align: center
+   :width: 1000
+
+The page is generated from ``CHANGELOG.rst`` when the frontend is built.
 
 Messages
 ========

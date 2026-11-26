@@ -1,9 +1,16 @@
+:orphan:
+
 .. _usage-workflow:
 .. _usage-connection:
 
 #########
 Workflows
 #########
+
+.. deprecated:: 5.0
+   This legacy page describes the connection editor of OpenCelium 4.x and is
+   no longer maintained. It is superseded by the guides — start with
+   :doc:`../guides/build-a-workflow`.
 
 .. contents::
    :local:

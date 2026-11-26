@@ -40,10 +40,26 @@ The pieces
    * - **Schedule**
      - When a workflow runs — a cron expression, a manual start, or a webhook.
    * - **Notification**
-     - Who gets told, over e-mail or webhook, before/after/on failure.
+     - Who gets told, over e-mail or webhook, before/after/on failure. Since
+       5.3 a workflow can also post to Slack, Microsoft Teams or any webhook
+       with a **Send Notification** step.
+   * - **Global variable**
+     - A value defined once — a URL, an ID, a counter, a small script — and
+       referenced by name in every workflow. See :doc:`../guides/global-variables`.
 
 The shortest possible path: create connectors for the two systems, build a
 workflow between them, attach a schedule.
+
+What is new in 5.3
+==================
+
+5.3 is about values you define once and requests you can try on their own:
+**global variables** for URLs, IDs, counters and shared scripts, a **Request
+Playground** that sends one request with your own test values, a **Script
+Playground** for transformation scripts, an automatic **workflow check** with a
+Problems panel, a **calendar** for the schedules, and **notifications** to Slack,
+Microsoft Teams or any webhook as a workflow step. Users can also sign in with a
+username. See :doc:`whats-new-5-3`.
 
 What is new in 5.2
 ==================
@@ -92,7 +108,7 @@ workflow you have open. See :doc:`../reference/command-palette`.
 lists and wizards, and light/dark themes throughout.
 
 **Server configuration from the UI.** ``application.yml`` can be edited under
-*License & System → Configurations*, with comments preserved, secrets masked and
+**License & System → System Configuration**, with comments preserved, secrets masked and
 automatic backups. See :doc:`../guides/configure-the-system`.
 
 **System Check.** One page reporting the health of OpenCelium, MariaDB, MongoDB,
@@ -110,6 +126,7 @@ documents are converted on read without being rewritten, but two
 Where to go next
 ================
 
+* :doc:`whats-new-5-3` — what changed in this release.
 * :doc:`install` — get a server running.
 * :doc:`first-workflow` — build a working integration end to end.
 * :doc:`../concepts/workflow-model` — understand the model properly.

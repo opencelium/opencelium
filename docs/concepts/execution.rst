@@ -39,6 +39,33 @@ and is reported. It does not fail the run.
 If an API definition declares pagination for the operation, the engine fetches all pages
 before the step is considered finished, so the workflow sees one complete result.
 
+Global variables
+================
+
+.. versionadded:: 5.3
+
+When a run starts, it takes a snapshot of the :doc:`global variables
+<../guides/global-variables>` in the workflow's scope. Constants are read from
+that snapshot, so a change made during the run reaches the next run, not the
+current one. Mutable variables are read live, each time they are read. The log
+records one ``GLOBAL_SNAPSHOT`` line per variable, with secret values masked.
+
+A workflow that uses a **mutable** global variable runs one execution at a time.
+What happens to a second start depends on the variable's busy policy:
+
+* **Queue** (the default) — the next run waits and starts when the running one
+  ends.
+* **Refuse** — the next run does not start and is logged as failed. If any of
+  the workflow's mutable variables is set to Refuse, this applies to the whole
+  workflow.
+
+The queue is bounded by ``opencelium.global-variable.queue.max-waiting``
+(default 100 waiting runs) and ``opencelium.global-variable.queue.max-wait-minutes``
+(default 60).
+
+Starting a schedule or calling its webhook while such a start is refused
+answers ``409`` with ``BUSY``.
+
 Conditions and OCEL
 ===================
 
@@ -87,7 +114,8 @@ Logs
 
 Execution logs are a tree that mirrors the workflow: steps and operators nest,
 loop iterations group together, and each call carries its HTTP method, URL,
-status, duration, and request/response headers and body.
+status, duration, and request/response headers and body. Global variables
+the run read at its start are listed as well.
 
 Logs stream to the browser over a WebSocket while the run is in progress, so a
 test run gives immediate feedback. The same viewer shows historical scheduled
@@ -99,7 +127,7 @@ shown on the step instead of in the request/response section.
 
 .. note::
    Logs are only recorded for a schedule when logging is enabled for it (the
-   **Debug** toggle). Retention is bounded — by default the two most recent
+   **Debug mode** toggle). Retention is bounded — by default the two most recent
    successful and three most recent failed runs per workflow — and configurable
    under ``log.retention.per-connection``.
 

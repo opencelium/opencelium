@@ -14,8 +14,8 @@ change no longer needs shell access. The full key reference is
 Open it
 =======
 
-**License & System → Configurations** (admin menu, ``Alt+M``). The palette
-equivalent is ``update system-config``.
+**License & System → System Configuration** (admin menu, ``Alt+M``). The
+palette equivalent is ``update system-config``.
 
 The page requires the **master password**. If none is configured it says so; set
 ``opencelium.connector.master-password`` in the file directly and restart, then the
@@ -64,6 +64,31 @@ retention are themselves configuration:
 These are convenience snapshots. For real backups see
 :doc:`../operations/backup-and-restore`.
 
+Which file the page edits
+=========================
+
+The page reads and writes the file named by ``file-path`` above. Since 5.3 its
+default is ``./application.yml``, resolved against the backend's working
+directory (``/opt/opencelium/src/backend`` with the shipped service). On a
+standard installation the file is in ``src/main/resources/``, so that default
+points at a file that does not exist: the page still shows values, but saving
+fails with *Cannot write to ./application.yml: file does not exist on disk*.
+
+Fix it once, in the file itself:
+
+* set ``file-path`` to the real file, for example
+  ``src/main/resources/application.yml``, or
+* set the environment variable ``OPENCELIUM_CONFIG_FILEPATH`` to the absolute
+  path of ``application.yml`` for the service. It takes precedence over
+  ``file-path`` and is also used by the startup configuration migration.
+
+The lookup order and an example for systemd are in :ref:`ref-config-file`.
+
+.. versionchanged:: 5.3
+   The default of ``file-path`` changed from ``src/main/resources/application.yml``
+   to ``./application.yml``, and ``OPENCELIUM_CONFIG_FILEPATH`` is new.
+   Installations updated from 5.2 keep their existing value.
+
 Editing a single value from the palette
 =======================================
 
@@ -81,6 +106,21 @@ Still perfectly valid:
    systemctl restart opencelium
 
 Use this for the master password itself, and whenever the UI is not reachable.
+If you keep the file elsewhere, edit the file ``OPENCELIUM_CONFIG_FILEPATH``
+points at.
+
+Key for secret global variables
+===============================
+
+.. versionadded:: 5.3
+
+Secret :doc:`global variables <global-variables>` are encrypted with
+``opencelium.global-variable.secret-key`` (or the environment variable
+``OPENCELIUM_GLOBALVARIABLE_SECRETKEY``, which takes precedence). Set it to a
+long random string **before the first secret is saved**: when it is empty, a
+built-in key is used that is the same on every installation. There is no key
+rotation — after a change every secret has to be entered again. See
+:ref:`ref-config-global-variable`.
 
 Appearance
 ==========

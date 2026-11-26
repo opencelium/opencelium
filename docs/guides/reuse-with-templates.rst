@@ -75,6 +75,14 @@ templates page you can also convert one explicitly, or all of them at once.
 Editing a template
 ==================
 
-There is no template editor. You can change the JSON on the server, but a small
-mistake breaks loading with no useful error. Load it into a workflow, edit there,
-and save as a new template.
+.. versionadded:: 5.3
+
+In the templates list, the row action **Edit as JSON** opens the template in the
+JSON editor (*Edit workflow template as JSON*) — the same editor as for a
+workflow, see :doc:`edit-as-json`. Applying saves the template straight away and
+replaces the stored one. If the JSON does not pass validation you can still force
+the save, after a confirmation; only do that when you are sure, because a broken
+template may not load.
+
+For larger changes it is often easier to load the template into a workflow, edit
+it on the canvas, and save it as a template again.

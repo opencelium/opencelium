@@ -27,20 +27,95 @@ You never type that. The **reference generator** walks you through
 Arrays and XML
 --------------
 
+Paths are JsonPath, and array indexes start at ``0``.
+
 * ``[*]`` references the whole array.
-* ``[<index>]`` references one element, e.g. ``[1]`` for the first.
+* ``[<index>]`` references one element, e.g. ``[0]`` for the first.
 * Inside a loop, append the iterator to walk through it: for a loop with
   iterator ``i`` and parameter ``result``, use ``result[i]``.
 * For XML responses, ``@`` offers the attributes of a tag.
 
+Operations
+----------
+
+.. versionadded:: 5.3
+
+When you pick a field, the dropdown lists **Operations** above the **Fields**.
+Each shows its label, the syntax it appends and a hint. Typing an operation's
+syntax, such as ``[-1]``, jumps to it.
+
+.. image:: ../img/workflow/OC5_reference-operations.png
+   :align: center
+   :width: 800
+
+.. list-table::
+   :header-rows: 1
+   :widths: 28 22 50
+
+   * - Operation
+     - Syntax
+     - Returns
+   * - **Whole response**
+     - ``$``
+     - The whole response body, unchanged (called *The root object* before
+       5.3).
+   * - **First element of the array**
+     - ``[0]``
+     - The first element, as a single value.
+   * - **Last element of the array**
+     - ``[-1]``
+     - The last element, as a single value. Continue with a field name to take
+       a field from it.
+   * - **The whole array**
+     - ``[*]``
+     - All elements, as a list.
+   * - **Number of elements**
+     - ``.length()``, e.g. ``$.items.length()``
+     - How many elements the array has, as a number — useful in a condition, to
+       continue only if a list is not empty.
+   * - **Any property**
+     - ``*``, e.g. ``$.data.*``
+     - Every property of an object. Continue with a field name to pick that
+       field from all of them. The result is a list.
+   * - **All key names**
+     - ``['*']~``, e.g. ``$.data['*']~``
+     - The names of all properties of an object, as a list — not their values.
+
+Paths that can match several values are marked *list*: they return a list of
+all matches, even when only one matches.
+
+Reference validation
+--------------------
+
+.. versionadded:: 5.3
+
+A reference is checked while you build it — its syntax, and whether the path
+exists in the method's example response. The field turns red for an error and
+amber for a warning; the tooltip gives the message and a hint.
+
+* **Errors** disable **Insert** in the reference generator, for example *The path
+  must start with $.*, *A bracket is not closed.* or *This loop iterator is not
+  available here: the reference is not inside that loop.*
+* **Warnings** only advise, for example *“..” searches the whole response —
+  usually a typo for a single dot.* or *This field is not in the method's
+  example response. The run fails if it is missing from the real response.*
+
+Warnings for the whole workflow are collected in the Problems panel — see
+:doc:`../guides/check-a-workflow`.
+
 Sources
 -------
 
-A reference can come from three places:
+A reference can come from four places:
 
 * **Method** — the response of an earlier step, as *Body*, *Header* or *Status*.
 * **Constant** — a literal value.
 * **Webhook** — a parameter of the webhook that started the workflow.
+* **Global variable** — a value defined once for many workflows, written
+  ``{{global.name}}``. See :doc:`../guides/global-variables`.
+
+.. versionchanged:: 5.3
+   **Global variable** was added as a fourth source.
 
 Direct references
 =================
@@ -72,8 +147,22 @@ The **Variable Information** panel tells you, for each variable, which method an
 field it comes from and where the result is used — worth reading before you
 change someone else's script.
 
+To try a JavaScript transformation with test values before a real run, open the
+:doc:`../guides/script-playground` from the transformation panel.
+
+Global variables in transformations
+-----------------------------------
+
+.. versionadded:: 5.3
+
+A transformation can use global variables: as an input (``VAR_n``), through
+``ref("{{global.name}}")`` in JavaScript, or by importing a **script** variable of
+the same language and calling it like a function. JavaScript transformations can
+also write a mutable variable with ``set("{{global.name}}", value)``. See
+:doc:`../guides/global-variables`.
+
 Deleting a reference replaces its variables in the script with
-``OC_VAR_NOT_EXIST`` rather than silently shifting the others. Editing a
+``VARIABLE_NOT_EXIST`` rather than silently shifting the others. Editing a
 reference leaves the script alone.
 
 Languages
@@ -81,8 +170,11 @@ Languages
 
 * **JavaScript** — runs inside the OpenCelium core on Nashorn
   (``org.openjdk.nashorn:nashorn-core 15.4``). The default, and the fastest.
-* **Python 2**, **Python 3**, **Ruby** — run in the separate ``polyglot-engine``
-  service, sandboxed.
+* **Python 3**, **Ruby** — run in the separate ``polyglot-engine`` service,
+  sandboxed.
+
+.. deprecated:: 5.0
+   **Python 2** is no longer offered in 5.x. Use Python 3 instead.
 
 .. code-block:: python
 

@@ -1,5 +1,5 @@
 ######################
-OpenCelium 5.2
+OpenCelium 5.3
 ######################
 
 OpenCelium is an integration platform: you connect APIs, move and enrich data
@@ -10,6 +10,11 @@ This documentation is organised by what you are trying to do.
 **New here?** Start with :doc:`start/introduction` for the ideas, then
 :doc:`start/first-workflow` builds a working integration end to end. Inside the
 application, the :doc:`guided tours <start/guided-tours>` do the same hands-on.
+
+**Coming from 5.2?** :doc:`start/whats-new-5-3` covers global variables, the
+request and script playgrounds, the workflow check with its Problems panel, the
+schedule calendar and notifications as a workflow step — and the defaults that
+changed on upgrade.
 
 **Coming from 5.1?** :doc:`start/whats-new-5-2` covers onboarding, field links,
 the minimap, safer deletes, multi-select and the JSON editor — and the renamed
@@ -31,6 +36,10 @@ for example :doc:`reference/configuration` and :doc:`reference/api`.
 **Running the server?** See :doc:`operations/requirements` and
 :doc:`operations/updating`.
 
+**Found a security issue?** Please report it privately to
+``security@opencelium.io`` — see :doc:`about/security` for what to include and
+how coordinated disclosure works.
+
 .. toctree::
    :caption: Get started
    :maxdepth: 2
@@ -39,6 +48,7 @@ for example :doc:`reference/configuration` and :doc:`reference/api`.
    start/install
    start/first-workflow
    start/guided-tours
+   start/whats-new-5-3
    start/whats-new-5-2
    start/whats-new-5-1
    start/upgrade-to-5
@@ -58,6 +68,7 @@ for example :doc:`reference/configuration` and :doc:`reference/api`.
 
    guides/build-a-workflow
    guides/branch-and-loop
+   guides/global-variables
    guides/trace-field-links
    guides/skip-steps-with-joints
    guides/call-any-api
@@ -66,7 +77,11 @@ for example :doc:`reference/configuration` and :doc:`reference/api`.
    guides/undo-and-history
    guides/edit-as-json
    guides/schedule-and-notify
+   guides/send-notifications
+   guides/check-a-workflow
    guides/debug-a-workflow
+   guides/request-playground
+   guides/script-playground
    guides/reuse-with-templates
    guides/users-and-permissions
    guides/configure-the-system
@@ -107,6 +122,7 @@ for example :doc:`reference/configuration` and :doc:`reference/api`.
    :caption: About
    :maxdepth: 1
 
+   about/security
    about/license
    about/sources
 

@@ -40,11 +40,45 @@ silently. See :ref:`ref-config-polyglot`.
 
 **Password reset does nothing.**
 ``spring.mail`` is not configured, so there is no mail sender at all. System
-Check reports Email as *Down*.
+Check reports Email as *Down*. The self-service reset also works only with an
+email address; for users without one, an administrator creates a reset link —
+see :doc:`../guides/users-and-permissions`.
+
+**Sign-in fails with HTTP 429.**
+Too many failed sign-ins: by default 5 for one account or 20 from one client
+address within 15 minutes. Wait until the window has passed (the response carries
+a ``Retry-After`` header) or restart the backend, which clears the in-memory
+counters. If all users are blocked at once behind a reverse proxy, the backend
+sees every request as coming from the proxy: check that the proxy sets
+``X-Forwarded-For`` and that ``server.forward-headers-strategy: native`` is in
+``application.yml``. The limits are in :ref:`ref-config-code-only`.
+
+**System Configuration cannot save: "Cannot write to ./application.yml: file
+does not exist on disk".**
+The page writes to ``opencelium.config.file-path``, whose 5.3 default
+``./application.yml`` resolves against the backend's working directory and does
+not exist on a standard installation. Set ``file-path`` to the real file, or set
+the environment variable ``OPENCELIUM_CONFIG_FILEPATH`` for the service, and
+restart. See :ref:`ref-config-file`.
+
+**Uploads larger than 200 MB fail with 413.**
+nginx rejects the request before it reaches the backend: the shipped
+configuration sets ``client_max_body_size 200M``, while OpenCelium accepts up to
+1 GB. Raise it (for example to ``1G``) and reload nginx. See
+:ref:`ref-configuration`.
+
+**Schedule times in the calendar look shifted by some hours.**
+The frontend shows run times in ``serverTimeZone`` from ``config.json``, or in
+the browser's zone when that is empty or invalid. Set it to the zone the backend
+runs in, for example ``"Europe/Berlin"`` — the build does not write it, so add it
+again after a frontend update. See :ref:`ref-config-server-time-zone`.
 
 **"Another schedule for this connection is already running."**
 Only one schedule per workflow runs at a time. Wait, or terminate the running
-execution from the schedule list.
+execution from the schedule list. A workflow that uses a mutable global variable
+with the busy policy *Queue* makes further starts wait instead; with *Refuse*,
+starts through the API or a webhook answer ``409 BUSY``. See
+:doc:`../guides/global-variables`.
 
 **Saving a workflow is refused with OPERATOR_EXPRESSION_IS_EMPTY.**
 An ``If`` or ``Loop`` operator has no condition. The editor outlines the offending
@@ -130,7 +164,7 @@ Commands to enable Opencelium services (already done on installation).
 
 .. code-block:: sh
 
-        ln -s /opt/scripts/oc_service.sh /usr/bin/oc
+        ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
         
         ln -s /opt/opencelium/conf/opencelium.service /etc/systemd/system/opencelium.service 
         systemctl daemon-reload

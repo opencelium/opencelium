@@ -23,7 +23,7 @@ use *Simple HTTP request* steps and skip the API definition work entirely.
 Each system needs an **API definition** (how to talk to that kind of API) and a
 **connector** (one instance of it, with credentials).
 
-Check **Configurations → API definitions** first: if an API definition for your product already
+Check **Configurations → API Definitions** first: if an API definition for your product already
 exists — shipped, uploaded, or synchronised from the Service Portal — you are
 done with this part. If not, create one, or take the shortcut in step 3.
 
@@ -32,7 +32,7 @@ Then create a connector per system under **Connectors → Create**:
 #. **General Data** — a title, the API definition, and optionally a timeout and icon.
 #. **Credentials** — the fields the API definition's authentication type requires.
 
-Use **Test connection** before submitting. If it fails, OpenCelium asks you to
+Use **Test connector** before submitting. If it fails, OpenCelium asks you to
 confirm explicitly rather than silently storing a broken connector — fix the
 credentials instead.
 
@@ -62,14 +62,22 @@ The step appears on the canvas showing the connector icon and the method name.
 Note its status dot: green means the connector's test passed.
 
 Double-click the step to inspect its request. For a connector method the HTTP
-method is fixed by the API definition; the URL, headers and body are editable.
+method comes from the API definition; the URL, headers and body are editable.
+
+.. versionchanged:: 5.3
+   The HTTP method of a connector method can be changed as well; up to 5.2 it was
+   read-only.
+
+To check the call before you go on, right-click the step and choose **Try
+Request…**: it sends this one request and shows the real response, see
+:doc:`../guides/request-playground`.
 
 4. Loop over the results
 ========================
 
 The source call returns a list, and you want one write per element.
 
-Hover the first step, click **+**, choose **Add Operator**, then **Loop**.
+Hover the first step, click **+**, choose **Add Logic Block**, then **Loop**.
 
 Double-click the Loop node to open its condition. Choose the ``For`` operator and
 point its argument at the array in the first step's response — use the reference
@@ -128,11 +136,12 @@ a time per workflow.
 ==============
 
 Once it works, give it a schedule. Either use the **schedules pill** in the editor
-header — **Add schedule**, scoped to this workflow — or go to **Schedules →
+header — **Create schedule**, scoped to this workflow — or go to **Schedules →
 Create**.
 
 A schedule needs a title and a workflow; the cron expression is optional, and the
-generator builds one for you with a preview of the next runs. Leave logging off
+generator builds one for you. The **Schedule Preview** under the field shows the
+next five runs. Leave logging off
 unless you need it, and switch it on from the list when you do.
 
 .. note::
@@ -146,6 +155,10 @@ then attach a notification to the schedule with event type **alert** so a failur
 reaches you by e-mail or webhook.
 
 See :doc:`../guides/schedule-and-notify`.
+
+To post a message from inside the workflow — to Slack, Microsoft Teams or any
+other incoming webhook — add a **Send Notification** step instead, see
+:doc:`../guides/send-notifications`.
 
 Where to go next
 ================

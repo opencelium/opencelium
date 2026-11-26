@@ -31,6 +31,11 @@ controls at the top left, below the zoom buttons:
 Both are view-only, so they are available in read-only mode as well. They are
 independent of each other; either can be open on its own.
 
+From 5.3 the fields of a Send Notification step (see :doc:`send-notifications`)
+and references to global variables (see :doc:`global-variables`) take part as
+well, and broken links are also listed in the **Problems** panel — see
+:doc:`check-a-workflow`.
+
 The lens on the canvas
 ======================
 

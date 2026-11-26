@@ -19,6 +19,9 @@ If it does not exist yet, copy the documented default beside it:
 
    cp .../application_default.yml .../application.yml
 
+To keep the file somewhere else, set the environment variable
+``OPENCELIUM_CONFIG_FILEPATH`` to its location — see :ref:`ref-config-file`.
+
 Since 5.0 the same file can be edited from the UI — see
 :doc:`../guides/configure-the-system`. Either way, **the backend must be
 restarted** for a change to take effect.
@@ -28,20 +31,57 @@ restarted** for a change to take effect.
 opencelium.config
 =================
 
-Where the ``/application-config`` endpoint reads and writes, and how it keeps
-backups.
+Where the ``/application-config`` endpoint (the **System Configuration** page)
+reads and writes, and how it keeps backups.
 
 .. code-block:: yaml
 
    opencelium:
      config:
        # the application.yml on disk to read and write
-       file-path: src/main/resources/application.yml
+       file-path: ./application.yml
        backup:
          # pre-write backups, named <file>.bak.<epochMillis>
          directory: runtime/backup/application
          # how many recent backups to keep per target file
          keep: 10
+
+.. versionchanged:: 5.3
+   The default of ``file-path`` is now ``./application.yml`` (it was
+   ``src/main/resources/application.yml``), and the environment variable
+   ``OPENCELIUM_CONFIG_FILEPATH`` can set the location instead.
+
+The location of ``application.yml`` is looked up in this order:
+
+#. the Java system property ``-Dopencelium.config.file-path=...``,
+#. the environment variable ``OPENCELIUM_CONFIG_FILEPATH``,
+#. for the System Configuration page: the ``file-path`` key above; for
+   startup: ``src/main/resources/application.yml``.
+
+A relative path is resolved against the backend's working directory —
+``/opt/opencelium/src/backend`` with the shipped systemd unit. Besides the
+System Configuration page, the startup configuration migration and Spring's
+config location follow the system property and the environment variable too.
+The migration's backup ``application_copy.yml`` is written next to that file.
+
+.. warning::
+   With the shipped unit, ``./application.yml`` means
+   ``/opt/opencelium/src/backend/application.yml``. On a standard installation
+   the file lives in ``src/main/resources/``, so a ``file-path`` copied
+   unchanged from ``application_default.yml`` points at a file that does not
+   exist: the page still shows values, but saving fails with *Cannot write to
+   ./application.yml: file does not exist on disk*. Either set ``file-path``
+   to the real file (for example ``src/main/resources/application.yml``) or
+   set ``OPENCELIUM_CONFIG_FILEPATH`` for the service, for example with
+   ``systemctl edit opencelium``:
+
+   .. code-block:: ini
+
+      [Service]
+      Environment=OPENCELIUM_CONFIG_FILEPATH=/opt/opencelium/src/backend/src/main/resources/application.yml
+
+   An upgraded installation keeps the value it had: the configuration
+   migration only adds missing keys.
 
 .. _ref-config-sweeper:
 
@@ -74,6 +114,121 @@ opencelium.connector
 
 Protects connector credentials, and additionally gates browsing a connector's
 GraphQL schema and the System Configuration page. ASCII characters only.
+
+.. _ref-config-forgot-psw:
+
+opencelium.forgot-psw
+=====================
+
+Password reset links — the self-service *Forgot password* link and the one-time
+link an admin creates from the user list (see
+:doc:`../guides/users-and-permissions`).
+
+.. code-block:: yaml
+
+   opencelium:
+     forgot-psw:
+       # the frontend's set-password page; reset and admin links add ?token=...
+       base-url: https://frontend.example.com/set-password
+       token-activity-time: 240000          # ms a self-service link stays valid
+       max-email-validation-attempts: 3
+       lockout-time: 480000
+       admin-link-activity-time: 86400000   # ms an admin-issued link stays valid (24 h)
+
+.. versionchanged:: 5.3
+   The default of ``base-url`` now ends in ``/set-password`` (it was
+   ``/reset-password``), and ``admin-link-activity-time`` is new.
+
+An existing value is not rewritten on upgrade. Links that still point at
+``/reset-password`` keep working — the frontend forwards them to
+``/set-password`` — but set ``base-url`` to ``https://<your host>/set-password``.
+Without ``base-url`` an admin cannot create a reset link.
+
+.. _ref-config-global-variable:
+
+opencelium.global-variable
+==========================
+
+.. versionadded:: 5.3
+
+Limits and the encryption key for :doc:`global variables
+<../guides/global-variables>`.
+
+.. code-block:: yaml
+
+   opencelium:
+     global-variable:
+       secret-key: ""               # key for secret values; see below
+       max-value-bytes: 65536       # largest value of one variable, in bytes
+       max-script-bytes: 262144     # largest code of one script variable, in bytes
+       script-timeout-ms: 5000      # how long a script variable may run (in a workflow and in a test)
+       queue:
+         max-waiting: 100           # starts that may wait per workflow; one more is refused
+         max-wait-minutes: 60       # how long a start may wait before it is dropped
+       change-log:
+         max-run-entries: 200       # run-write entries kept per variable; oldest go first
+
+**queue** applies to workflows that use a mutable global variable: they run one
+execution at a time, and with the busy policy *Queue* a further start waits for
+the running one.
+
+.. warning::
+   **Set** ``secret-key`` **before the first secret value is saved.** It
+   encrypts secret constants. When it is empty, a built-in default key is used —
+   the same on every installation, so it hides the values but does not protect
+   them. Use a long random string and keep a copy apart from your database
+   backups. The environment variable ``OPENCELIUM_GLOBALVARIABLE_SECRETKEY``
+   takes precedence over the file.
+
+   There is no key rotation: a secret saved under one key cannot be read under
+   another, so after changing the key every secret has to be entered again.
+
+.. _ref-config-code-only:
+
+Keys without a default entry
+============================
+
+.. versionadded:: 5.3
+
+These optional keys are read by the backend but are not in
+``application_default.yml``. Add them under ``opencelium:`` only if you need a
+different value.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 15 45
+
+   * - Key
+     - Default
+     - What it does
+   * - ``opencelium.login.max-failures-per-account``
+     - ``5``
+     - Failed sign-ins per account within the window before further attempts
+       are refused with HTTP 429.
+   * - ``opencelium.login.max-failures-per-client``
+     - ``20``
+     - Failed sign-ins per client address within the window.
+   * - ``opencelium.login.failure-window``
+     - ``900000``
+     - Length of the sliding window, in ms (15 minutes).
+   * - ``opencelium.connector.token-cache-ttl``
+     - ``300000``
+     - How long, in ms, a login token computed by an API definition is cached
+       for single requests such as the Request Playground.
+   * - ``opencelium.script-run.timeout``
+     - ``5s``
+     - Time limit of one run in the :doc:`Script Playground
+       <../guides/script-playground>`.
+   * - ``opencelium.script-run.max-concurrent``
+     - ``2``
+     - Script Playground runs at the same time; more are refused with HTTP 429.
+
+The login limit counts failures only and is kept in memory per backend
+instance; a successful sign-in clears the failures of that account. The client
+is identified by its address, which behind nginx needs both
+``server.forward-headers-strategy: native`` (in the default file) and
+``proxy_set_header X-Forwarded-For $remote_addr`` (in the shipped nginx
+configuration). Without them all users share one client budget.
 
 .. _ref-config-polyglot:
 
@@ -372,6 +527,31 @@ a backend elsewhere, fill them in:
      "socket": { "protocol": "https", "hostname": "oc.example.com", "port": "9090", "prefix": "/ws" }
    }
 
+.. _ref-config-server-time-zone:
+
+serverTimeZone
+--------------
+
+.. versionadded:: 5.3
+
+.. code-block:: json
+
+   {
+     "server": { "protocol": "", "hostname": "", "port": "", "prefix": "/api" },
+     "socket": { "protocol": "", "hostname": "", "port": "", "prefix": "/ws" },
+     "serverTimeZone": "Europe/Berlin"
+   }
+
+An IANA time zone name. Schedule run times — the schedules calendar, the
+dashboard **Schedule** card and the **Schedule Preview** under the cron field —
+are shown in this zone, labelled *Times in <zone>*. Set it to the zone the
+backend runs in, because that is the zone schedules fire in. When it is empty or
+not a valid zone, the browser's zone is used.
+
+.. note::
+   The production build writes ``config.json`` without ``serverTimeZone``. Add
+   the key by hand after building or updating the frontend.
+
 .. note::
    ``settings.json`` and ``window.config.env.urlInfo`` from earlier versions are
    no longer used.
@@ -401,6 +581,13 @@ breaks test runs, the live dashboard and support-log notifications.
            proxy_set_header Host $host;
            proxy_cache_bypass $http_upgrade;
    }
+
+.. note::
+   ``client_max_body_size 200M`` limits uploads through nginx to 200 MB, while
+   the backend and the upload dialogs accept up to 1 GB (templates, API
+   definitions and offline update packages). If you need bigger uploads, raise
+   it, for example to ``1G``; otherwise nginx answers *413 Request Entity Too
+   Large*. The shipped Apache configurations set no limit.
 
 Ready-made nginx and Apache configurations are in
 `conf/ <https://github.com/opencelium/opencelium/tree/prod/conf>`_.

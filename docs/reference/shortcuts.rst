@@ -125,7 +125,36 @@ General
 
 The keyboard shortcuts act on the canvas only. They are ignored while the cursor
 is in a text field or a code editor, while an editing dialog is open, in
-read-only mode and while a test run is in progress.
+read-only mode and while a test run is in progress. The exception is ``Ctrl+C``,
+which also copies in read-only mode *(5.3)*.
+
+More keys
+---------
+
+.. versionadded:: 5.3
+
+The dialog itself is unchanged in 5.3. These keys work as well but are not listed
+in it:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - Shortcut
+     - Action
+   * - ``Ctrl+C`` / ``Ctrl+V``
+     - Work across workflows and browser tabs: copy steps in one workflow, select
+       a step in another and paste. The **Check pasted steps** dialog asks about
+       connectors and references when needed — see
+       :doc:`../guides/build-a-workflow`.
+   * - ``Esc``
+     - Also closes the **Problems** panel (:doc:`../guides/check-a-workflow`).
+   * - ``Ctrl+Enter`` / ``⌘+Enter``
+     - Runs the :doc:`Script Playground <../guides/script-playground>`, in the
+       script editor and in the playground panel.
+   * - ``Enter``
+     - Opens a focused **Send Notification** step
+       (:doc:`../guides/send-notifications`).
 
 .. note::
    ``Ctrl+Z`` inside a text field — a URL, a body, a script — is the browser's own

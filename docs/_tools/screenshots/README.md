@@ -30,8 +30,18 @@ OC_LINKS_WF=1 OC_MINIMAP_WF=42 node capture-52.mjs
 ONLY=minimap node capture-52.mjs
 ```
 
-Then copy `out/*.png`, `out51/*.png` and `out52/*.png` over the files in
-`docs/img/*/OC5_*.png` (the onboarding and help-menu shots go to `docs/img/start/`).
+```sh
+# 5.3 shots -> out53/. Shot against a 5.3 backend on a COPY of the database
+# (see "Shooting 5.3 safely" below), after seeding it with seed-53.mjs.
+API=http://127.0.0.1:9190 OC_WF=182 node seed-53.mjs
+BASE=http://127.0.0.1:8053 OC_WF=182 OC_DEMO_USER=5 node capture-53.mjs
+ONLY=calendar-week,gv-list node capture-53.mjs
+```
+
+Then copy `out/*.png`, `out51/*.png`, `out52/*.png` and `out53/*.png` over the files in
+`docs/img/*/OC5_*.png` (the onboarding, help-menu and changelog shots go to
+`docs/img/start/`; global variables, users and the password-link dialog to
+`docs/img/admin5/`; calendar and cron preview to `docs/img/schedule/`).
 
 ## Things that will bite you
 
@@ -111,3 +121,51 @@ write anywhere. Then pause inside the loop and shoot
   `dist/config.json` — an empty port makes the app call `:80`.
 * **The workflow tutorial needs `/workflow/create`** and is started through the
   palette (`help work` + Enter); it runs on its own fake backend.
+
+## Shooting 5.3 safely
+
+The 5.3 shots need demo data (global variables, schedules with cron
+expressions, a user without email) that should not be created on a real
+instance. They were shot like this:
+
+1. Build the 5.3 backend and frontend from the release branch in a scratch
+   directory (`./gradlew -x test bootJar`, `npm install && npm run build`).
+2. Copy the databases: MariaDB `opencelium` -> `opencelium_docs53`
+   (`mysqldump | mysql`), MongoDB `opencelium` -> `opencelium_docs53`
+   (`mongodump --archive | mongorestore --nsFrom 'opencelium.*' --nsTo 'opencelium_docs53.*'`),
+   and copy `runtime/` and `upload-dir/` next to the scratch backend.
+3. In the scratch `application.yml` point both databases at the copies
+   (Mongo needs `?authSource=opencelium`), set `server.port: 9190`,
+   **`spring.quartz.auto-startup: false`** (no schedule ever fires) and
+   **`opencelium.online-services.active: false`** (no usage reports or syncs
+   with the Service Portal under the real subscription). Also set every
+   `QRTZ_TRIGGERS.TRIGGER_STATE` in the copy to `PAUSED`.
+4. Serve `dist/` on its own port with `/api` and `/ws` proxied to `:9190`, and
+   set `server`/`socket` host and port in `dist/config.json` (`"protocol": "http:"`
+   with the colon) — an empty port makes the app call the real instance on `:80`.
+5. Seed with `seed-53.mjs`, then run `capture-53.mjs`.
+
+Drop the copies afterwards (`DROP DATABASE opencelium_docs53`,
+`db.dropDatabase()` in `opencelium_docs53`).
+
+## Things that will bite you in capture-53.mjs
+
+* **"New" feature cards** pop up over the editor; the script marks them all
+  dismissed in `localStorage` (`opencelium:new-features:dismissed`).
+* **The demo workflow's description** carries an automation marker; `snap()`
+  replaces it on screen before every shot.
+* **Never press Send, cURL or Run now.** Send calls the real API with the
+  connector's credentials, opening the cURL panel runs the connector's
+  authentication and prints real credentials, *Run now* on a calendar run card
+  starts the schedule, *Send test message* in the notification dialog posts to
+  the webhook. None of these is automated.
+* **The problems panel needs a problem.** The script adds an IF without a
+  condition and never saves; the editor is reopened for the next shot.
+* **The user wizard is autofilled** by Chromium with the sign-in credentials;
+  the script clears the fields and types a demo username.
+* **Reference fields open their error tooltip by themselves** for ~5 s; wait
+  before shooting (the paste-check dialog has two broken references).
+* **Not captured:** *Open in Playground* in the execution log (needs a stored
+  execution — the docs copy has none, and producing one means running a
+  workflow against real systems), the reference validation tooltip (closes
+  under automation) and the cURL panel (real credentials).

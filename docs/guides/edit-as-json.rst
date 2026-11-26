@@ -67,6 +67,10 @@ Apply, Reset, Force Apply
      - Applies the JSON despite validation errors, as long as it parses. Use it
        only when you know the validator is wrong about your case — the result can
        be a workflow the editor cannot run or save cleanly.
+   * - **Copy**
+     - Copies the JSON to the clipboard. *(5.3)*
+
+The toggle next to the close button maximises the dialog. *(5.3)*
 
 Applying does **not** save. The workflow is marked as changed; review it on the
 canvas and **Save** as usual, which creates a new version you can roll back to.
@@ -80,4 +84,5 @@ Where to go next
 
 * :doc:`build-a-workflow` — the canvas, for everything else.
 * :doc:`undo-and-history` — Version History, to roll back a saved state.
-* :doc:`reuse-with-templates` — moving workflows between instances.
+* :doc:`reuse-with-templates` — moving workflows between instances. From 5.3
+  workflow templates can be edited as JSON too, from the template list.

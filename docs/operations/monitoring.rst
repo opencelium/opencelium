@@ -64,10 +64,28 @@ stale*).
    :align: center
    :width: 1000
 
+* **Schedule** — the schedules due in the next 24 hours as a heatmap, the next
+  runs, how many schedules there are and how many failed, and a link **All
+  schedules →** to the schedules list. Shown only to users who may read
+  schedules.
+
+.. versionadded:: 5.3
+   The **Schedule** card. Run times are shown in the server time zone set by
+   ``serverTimeZone`` in the frontend's ``config.json``, otherwise in the
+   browser's zone. See :doc:`../guides/schedule-and-notify`.
+
+.. image:: ../img/dashboard/OC5_dashboard-schedule-card.png
+   :align: center
+   :width: 640
+
 .. note::
-   *Attention required*, *Recent activity* and *System health* are laid out but
-   marked **Coming soon**. They are placeholders in 5.0 and do not show live
-   data.
+   *Attention required* and *Recent activity* are laid out but marked **Coming
+   soon**. They are placeholders and do not show live data.
+
+.. deprecated:: 5.3
+   The *System health* placeholder card was removed in 5.3; it was last shown in
+   5.2. Its place is taken by the **Schedule** card. For the health of the
+   components, use :ref:`ref-system-check`.
 
 If the dot says the connection was lost, the usual cause is a reverse proxy that
 does not forward ``/ws`` — see :ref:`ref-configuration`.
@@ -79,7 +97,7 @@ Logs on the host
 
    journalctl -xe -u opencelium -f
 
-``opencelium.debug_mode`` raises verbosity. Execution logs themselves are in the
+``opencelium.debug-mode`` raises verbosity. Execution logs themselves are in the
 UI, not on disk — see :doc:`../guides/debug-a-workflow`.
 
 Netdata
