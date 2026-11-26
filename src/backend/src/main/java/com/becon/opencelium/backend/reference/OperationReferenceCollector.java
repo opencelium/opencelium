@@ -44,7 +44,8 @@ public final class OperationReferenceCollector {
     }
 
     private static void collect(SchemaDTO schema, Set<String> references) {
-        if (schema == null) {
+        // a literal value is sent as written, so it holds no reference
+        if (schema == null || schema.isLiteral()) {
             return;
         }
 

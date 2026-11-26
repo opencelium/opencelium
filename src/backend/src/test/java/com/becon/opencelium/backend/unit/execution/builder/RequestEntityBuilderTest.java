@@ -19,11 +19,14 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Unit tests for how {@link RequestEntityBuilder} casts a global variable to what its place in
- * the request needs: text in the URL and in a header, the JSON type in a body field.
+ * the request needs: text in the URL and in a header, the JSON type in a body field. Also for the
+ * body of a GraphQL request, whose query is sent as written while its variables are resolved.
  *
  * <p>The operation is mapped from a method the way an execution maps it, and references are
  * resolved by a real execution manager over a snapshot, so no reference logic is faked.
@@ -153,6 +156,97 @@ class RequestEntityBuilderTest {
         RequestEntity<Object> request = build(operation);
 
         assertThat(request.getUrl().getRawPath()).isEqualTo("/templates/%7B%7Bglobal.limit%7D%7D/items");
+    }
+
+    // ── GraphQL body ──────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("createRequest — the query of a GraphQL body is sent as written: {url} is a selection, not a connector field")
+    void createRequestSendsGraphQlQueryAsWrittenWhenItHoldsBraces() throws Exception {
+        String query = "query { items { ...F } } fragment F on Item {url}";
+        OperationDTO operation = OperationDTOFixture.aGraphQlOperation(Map.of("query", query));
+
+        RequestEntity<Object> request = build(operation);
+
+        JsonNode sent = JSON.readTree((String) request.getBody());
+        assertThat(sent.get("query").asText()).isEqualTo(query);
+    }
+
+    @Test
+    @DisplayName("createRequest — the variables of a GraphQL body are resolved like any other body field")
+    void createRequestResolvesGraphQlVariablesWhenTheyHoldReferences() throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("query", "query Items($limit: Int) { items(first: $limit) { id } }");
+        body.put("variables", Map.of("limit", "{{global.limit}}"));
+        OperationDTO operation = OperationDTOFixture.aGraphQlOperation(body);
+
+        RequestEntity<Object> request = build(operation);
+
+        JsonNode limit = JSON.readTree((String) request.getBody()).get("variables").get("limit");
+        assertThat(limit.isInt()).isTrue();
+        assertThat(limit.asInt()).isEqualTo(50);
+    }
+
+    @Test
+    @DisplayName("createRequest — a JSON body field named query is resolved; only a GraphQL body sends it as written")
+    void createRequestResolvesQueryFieldWhenBodyIsNotGraphQl() throws Exception {
+        OperationDTO operation = OperationDTOFixture.anHttpOperation(
+                "POST", "https://api.example.test/search", Map.of("Content-Type", "application/json"),
+                Map.of("query", "{{global.limit}}"));
+
+        RequestEntity<Object> request = build(operation);
+
+        JsonNode sent = JSON.readTree((String) request.getBody());
+        assertThat(sent.get("query").asInt()).isEqualTo(50);
+    }
+
+    @Test
+    @DisplayName("createRequest — a global variable in the query of a GraphQL body is not resolved: it belongs in variables")
+    void createRequestKeepsGlobalTokenWhenGraphQlQueryHoldsOne() throws Exception {
+        String query = "query { items(first: {{global.limit}}) { id } }";
+        OperationDTO operation = OperationDTOFixture.aGraphQlOperation(Map.of("query", query));
+
+        RequestEntity<Object> request = build(operation);
+
+        JsonNode sent = JSON.readTree((String) request.getBody());
+        assertThat(sent.get("query").asText()).isEqualTo(query);
+    }
+
+    @Test
+    @DisplayName("createRequest — line breaks in the query of a GraphQL body become spaces (OC-945)")
+    void createRequestReplacesLineBreaksWhenGraphQlQueryIsMultiline() throws Exception {
+        OperationDTO operation = OperationDTOFixture.aGraphQlOperation(
+                Map.of("query", "query {\r\n  items {\n    id\n  }\n}"));
+
+        RequestEntity<Object> request = build(operation);
+
+        JsonNode sent = JSON.readTree((String) request.getBody());
+        assertThat(sent.get("query").asText()).isEqualTo("query {   items {     id   } }");
+    }
+
+    @Test
+    void createRequestSendsLiteralFormFieldAsWrittenWhenBodyIsFormUrlencoded() {
+        String query = "query { items { ...F } } fragment F on Item {url}";
+        OperationDTO operation = OperationDTOFixture.aBodyOperation(
+                "graphql", MediaType.APPLICATION_FORM_URLENCODED_VALUE, Map.of("query", query));
+
+        RequestEntity<Object> request = build(operation);
+
+        @SuppressWarnings("unchecked")
+        MultiValueMap<String, Object> form = (MultiValueMap<String, Object>) request.getBody();
+        assertThat(form.getFirst("query")).isEqualTo(query);
+    }
+
+    @Test
+    @DisplayName("createRequest — a body stored without its kind (data) is still sent")
+    void createRequestSendsBodyWhenBodyDataIsMissing() throws Exception {
+        OperationDTO operation = OperationDTOFixture.aBodyOperation(
+                null, MediaType.APPLICATION_JSON_VALUE, Map.of("name", "acme"));
+
+        RequestEntity<Object> request = build(operation);
+
+        JsonNode sent = JSON.readTree((String) request.getBody());
+        assertThat(sent.get("name").asText()).isEqualTo("acme");
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

@@ -66,6 +66,31 @@ public final class OperationDTOFixture {
      */
     public static OperationDTO anHttpOperation(
             String httpMethod, String endpoint, Map<String, String> header, Map<String, Object> bodyFields) {
+        return anHttpOperation(httpMethod, endpoint, header, bodyFields, "raw");
+    }
+
+    /**
+     * A POST request with a body of kind {@code data}, mapped the way a connection execution maps
+     * it.
+     *
+     * @param data the kind of body as the workflow editor stores it, e.g. {@code "graphql"}, or
+     *     {@code null} for a body stored without one
+     * @param contentType the {@code Content-Type} header of the request
+     * @param bodyFields the body fields
+     */
+    public static OperationDTO aBodyOperation(String data, String contentType, Map<String, Object> bodyFields) {
+        return anHttpOperation(
+                "POST", "https://api.example.test/graphql", Map.of("Content-Type", contentType), bodyFields, data);
+    }
+
+    /** A GraphQL request: a JSON body of {@code query} and, if given, {@code variables}. */
+    public static OperationDTO aGraphQlOperation(Map<String, Object> bodyFields) {
+        return aBodyOperation("graphql", MediaType.APPLICATION_JSON_VALUE, bodyFields);
+    }
+
+    private static OperationDTO anHttpOperation(
+            String httpMethod, String endpoint, Map<String, String> header, Map<String, Object> bodyFields,
+            String data) {
         RequestMng request = new RequestMng();
         request.setMethod(httpMethod);
         request.setEndpoint(endpoint);
@@ -74,7 +99,7 @@ public final class OperationDTOFixture {
             BodyMng body = new BodyMng();
             body.setType("object");
             body.setFormat("json");
-            body.setData("raw");
+            body.setData(data);
             body.setFields(new LinkedHashMap<>(bodyFields));
             request.setBody(body);
         }

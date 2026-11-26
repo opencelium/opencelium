@@ -4,6 +4,7 @@ import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.anOperationWith;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.anOperationWithBody;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.array;
+import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.literal;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.object;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.string;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -162,6 +163,18 @@ class OperationReferenceCollectorTest {
         Set<String> references = OperationReferenceCollector.collect(operation);
 
         assertThat(references).containsExactly("{token}", "${status}");
+    }
+
+    @Test
+    @DisplayName("collect — a literal value, like the query of a GraphQL body, holds no reference; its siblings do")
+    void collectSkipsValueWhenSchemaIsLiteral() {
+        OperationDTO operation = anOperationWithBody(object(
+                "query", literal("query { me { id } } fragment F on Item {url}"),
+                "variables", object("limit", string("{{global.limit}}"))));
+
+        Set<String> references = OperationReferenceCollector.collect(operation);
+
+        assertThat(references).containsExactly("{{global.limit}}");
     }
 
     @Test
