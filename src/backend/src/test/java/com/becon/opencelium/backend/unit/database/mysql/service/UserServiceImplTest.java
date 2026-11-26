@@ -13,6 +13,7 @@ import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
+import com.becon.opencelium.backend.database.mysql.repository.PasswordResetTokenRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
@@ -33,6 +34,7 @@ import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -83,6 +86,9 @@ class UserServiceImplTest {
 
     @Mock
     StorageService storageService;
+
+    @Mock
+    PasswordResetTokenRepository passwordResetTokenRepository;
 
     @InjectMocks
     UserServiceImpl userService;
@@ -581,11 +587,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    void deleteByIdInvokesRepositoryWhenCalled() {
+    void deleteByIdDeletesPasswordResetTokensBeforeUserWhenCalled() {
         userService.deleteById(13);
 
-        verify(userRepository).deleteOneById(13);
-        verifyNoMoreInteractions(userRepository);
+        // The tokens reference the user row, so they must be gone before it is deleted.
+        InOrder order = inOrder(passwordResetTokenRepository, userRepository);
+        order.verify(passwordResetTokenRepository).deleteAllByUserId(13);
+        order.verify(userRepository).deleteOneById(13);
+        verifyNoMoreInteractions(userRepository, passwordResetTokenRepository);
     }
 
     @Test
