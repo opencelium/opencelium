@@ -4,17 +4,16 @@
 As a system administrator who installs OpenCelium for the first time, I want a terminal wizard that asks numbered questions, connects OpenCelium to MongoDB and writes the start-up configuration, so that I get an OpenCelium that operates without the documentation and without edits to the yml files by hand.
 
 ## Context
-Without the wizard, a new user must write `application.yml` by hand, install MongoDB and give a master key before the first start. Section 6.4 of the architecture document (decisions 13 and 14) keeps the values that the application needs before the database in the yml file. The terminal wizard makes these files, does the host task that a browser page cannot do, and makes the first admin. The host task is the system service. A start without a terminal never sees the wizard: it uses the defaults and the fail-fast rules of section 4.1. In this document, the user is the person who runs the wizard.
+Without the wizard, a new user must write `application.yml` by hand, install MongoDB and give a master key before the first start. Section 6.4 of the architecture document (decisions 13 and 14) keeps the values that the application needs before the database in the yml file. The terminal wizard makes these files and the first admin. A start without a terminal never sees the wizard: it uses the defaults and the fail-fast rules of section 4.1. In this document, the user is the person who runs the wizard.
 
 ## Scope
 The wizard runs in the terminal and installs the self-host mode only. It does these things:
 
-- It asks the service question, the data directory and the web port.
+- It asks the data directory and the web port.
 - It uses a local MongoDB server or connects to a server that exists. The user types the whole URI, or the values of the URI one by one. Then the wizard pings the server.
 - It resolves the master key: a new master key in the data directory, the environment variable `OC_MASTER_KEY`, or a key file.
 - It makes the first admin with the admin password `1234`.
-- It installs OpenCelium as a system service on Linux with systemd, and it prints the service files for macOS and Windows.
-- It makes everything after the summary: the files, the key file and the service. Then the application starts.
+- It makes everything after the summary: the files and the key file. Then the application starts.
 - It takes its values from a setup file for a run without a terminal.
 - It takes a bootstrap value from the environment when the environment gives one, and asks only the other questions.
 
@@ -37,9 +36,8 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - **SW-06** Given the summary, when the user confirms, then the wizard must do these steps in this order:
   1. It writes the files together: the yml file and the env file. With the generate option, it then writes the key file and asks the backup question of SW-20.
   2. It writes the admin marker into the database.
-  3. It installs the service, with the service option.
-  4. It starts the application: the wizard process without the service, systemd with the service. Only 1 process starts it.
-  5. It prints the admin login box when the port listens.
+  3. It starts the application in the wizard process.
+  4. It prints the admin login box when the port listens.
 
   The question of the summary is "Write the files?". The summary shows the start as the last action after the write.
 - **SW-46** Given a file at a target path, when the wizard writes the files, then it must keep the old file as `<name>.bak`.
@@ -122,7 +120,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
   The help text of the key file option also tells these 3 facts:
   1. OpenCelium reads the file at this path at each start.
-  2. With the service option, the system user `opencelium` must have read permission.
+  2. With a service, the system user `opencelium` must have read permission.
   3. The file must not be under `/tmp`, because the service does not see it, and a reboot can delete it.
 
   The help text also tells how to use `OC_MASTER_KEY`: set the variable before the setup, then run `setup` again (SW-66). It gives the command `openssl rand -base64 32` for the variable. The key file option gives it with `umask 077`, so that only the owner can read the new file.
@@ -137,38 +135,15 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - **SW-64** Given a start, when a tester reads the log, then it must show no Spring Security password. The application makes no Spring Security user, so only an OpenCelium user can log in.
 - **SW-26** Given a secret, when the wizard is complete, then no log, journal or leftover temporary file must hold it. The secrets are the master key and the database password. The summary and each message mask the database password.
 
-### Service registration
-
-- **SW-27** Given Linux with systemd, when the user answers yes to the service question, then the wizard must offer 3 options:
-  1. Run sudo now.
-  2. Show the files and the commands.
-  3. Skip.
-  The service question is "Start OpenCelium automatically on boot?". It comes before the data directory question. With the sudo option or the show option, the data directory default is `/var/lib/opencelium`.
-- **SW-28** Given the sudo option, when sudo is successful, then the sudo child must do these steps as root:
-  1. It makes the system user `opencelium` and the data directory `/var/lib/opencelium`.
-  2. It copies the jar to `/opt/opencelium`.
-  3. It writes the yml file and the env file to `/etc/opencelium`, and the key file to the data directory.
-  4. It gives the data directory and its content to the system user `opencelium`.
-  5. It writes the admin marker into the database.
-  6. It writes the unit file, then runs `daemon-reload` and `enable --now`. With SW-74, it runs `enable` only, and the wizard does not wait.
-  Then the wizard process waits 60 seconds for the port and prints the admin login box.
-- **SW-74** Given a value from the environment, when the child installs the service, then the child must only enable the service. It does not start the service, because the service does not get the environment of the wizard. Thus the service generates no master key at the installation. The wizard prints the variables for the service environment, the start command and the admin login box. With the show option, the printed commands also name each variable.
-- **SW-57** Given the key file option, when the system user cannot read the key file, then the sudo child must stop. The child does this check after it makes the system user `opencelium` and before it writes a file. The message names the key file and tells how to give read permission to the system user. The wizard ends with exit code 1.
-- **SW-45** Given the service option, when the port does not listen after 60 seconds, then the wizard must say so. It names the `journalctl` command, leaves the unit in place and ends with exit code 1.
-- **SW-29** Given the show option, when the user selects it, then the wizard must print the unit file and the commands.
-- **SW-30** Given macOS or Windows, when the user wants the service, then the wizard must print the files and install nothing. The files are the launchd plist on macOS and the `sc.exe` commands on Windows.
-- **SW-31** Given any state, when the user runs `java -jar oc-app.jar install-service`, then the service step must run alone.
-
 ### Handover to the browser
 
-- **SW-32** Given a complete wizard, when the port listens, then the wizard process must print a terminal box. The box shows the URL `http://<host>:<port>/login` of the admin login page, the admin username and the admin password `1234`. With the service, the wizard prints it, not the service. When the wizard skips the admin step (SW-37), the box shows the URL and says that an admin exists in the database. It then shows no admin username and no admin password, because the admin password can be different from `1234`.
-- **SW-37** Given an admin that exists, when the user runs `setup`, then the wizard must skip the admin step. It offers only the steps that still apply: the MongoDB URI and the service.
+- **SW-32** Given a complete wizard, when the port listens, then the wizard process must print a terminal box. The box shows the URL `http://<host>:<port>/login` of the admin login page, the admin username and the admin password `1234`. When the wizard skips the admin step (SW-37), the box shows the URL and says that an admin exists in the database. It then shows no admin username and no admin password, because the admin password can be different from `1234`.
+- **SW-37** Given an admin that exists, when the user runs `setup`, then the wizard must skip the admin step. It offers only the steps that still apply: the MongoDB URI.
 
 ### Non-interactive install
 
-- **SW-38** Given a complete setup file, when the user runs `setup --file setup-values.yml`, then the wizard must ask nothing. It makes the same files as an interactive run. An env reference of SW-40 in the file takes its value from the environment of the process. A reference without a value stops the setup with exit code 1. The error names the setup file key, the file and the variable.
+- **SW-38** Given a complete setup file, when the user runs `setup --file setup-values.yml`, then the wizard must ask nothing. It makes the same files as an interactive run.
 - **SW-39** Given a setup file without 1 value, when the wizard runs, then it must ask only that question. With `--batch` it stops instead, with exit code 1, and names the setup file key and the file.
-- **SW-40** Given a complete installation, when the user runs `setup --print-values`, then the wizard must print its setup file. The file reproduces the installation. The wizard replaces the MongoDB URI with an env reference, because the URI holds the database password. The wizard reads `./config/` first, then `/etc/opencelium/` on Linux and macOS. When the user cannot read a file that exists, the wizard names the file and its owner.
 - **SW-41** Given any state, when the user runs `setup --template`, then the wizard must print a template of the setup file. The template has each setup file key with its help text and the default of this host.
 
 ### Values from the environment
@@ -203,7 +178,8 @@ In this section, "the environment" means the environment variables of the setup.
 - The admin login page `/login` and the admin login API: the authentication story.
 - The guide in the frontend after the first admin login: LDAP, OIDC, the Service Portal, the broker connection, the license and the change of the admin password. It is the frontend story.
 - A setup state after the first start, and a block of the API until the admin completes the browser settings. The admin uses OpenCelium right after the first admin login.
-- Native service registration on macOS and Windows. The print fallback only.
+- The service step. The wizard installs no system service and prints no service file. The user starts OpenCelium with `java -jar oc-app.jar` or makes a service by hand.
+- The flag `--print-values` of `setup`, and an env reference in a setup file.
 - The download, the installation and the start of MongoDB by the wizard. The user selects a local server or a server that exists.
 - The installation of RabbitMQ from the wizard.
 - Encryption of the database password in the yml file under the master key. The env file only.
@@ -218,14 +194,13 @@ In this section, "the environment" means the environment variables of the setup.
 - Decision 10: the admin logs in through the local strategy with the normal admin login form. The wizard issues no setup token. In the cloud mode the Service Portal gives the OpenCelium users, thus the start makes no default admin.
 - Decision 11: the self-host mode is 1 static tenant. The admin and the admin marker carry its tenant ID.
 - Decision 7: the first admin gets its rights from RBAC. The admin marker is not a resource with an ACL.
-- A new decision is necessary for a bootstrap secret. The yml file holds the placeholder `${OC_MONGO_URI}`, and an env file next to it gives the whole MongoDB URI. The start reads the env file, and the environment of the process has priority over it. A bootstrap value from the environment also has priority over the yml file, thus the wizard writes no copy of it. This extends decision 13. The architect agent drafts it.
-- A new decision is necessary for the first admin of a self-host installation. The admin marker gives the admin username from the wizard to the first start. A start without a marker makes the default admin when the database has no OpenCelium user. Each process that starts the application does this. The architect agent drafts it.
+- Decision 26: the yml file holds the placeholder `${OC_MONGO_URI}`, and the env file next to it gives the whole MongoDB URI. The environment of the process has priority, and the wizard writes no copy of a value from the environment.
+- Decision 27: the admin marker gives the admin username from the wizard to the first start. A start without a marker makes the default admin when the database has no OpenCelium user.
 
 ## Open questions
 1. Is the admin username a question with the default `admin`, or is it fixed like the admin password? Assumption until the answer comes: a question (assumption).
-2. Is the print flag of SW-40 still wanted, now that `setup --template` exists? Assumption until the answer comes: yes, it prints the values of the last run with the secrets replaced (assumption).
-3. What is the reason for the fixed admin password `1234` with no forced change? The product management decided it. The application listens on all interfaces, and a start without the wizard also makes the default admin with this admin password. Such a start shows no box: only a log line names the default admin. Assumption until the answer comes: the admin logs in right after the first start, so the window is short (assumption).
-4. What does a run with a setup file do when the MongoDB server of the file does not answer? Assumption until the answer comes: the setup stops with exit code 1 and names the setup file key, as for a bad value (assumption).
-5. What does the option "Continue" of SW-17 do when a later step uses the database? The master key step reads the database before the summary, and the admin marker writes into it after the summary. Assumption until the answer comes: the master key step reports the server, and the setup stops with exit code 1 before the summary (assumption).
-6. Must the values option of SW-53 ask if the MongoDB connection uses TLS (Transport Layer Security)? Assumption until the answer comes: no. The built URI has no TLS option, and a server that must have TLS gets the URI option (assumption).
-7. Which form has the admin username? SW-24 gives only the default `admin`. Assumption until the answer comes: a text without a space and without a control character (assumption).
+2. What is the reason for the fixed admin password `1234` with no forced change? The product management decided it. The application listens on all interfaces, and a start without the wizard also makes the default admin with this admin password. Such a start shows no box: only a log line names the default admin. Assumption until the answer comes: the admin logs in right after the first start, so the window is short (assumption).
+3. What does a run with a setup file do when the MongoDB server of the file does not answer? Assumption until the answer comes: the setup stops with exit code 1 and names the setup file key, as for a bad value (assumption).
+4. What does the option "Continue" of SW-17 do when a later step uses the database? The master key step reads the database before the summary, and the admin marker writes into it after the summary. Assumption until the answer comes: the master key step reports the server, and the setup stops with exit code 1 before the summary (assumption).
+5. Must the values option of SW-53 ask if the MongoDB connection uses TLS (Transport Layer Security)? Assumption until the answer comes: no. The built URI has no TLS option, and a server that must have TLS gets the URI option (assumption).
+6. Which form has the admin username? SW-24 gives only the default `admin`. Assumption until the answer comes: a text without a space and without a control character (assumption).
