@@ -7,7 +7,7 @@
     },
     "MUTABLE": {
       "label": "Mutable",
-      "hint": "Its owner workflow changes it during runs. Other workflows read it."
+      "hint": "Its owner workflows change it during runs. Other workflows read it."
     },
     "SCRIPT": {
       "label": "Script",
@@ -47,7 +47,7 @@
   },
   "live": {
     "beingUpdated": "Being updated by run #{{executionId}}",
-    "beingUpdatedHint": "The owner workflow is writing this variable (started {{startedAt}}). The value shown is the last saved one.",
+    "beingUpdatedHint": "An owner workflow is writing this variable (started {{startedAt}}). The value shown is the last saved one.",
     "beingUpdatedStarting": "Being updated by a starting run"
   },
   "fields": {
@@ -273,7 +273,7 @@
     "NO_USE_PERMISSION": "You may not use global variable \"{{variable}}\".",
     "INVALID_WRITE_TARGET": "A write target must be exactly global.<name> (\"{{field}}\").",
     "NOT_MUTABLE": "\"{{variable}}\" is not a mutable variable, so it can't be written.",
-    "NOT_OWNER": "Global variable \"{{variable}}\" belongs to another workflow; only its owner workflow may write it.",
+    "NOT_OWNER": "Global variable \"{{variable}}\" is not owned by this workflow; only its owner workflows may write it.",
     "SCRIPT_NOT_CALLABLE": "\"{{variable}}\" is a script: import it in a transformation of its language and call it there.",
     "IMPORT_LANGUAGE_MISMATCH": "\"{{variable}}\" is written in another language than this transformation.",
     "more": "(+{{count}} more)"
@@ -328,7 +328,7 @@
   "mutable": {
     "busyPolicy": {
       "label": "When a run of a workflow that uses it is still going",
-      "scope": "This applies to every workflow that uses this variable: the owner workflow and every workflow that references it. Such a workflow runs one execution at a time, and if any of its mutable variables says Refuse, a second start is refused for the whole workflow.",
+      "scope": "This applies to every workflow that uses this variable: its owner workflows and every workflow that references it. Such a workflow runs one execution at a time, and if any of its mutable variables says Refuse, a second start is refused for the whole workflow.",
       "queueLimits": "Queue limits are set in application.yml: <code>opencelium.global-variable.queue.max-waiting</code> (starts that may wait per workflow, default 100) and <code>opencelium.global-variable.queue.max-wait-minutes</code> (how long a start may wait, default 60). A start past either limit is refused. Change them in <page>System Configuration</page> and restart the backend.",
       "hints": {
         "QUEUE": "The next run waits and starts when the running one ends.",
@@ -336,12 +336,12 @@
       }
     },
     "owner": {
-      "label": "Owner workflow",
-      "hint": "The only workflow whose runs may write this variable. It must be inside the scope.",
-      "placeholder": "Choose the workflow"
+      "label": "Owner workflows",
+      "hint": "The workflows whose runs may write this variable, each inside the scope. Runs of different owners do not wait for each other, so the last write wins.",
+      "placeholder": "Choose one or more workflows"
     },
     "errors": {
-      "ownerRequired": "Choose the workflow whose runs may write this variable."
+      "ownerRequired": "Choose at least one workflow whose runs may write this variable."
     }
   },
   "details": {

@@ -22,7 +22,7 @@ describe('playground globals', () => {
 	it('prefills a global arg with its current value, and a secret with nothing', () => {
 		const mutable = toPlaygroundGlobal('lastSync', {
 			...audit, id: 4, name: 'lastSync', kind: 'MUTABLE', value: null,
-			mutable: { currentValue: 5, revision: 1, setAt: null, setBy: null, setByExecutionId: null, busyPolicy: 'QUEUE', ownerWorkflow: null },
+			mutable: { currentValue: 5, revision: 1, setAt: null, setBy: null, setByExecutionId: null, busyPolicy: 'QUEUE', ownerWorkflows: [] },
 		});
 		const secret = toPlaygroundGlobal('apiKey', { ...audit, id: 5, name: 'apiKey', kind: 'CONSTANT', value: null, secret: true, hasValue: true });
 		expect(initialReferenceInput('{{global.lastSync}}', [mutable, secret])).toEqual({ mode: 'json', text: '5' });

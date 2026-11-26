@@ -25,3 +25,13 @@ export const BeingUpdatedBadge: React.FC<Props> = ({ beingUpdatedBy }) => {
         </Tooltip>
     )
 }
+
+// Runs of different owner workflows may write the variable at the same time, one badge each.
+export const BeingUpdatedBadges: React.FC<{ runs: BeingUpdatedBy[] }> = ({ runs }) => {
+    if (runs.length === 0) return null
+    return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {runs.map((run) => <BeingUpdatedBadge key={run.workflowId} beingUpdatedBy={run} />)}
+        </div>
+    )
+}

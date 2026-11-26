@@ -23,7 +23,7 @@ const constant = (overrides: Partial<ConstantVariable> = {}): ConstantVariable =
 
 const values = (overrides: Partial<GlobalVariableFormValues> = {}): GlobalVariableFormValues => ({
     kind: 'CONSTANT', name: ' idoitUrl ', description: '', secret: false, value: 'https://cmdb', script: emptyScript(),
-    busyPolicy: 'QUEUE', ownerWorkflowId: null,
+    busyPolicy: 'QUEUE', ownerWorkflowIds: [],
     scope: { type: 'ALL', categoryIds: [9], workflowIds: [8] }, ...overrides,
 })
 
@@ -139,29 +139,30 @@ describe('mutable form mapping', () => {
         id: 9, name: 'lastSync', kind: 'MUTABLE', description: '', value: null,
         mutable: {
             currentValue: '2026-11-20T00:00:00Z', revision: 12, setAt: null, setBy: null, setByExecutionId: null,
-            busyPolicy: 'REFUSE', ownerWorkflow: { id: 42, title: 'VMware → i-doit' },
+            busyPolicy: 'REFUSE', ownerWorkflows: [{ id: 42, title: 'VMware → i-doit' }, { id: 57, title: 'Jira → i-doit' }],
         },
         scope: { type: 'ALL', categories: [], workflows: [] }, ownerUser: { id: 1, name: 'admin' },
         myPermissions: ['EDIT'], version: 2, createdAt: '', createdBy: { type: 'USER', id: 1, name: 'admin' },
         updatedAt: '', updatedBy: { type: 'USER', id: 1, name: 'admin' },
     }
 
-    it('loads the busy policy and owner from the mutable part, and the initial value', () => {
-        expect(toFormValues(mutable)).toMatchObject({ kind: 'MUTABLE', value: 'null', busyPolicy: 'REFUSE', ownerWorkflowId: 42 })
+    it('loads the busy policy and owners from the mutable part, and the initial value', () => {
+        expect(toFormValues(mutable)).toMatchObject({ kind: 'MUTABLE', value: 'null', busyPolicy: 'REFUSE', ownerWorkflowIds: [42, 57] })
     })
 
-    it('saves the busy policy and owner with the value and no secret flag', () => {
-        expect(toSaveDto(values({ kind: 'MUTABLE', value: '0', busyPolicy: 'REFUSE', ownerWorkflowId: 42 }), 'create'))
+    it('saves the busy policy and owners with the value and no secret flag', () => {
+        expect(toSaveDto(values({ kind: 'MUTABLE', value: '0', busyPolicy: 'REFUSE', ownerWorkflowIds: [42, 57] }), 'create'))
             .toEqual({
                 kind: 'MUTABLE', name: 'idoitUrl', description: '', value: 0,
-                busyPolicy: 'REFUSE', ownerWorkflowId: 42,
+                busyPolicy: 'REFUSE', ownerWorkflowIds: [42, 57],
                 scope: { type: 'ALL', categoryIds: [], workflowIds: [] },
             })
     })
 
-    it('requires an owner workflow', () => {
-        expect(isOwnerMissing({ kind: 'MUTABLE', ownerWorkflowId: null })).toBe(true)
-        expect(isOwnerMissing({ kind: 'MUTABLE', ownerWorkflowId: 42 })).toBe(false)
-        expect(isOwnerMissing({ kind: 'CONSTANT', ownerWorkflowId: null })).toBe(false)
+    it('requires at least one owner workflow', () => {
+        expect(isOwnerMissing({ kind: 'MUTABLE', ownerWorkflowIds: [] })).toBe(true)
+        expect(isOwnerMissing({ kind: 'MUTABLE' })).toBe(true)
+        expect(isOwnerMissing({ kind: 'MUTABLE', ownerWorkflowIds: [42, 57] })).toBe(false)
+        expect(isOwnerMissing({ kind: 'CONSTANT', ownerWorkflowIds: [] })).toBe(false)
     })
 })

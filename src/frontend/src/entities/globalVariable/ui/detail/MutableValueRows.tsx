@@ -3,7 +3,7 @@ import { Button } from '@shared/ui/primitives/Button'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { GlobalVariableValue, MutableVariable } from '../../model/types'
-import { BeingUpdatedBadge } from '../live-values/BeingUpdatedBadge'
+import { BeingUpdatedBadges } from '../live-values/BeingUpdatedBadge'
 import { OverviewRow } from './OverviewRow'
 import { useResetVariable } from './useResetVariable'
 
@@ -19,7 +19,8 @@ export const MutableValueRows: React.FC<Props> = ({ variable, live, onReset }) =
     const { reset, isResetting } = useResetVariable(variable, onReset)
     const setAt = live ? live.updatedAt : variable.mutable.setAt
     const setBy = live ? live.updatedBy : variable.mutable.setBy
-    const beingUpdatedBy = live?.beingUpdatedBy ?? null
+    const beingUpdatedBy = live?.beingUpdatedBy ?? []
+    const owners = variable.mutable.ownerWorkflows.map((workflow) => workflow.title).join(', ')
     const canReset = variable.myPermissions.includes('EDIT')
 
     return (
@@ -36,7 +37,7 @@ export const MutableValueRows: React.FC<Props> = ({ variable, live, onReset }) =
                         })}
                     </Typography>
                 )}
-                {beingUpdatedBy && <BeingUpdatedBadge beingUpdatedBy={beingUpdatedBy} />}
+                <BeingUpdatedBadges runs={beingUpdatedBy} />
             </OverviewRow>
             <OverviewRow label={t('global-variable.detail.initialValue')}>
                 <span style={{ overflowWrap: 'anywhere' }}>{JSON.stringify(variable.value)}</span>
@@ -48,7 +49,7 @@ export const MutableValueRows: React.FC<Props> = ({ variable, live, onReset }) =
                     </div>
                 )}
             </OverviewRow>
-            <OverviewRow label={t('global-variable.mutable.owner.label')}>{variable.mutable.ownerWorkflow?.title ?? '—'}</OverviewRow>
+            <OverviewRow label={t('global-variable.mutable.owner.label')}>{owners || '—'}</OverviewRow>
             <OverviewRow label={t('global-variable.mutable.busyPolicy.label')}>{t(`global-variable.busyPolicy.${variable.mutable.busyPolicy}`)}</OverviewRow>
         </>
     )
