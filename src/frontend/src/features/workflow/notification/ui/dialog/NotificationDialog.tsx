@@ -11,6 +11,8 @@ import { NotificationStepNav } from './NotificationStepNav';
 import { NotificationStepContent } from './NotificationStepContent';
 import { useNotificationDialog } from './useNotificationDialog';
 import { useNotificationTestSend } from '../test/useNotificationTestSend';
+import { NotificationTransformationProvider } from '../transformation/NotificationTransformationProvider';
+import { useTransformationState } from '../transformation/useTransformationState';
 import './notificationDialog.css';
 
 export type NotificationDialogProps = {
@@ -21,7 +23,8 @@ export type NotificationDialogProps = {
 	fieldBindings?: readonly unknown[];
 	isReadOnly?: boolean;
 	onClose: () => void;
-	onSave: (nodeId: string, label: string, config: NotificationConfig) => void;
+	/** `fieldBindings` is null when the dialog left the page's bindings as they were. */
+	onSave: (nodeId: string, label: string, config: NotificationConfig, fieldBindings: unknown[] | null) => void;
 };
 
 export function NotificationDialog(props: NotificationDialogProps) {
@@ -43,6 +46,7 @@ function NotificationDialogContent({ editor, node, nodes, edges, isReadOnly, onC
 	const state = useNotificationDialog({ rawConfig: node.data.notification, initialLabel: node.data.subtitle || node.data.title,
 		target: editor.target });
 	const testSend = useNotificationTestSend({ node, config: state.config, nodes, edges });
+	const transformations = useTransformationState(state.config);
 
 	const apply = () => {
 		if (!state.isBodyValid()) {
@@ -50,7 +54,7 @@ function NotificationDialogContent({ editor, node, nodes, edges, isReadOnly, onC
 			state.goTo(3);
 			return;
 		}
-		onSave(node.id, state.label.trim() || node.data.title, state.config);
+		onSave(node.id, state.label.trim() || node.data.title, state.config, transformations.collectBindings(state.config));
 	};
 
 	return (
@@ -64,10 +68,12 @@ function NotificationDialogContent({ editor, node, nodes, edges, isReadOnly, onC
 				label={state.label} inputRef={labelInputRef} isReadOnly={isReadOnly} onLabelChange={state.setLabel} />}
 			footer={<NotificationDialogFooter step={state.step} hasTool={state.hasTool} isReadOnly={isReadOnly}
 				onBack={state.back} onNext={state.next} onApply={apply} />}>
-			<div className='notificationDialog'>
-				<NotificationStepNav state={state} />
-				<NotificationStepContent state={state} nodeColor={node.data.color} testSend={testSend} />
-			</div>
+			<NotificationTransformationProvider state={transformations} isReadOnly={!!isReadOnly}>
+				<div className='notificationDialog'>
+					<NotificationStepNav state={state} />
+					<NotificationStepContent state={state} nodeColor={node.data.color} testSend={testSend} />
+				</div>
+			</NotificationTransformationProvider>
 		</Dialog>
 	);
 }

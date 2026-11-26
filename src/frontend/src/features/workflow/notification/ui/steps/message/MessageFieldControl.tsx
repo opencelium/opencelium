@@ -5,7 +5,7 @@ import { Select } from '@shared/ui/primitives/Select';
 import type { NotificationFieldValue, NotificationMessageValues } from '../../../model/notification.types';
 import type { NotificationField } from '../../../tools/notificationTool.types';
 import { factsValue, flagValue, textValue } from '../../../tools/toolValues';
-import { ReferenceTextField } from '../../references/ReferenceTextField';
+import { NotificationValueField } from '../../transformation/NotificationValueField';
 import { FactsEditor } from './FactsEditor';
 
 type Props = {
@@ -27,7 +27,7 @@ export function MessageFieldControl({ field, values, isDisabled, onChange }: Pro
 			return (
 				<div className='notificationField'>
 					{caption}
-					<ReferenceTextField id={id} value={textValue(values, field.key)} isMultiline={field.kind === 'area'}
+					<NotificationValueField target={{ kind: 'field', key: field.key }} id={id} value={textValue(values, field.key)} isMultiline={field.kind === 'area'}
 						placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined} ariaLabel={label}
 						disabled={isDisabled} testId={id} onChange={(value) => onChange(field.key, value)} />
 					{field.helpKey && <span className='notificationFieldHelp'>{t(field.helpKey)}</span>}
@@ -60,7 +60,7 @@ export function MessageFieldControl({ field, values, isDisabled, onChange }: Pro
 			return (
 				<div className='notificationField'>
 					<span className='notificationFieldLabel'>{label}</span>
-					<FactsEditor facts={factsValue(values, field.key)} isDisabled={isDisabled}
+					<FactsEditor fieldKey={field.key} facts={factsValue(values, field.key)} isDisabled={isDisabled}
 						onChange={(facts) => onChange(field.key, facts)} />
 				</div>
 			);

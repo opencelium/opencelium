@@ -5,11 +5,11 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { createFact } from '../../../model/notificationConfig';
 import type { NotificationFact } from '../../../model/notification.types';
-import { ReferenceTextField } from '../../references/ReferenceTextField';
+import { NotificationValueField } from '../../transformation/NotificationValueField';
 
-type Props = { facts: NotificationFact[]; isDisabled: boolean; onChange: (facts: NotificationFact[]) => void };
+type Props = { fieldKey: string; facts: NotificationFact[]; isDisabled: boolean; onChange: (facts: NotificationFact[]) => void };
 
-export function FactsEditor({ facts, isDisabled, onChange }: Props) {
+export function FactsEditor({ fieldKey, facts, isDisabled, onChange }: Props) {
 	const { t } = useI18n('workflow');
 	const update = (id: string, patch: Partial<Omit<NotificationFact, 'id'>>) =>
 		onChange(facts.map((fact) => fact.id === id ? { ...fact, ...patch } : fact));
@@ -19,7 +19,8 @@ export function FactsEditor({ facts, isDisabled, onChange }: Props) {
 				<div key={fact.id} className='notificationFactRow'>
 					<Input value={fact.label} disabled={isDisabled} placeholder={t('notification.facts.labelPlaceholder')}
 						testId={`notification-fact-label-${index}`} onChange={(event) => update(fact.id, { label: event.target.value })} />
-					<ReferenceTextField id={`notification-fact-value-${fact.id}`} value={fact.value} disabled={isDisabled}
+					<NotificationValueField target={{ kind: 'fact', key: fieldKey, factId: fact.id }}
+						id={`notification-fact-value-${fact.id}`} value={fact.value} disabled={isDisabled}
 						placeholder={t('notification.facts.valuePlaceholder')}
 						ariaLabel={t('notification.facts.valueAria', { index: index + 1 })}
 						testId={`notification-fact-value-${index}`} onChange={(value) => update(fact.id, { value })} />
