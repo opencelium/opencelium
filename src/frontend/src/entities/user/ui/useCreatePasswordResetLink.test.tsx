@@ -1,11 +1,19 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 import {act, renderHook} from '@testing-library/react'
 
-const mocks = vi.hoisted(() => ({generalRequest: vi.fn(), emit: vi.fn(), notifyError: vi.fn()}))
+const mocks = vi.hoisted(() => ({
+    generalRequest: vi.fn(),
+    emit: vi.fn(),
+    notifyError: vi.fn(),
+    dispatch: vi.fn(),
+    invalidateGeneric: vi.fn((tags: unknown) => ({kind: 'generic', tags})),
+}))
 
 vi.mock('@shared/api/genericApi', () => ({
     useGeneralRequestMutation: () => [mocks.generalRequest],
+    genericApi: {util: {invalidateTags: mocks.invalidateGeneric}},
 }))
+vi.mock('@shared/lib/storeHooks', () => ({useAppDispatch: () => mocks.dispatch}))
 vi.mock('@shared/errors/api/errorBus', () => ({errorBus: {emit: mocks.emit}}))
 vi.mock('@shared/errors/api/normalizeError', () => ({
     normalizeError: (error: unknown) => ({type: 'NORMALIZED', error}),
@@ -23,11 +31,11 @@ function respond(outcome: {ok: unknown} | {fail: unknown}) {
     })
 }
 
-async function createFor(userId: number) {
+async function createFor(userId: number, sendEmail = false) {
     const {result} = renderHook(() => useCreatePasswordResetLink())
     let link: unknown
     await act(async () => {
-        link = await result.current.create(userId)
+        link = await result.current.create(userId, sendEmail)
     })
     return link
 }
@@ -36,16 +44,17 @@ beforeEach(() => {
     mocks.generalRequest.mockReset()
     mocks.emit.mockReset()
     mocks.notifyError.mockReset()
+    mocks.dispatch.mockReset()
 })
 
 describe('useCreatePasswordResetLink', () => {
     it('posts to the user endpoint without invalidating the entity cache and returns the link', async () => {
-        const dto = {token: 'tok', expiresAt: '2026-11-26T10:00:00Z'}
+        const dto = {link: 'https://oc.example.com/set-password?token=tok', expiresAt: '2026-11-26T10:00:00Z'}
         respond({ok: dto})
 
-        expect(await createFor(7)).toEqual(dto)
+        expect(await createFor(7, true)).toEqual(dto)
         expect(mocks.generalRequest).toHaveBeenCalledWith({
-            url: '/user/7/password-reset-link',
+            url: '/user/7/password-link?sendEmail=true',
             method: 'POST',
             options: {ignoreError: true, skipEntityInvalidation: true},
         })
@@ -53,10 +62,25 @@ describe('useCreatePasswordResetLink', () => {
     })
 
     it('explains an LDAP account itself', async () => {
-        respond({fail: {status: 400, data: {error: 'LDAP_ACCOUNT'}}})
+        respond({fail: {status: 400, data: {error: 'PASSWORD_MANAGED_EXTERNALLY'}}})
         expect(await createFor(7)).toBeNull()
         expect(mocks.notifyError).toHaveBeenCalledWith('user.resetLink.error.ldapAccount')
         expect(mocks.emit).not.toHaveBeenCalled()
+        expect(mocks.dispatch).not.toHaveBeenCalled()
+    })
+
+    it('explains a failed email itself instead of the error bus', async () => {
+        respond({fail: {status: 503, data: {error: 'EMAIL_RECOVERY_FAILED'}}})
+        expect(await createFor(7, true)).toBeNull()
+        expect(mocks.notifyError).toHaveBeenCalledWith('user.resetLink.error.emailFailed')
+        expect(mocks.emit).not.toHaveBeenCalled()
+    })
+
+    it('refreshes the user list when the user no longer exists', async () => {
+        respond({fail: {status: 404, data: {error: 'USER_NOT_EXIST'}}})
+        expect(await createFor(7)).toBeNull()
+        expect(mocks.notifyError).toHaveBeenCalledWith('user.resetLink.error.userNotFound')
+        expect(mocks.dispatch).toHaveBeenCalledWith({kind: 'generic', tags: ['Entity']})
     })
 
     it('routes auth failures through the error bus so session expiry still works', async () => {

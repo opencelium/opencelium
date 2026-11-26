@@ -178,17 +178,21 @@
     "tooltip": "Einmaligen Link zum Zurücksetzen des Passworts erstellen",
     "confirm": {
       "title": "Link zum Zurücksetzen erstellen",
-      "message": "Einen einmaligen Link zum Zurücksetzen des Passworts für \"{{user}}\" erstellen? Früher erstellte Links für diesen Benutzer funktionieren danach nicht mehr."
+      "message": "Einen einmaligen Link erstellen, mit dem \"{{user}}\" ein neues Passwort festlegt? Früher erstellte Links für diesen Benutzer, auch ein offener \"Passwort vergessen\"-Link, funktionieren danach nicht mehr. Das aktuelle Passwort bleibt gültig, bis der Link verwendet wird.",
+      "sendEmail": "Link zusätzlich per E-Mail an den Benutzer senden"
     },
     "dialog": {
       "title": "Link zum Zurücksetzen des Passworts",
       "description": "Senden Sie diesen Link an \"{{user}}\". Er öffnet eine Seite, auf der ein neues Passwort festgelegt werden kann.",
+      "descriptionEmailSent": "Der Link wurde zusätzlich per E-Mail an \"{{user}}\" gesendet. Sie können ihn auch hier kopieren. Er öffnet eine Seite, auf der ein neues Passwort festgelegt werden kann.",
       "expiresAt": "Gültig bis {{expiry}}. Der Link kann nur einmal verwendet werden.",
       "securityHint": "Jede Person mit diesem Link kann das Passwort für dieses Konto festlegen. Teilen Sie ihn nur über einen vertrauenswürdigen Kanal. Er wird nur jetzt angezeigt und kann später nicht erneut abgerufen werden."
     },
     "error": {
       "ldapAccount": "Dieser Benutzer meldet sich über LDAP an. Sein Passwort wird im Verzeichnis verwaltet und kann hier nicht zurückgesetzt werden.",
       "userNotFound": "Dieser Benutzer existiert nicht mehr.",
+      "emailNotFound": "Dieser Benutzer hat keine E-Mail-Adresse. Erstellen Sie den Link ohne E-Mail und geben Sie ihn selbst weiter.",
+      "emailFailed": "Die E-Mail konnte nicht gesendet werden, daher wurde kein Link erstellt. Erstellen Sie den Link ohne E-Mail oder prüfen Sie die E-Mail-Einstellungen.",
       "notAvailable": "Links zum Zurücksetzen des Passworts werden von dieser Serverversion noch nicht unterstützt.",
       "failed": "Der Link zum Zurücksetzen des Passworts konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
     }

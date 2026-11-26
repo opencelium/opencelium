@@ -178,17 +178,21 @@
     "tooltip": "Create one-time password reset link",
     "confirm": {
       "title": "Create password reset link",
-      "message": "Create a one-time password reset link for \"{{user}}\"? Any reset link created earlier for this user stops working."
+      "message": "Create a one-time link with which \"{{user}}\" sets a new password? Any earlier link for this user, including a pending \"forgot password\" link, stops working. The current password stays valid until the link is used.",
+      "sendEmail": "Also send the link to the user by email"
     },
     "dialog": {
       "title": "Password reset link",
       "description": "Send this link to \"{{user}}\". It opens a page where they can set a new password.",
+      "descriptionEmailSent": "The link was also emailed to \"{{user}}\". You can copy it here as well. It opens a page where they can set a new password.",
       "expiresAt": "Valid until {{expiry}}. The link works only once.",
       "securityHint": "Anyone with this link can set the password for this account. Share it only through a trusted channel. It is shown only now and cannot be displayed again."
     },
     "error": {
       "ldapAccount": "This user signs in via LDAP. Their password is managed in the directory and cannot be reset here.",
       "userNotFound": "This user no longer exists.",
+      "emailNotFound": "This user has no email address. Create the link without email and pass it on yourself.",
+      "emailFailed": "The email could not be sent, so no link was created. Create the link without email, or check the mail settings.",
       "notAvailable": "Password reset links are not supported by this server version yet.",
       "failed": "Could not create the password reset link. Please try again."
     }

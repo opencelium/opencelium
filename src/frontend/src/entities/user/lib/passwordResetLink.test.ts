@@ -1,34 +1,45 @@
 import {describe, expect, it} from 'vitest'
 import {
-    buildPasswordResetUrl,
+    buildPasswordResetLinkUrl,
     isPasswordResetLinkDto,
     resolveResetLinkFailure,
 } from './passwordResetLink'
 
-describe('buildPasswordResetUrl', () => {
-    it('points at /set-password on the given origin with an encoded token', () => {
-        expect(buildPasswordResetUrl('a+b/c', 'https://oc.example.com'))
-            .toBe('https://oc.example.com/set-password?token=a%2Bb%2Fc')
+describe('buildPasswordResetLinkUrl', () => {
+    it.each([true, false])('passes sendEmail=%s as a query parameter', (sendEmail) => {
+        expect(buildPasswordResetLinkUrl(42, sendEmail)).toBe(`/user/42/password-link?sendEmail=${sendEmail}`)
     })
 })
 
 describe('isPasswordResetLinkDto', () => {
-    it('accepts the expected shape', () => {
-        expect(isPasswordResetLinkDto({token: 't', expiresAt: '2026-11-25T10:00:00Z'})).toBe(true)
+    it('accepts the backend shape', () => {
+        expect(isPasswordResetLinkDto({
+            link: 'https://oc.example.com/set-password?token=Hk3v0QpN2xT7bW9cLq4mR8sYv1aD5eF6gH0jK3nP2uZ',
+            expiresAt: '2026-11-27T10:15:30Z',
+        })).toBe(true)
     })
 
-    it.each([null, {}, {token: '', expiresAt: 'x'}, {token: 't'}, {message: 'ok'}])('rejects %j', (value) => {
+    it.each([
+        null,
+        {},
+        {link: '', expiresAt: 'x'},
+        {link: 'https://oc.example.com/set-password?token=t'},
+        {link: 'javascript:alert(1)', expiresAt: '2026-11-27T10:15:30Z'},
+        {link: 'not a url', expiresAt: '2026-11-27T10:15:30Z'},
+        {token: 't', expiresAt: '2026-11-27T10:15:30Z'},
+    ])('rejects %j', (value) => {
         expect(isPasswordResetLinkDto(value)).toBe(false)
     })
 })
 
 describe('resolveResetLinkFailure', () => {
-    it('maps the LDAP code', () => {
-        expect(resolveResetLinkFailure({status: 400, data: {error: 'LDAP_ACCOUNT'}})).toBe('ldapAccount')
-    })
-
-    it('maps a missing user before the generic 404', () => {
-        expect(resolveResetLinkFailure({status: 404, data: {error: 'USER_NOT_FOUND'}})).toBe('userNotFound')
+    it.each([
+        [400, 'PASSWORD_MANAGED_EXTERNALLY', 'ldapAccount'],
+        [404, 'USER_NOT_EXIST', 'userNotFound'],
+        [400, 'EMAIL_NOT_FOUND', 'emailNotFound'],
+        [503, 'EMAIL_RECOVERY_FAILED', 'emailFailed'],
+    ])('maps %i %s', (status, error, expected) => {
+        expect(resolveResetLinkFailure({status, data: {error}})).toBe(expected)
     })
 
     it.each([404, 405])('treats an unknown %i as an endpoint this backend lacks', (status) => {
@@ -38,11 +49,11 @@ describe('resolveResetLinkFailure', () => {
     it('recognises the OC backend answer for a route it does not have', () => {
         expect(resolveResetLinkFailure({
             status: 400,
-            data: {status: 502, error: 'BAD_GATEWAY', message: 'No endpoint POST /user/2/password-reset-link.'},
+            data: {status: 502, error: 'BAD_GATEWAY', message: 'No endpoint POST /user/2/password-link.'},
         })).toBe('notAvailable')
     })
 
-    it.each([401, 403, 500, 'FETCH_ERROR'])('leaves %s to the error bus', (status) => {
+    it.each([401, 403, 500, 503, 'FETCH_ERROR'])('leaves %s without a known code to the error bus', (status) => {
         expect(resolveResetLinkFailure({status, data: null})).toBeNull()
     })
 
