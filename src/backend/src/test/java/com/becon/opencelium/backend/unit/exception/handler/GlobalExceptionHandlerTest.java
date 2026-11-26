@@ -10,14 +10,19 @@ package com.becon.opencelium.backend.unit.exception.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.exception.handler.GlobalExceptionHandler;
 import com.becon.opencelium.backend.exception.handler.ResponseExceptionHandler;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
 
@@ -65,6 +70,21 @@ class GlobalExceptionHandlerTest {
 
         assertThat(handler.getBeanType()).isEqualTo(GlobalExceptionHandler.class);
         assertThat(handler.getMethod().getName()).isEqualTo("handleGlobalVariableConflictException");
+    }
+
+    @Test
+    @DisplayName("a GeneralServiceException is answered with its own status and error code, not the 500")
+    void handleGeneralExceptionAnswersWithStatusAndErrorOfExceptionWhenThrown() {
+        GeneralServiceException notFound = new GeneralServiceException(
+                HttpStatus.NOT_FOUND, ExceptionConstant.USER_NOT_EXIST, "User not found.");
+
+        ServletInvocableHandlerMethod handler = resolver.handlerFor(notFound);
+        ResponseEntity<ErrorResource> response = new GlobalExceptionHandler().handleGeneralException(notFound);
+
+        assertThat(handler.getMethod().getName()).isEqualTo("handleGeneralException");
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody().getStatus()).isEqualTo(404);
+        assertThat(response.getBody().getError()).isEqualTo(ExceptionConstant.USER_NOT_EXIST);
     }
 
     @Test

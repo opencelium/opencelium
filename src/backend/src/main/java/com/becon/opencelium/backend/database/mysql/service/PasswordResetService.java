@@ -18,8 +18,8 @@ public interface PasswordResetService {
      * @param issuedBy  id of the admin issuing it, recorded with the token
      * @param sendEmail whether to also mail the link to the user
      * @return the link, carrying the raw token, and its expiry; only the token's hash is stored
-     * @throws com.becon.opencelium.backend.exception.UserNotFoundException if no user has the id
-     * @throws com.becon.opencelium.backend.exception.GeneralServiceException with status 400 and
+     * @throws com.becon.opencelium.backend.exception.GeneralServiceException with status 404 and
+     *     {@code USER_NOT_EXIST} if no user has the id; with status 400 and
      *     {@code PASSWORD_MANAGED_EXTERNALLY} if the user signs in through LDAP, or
      *     {@code EMAIL_NOT_FOUND} if {@code sendEmail} is set but the user has no email
      * @throws com.becon.opencelium.backend.exception.ServiceUnavailableException with
