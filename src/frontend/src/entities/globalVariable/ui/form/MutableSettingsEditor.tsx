@@ -7,6 +7,7 @@ import { FormControl } from '@shared/ui/form/FormControl'
 import { Radio } from '@shared/ui/primitives/Radio'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { Hint } from '@shared/ui/primitives/Hint'
+import { EntityText } from '@shared/ui/primitives/Text'
 import { useFetchEntitiesQuery } from '@shared/api/genericApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { ConnectionMeta } from '@entities/connection/command/connectionCache'
@@ -73,11 +74,11 @@ function SystemConfigLink({ children }: { children?: ReactNode }) {
 
 const QUEUE_LIMITS_COMPONENTS = { code: <code />, page: <SystemConfigLink /> }
 
+// Plain text styled like a FormControl hint (e.g. the owner hint), not an info box.
 function BusyPolicyScopeHint() {
-    const { t } = useI18n('entities')
     return (
-        <div data-testid="global-variable-busy-policy-scope-hint">
-            <Hint noPrefix>{t('global-variable.mutable.busyPolicy.scope')}</Hint>
+        <div className="form-control__hint" data-testid="global-variable-busy-policy-scope-hint">
+            <EntityText i18nKey="global-variable.mutable.busyPolicy.scope" />
         </div>
     )
 }

@@ -337,7 +337,7 @@
     },
     "owner": {
       "label": "Owner workflows",
-      "hint": "The workflows whose runs may write this variable, each inside the scope. Runs of different owners do not wait for each other, so the last write wins.",
+      "hint": "The workflows whose runs may write this variable, each inside the scope. Runs of different owners do not wait for each other, so the last write wins. A run writes the variable when the method that sets it gets its API response, so other workflows read the old value until then.",
       "placeholder": "Choose one or more workflows"
     },
     "errors": {

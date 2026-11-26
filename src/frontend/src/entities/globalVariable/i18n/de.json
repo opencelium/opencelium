@@ -337,7 +337,7 @@
     },
     "owner": {
       "label": "Besitzer-Workflows",
-      "hint": "Die Workflows, deren Ausführungen diese Variable schreiben dürfen, jeder im Gültigkeitsbereich. Ausführungen verschiedener Besitzer warten nicht aufeinander, daher gewinnt der letzte Schreibvorgang.",
+      "hint": "Die Workflows, deren Ausführungen diese Variable schreiben dürfen, jeder im Gültigkeitsbereich. Ausführungen verschiedener Besitzer warten nicht aufeinander, daher gewinnt der letzte Schreibvorgang. Eine Ausführung schreibt die Variable, sobald die Methode, die sie setzt, ihre API-Antwort erhält; bis dahin lesen andere Workflows den alten Wert.",
       "placeholder": "Einen oder mehrere Workflows auswählen"
     },
     "errors": {
