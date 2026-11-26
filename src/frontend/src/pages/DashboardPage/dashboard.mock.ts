@@ -24,14 +24,14 @@ export type ActivityItem = {
 export const attentionItems: AttentionItem[] = [
     {
         id: 'a-1',
-        title: 'SAP -> Salesforce Sync failed',
-        subtitle: 'Connection: SAP_to_Salesforce',
+        title: 'ERP -> CRM sync failed',
+        subtitle: 'Connection: ERP_to_CRM',
         severity: 'critical',
         timeAgo: '4m ago',
     },
     {
         id: 'a-2',
-        title: 'Microsoft 365 token expires soon',
+        title: 'API token expires soon',
         subtitle: 'Renew within 2 days',
         severity: 'warning',
         timeAgo: '1h ago',
@@ -45,14 +45,14 @@ export const attentionItems: AttentionItem[] = [
     },
     {
         id: 'a-4',
-        title: 'SAP data export stalled',
+        title: 'ERP data export stalled',
         subtitle: 'Awaiting confirmation',
         severity: 'warning',
         timeAgo: '5h ago',
     },
     {
         id: 'a-5',
-        title: 'ServiceNow sync incomplete',
+        title: 'Helpdesk sync incomplete',
         subtitle: '14 records skipped',
         severity: 'info',
         timeAgo: '1d ago',
@@ -63,7 +63,7 @@ export const recentActivity: ActivityItem[] = [
     {
         id: 'r-1',
         title: 'Sync job completed',
-        subtitle: 'Shopify -> Postgres',
+        subtitle: 'Webshop -> Database',
         kind: 'success',
         timeAgo: '2m ago',
         icon: 'check',
@@ -71,14 +71,14 @@ export const recentActivity: ActivityItem[] = [
     {
         id: 'r-2',
         title: 'Notification dispatched',
-        subtitle: 'Slack channel #ops',
+        subtitle: 'Chat channel #ops',
         kind: 'info',
         timeAgo: '5m ago',
         icon: 'notification',
     },
     {
         id: 'r-3',
-        title: 'Salesforce webhook received',
+        title: 'CRM webhook received',
         subtitle: 'Lead conversion event',
         kind: 'info',
         timeAgo: '8m ago',
@@ -86,7 +86,7 @@ export const recentActivity: ActivityItem[] = [
     },
     {
         id: 'r-4',
-        title: 'SAP data export started',
+        title: 'ERP data export started',
         subtitle: 'Daily snapshot',
         kind: 'info',
         timeAgo: '11m ago',
@@ -94,7 +94,7 @@ export const recentActivity: ActivityItem[] = [
     },
     {
         id: 'r-5',
-        title: 'ServiceNow sync completed',
+        title: 'Helpdesk sync completed',
         subtitle: '320 records',
         kind: 'success',
         timeAgo: '20m ago',
