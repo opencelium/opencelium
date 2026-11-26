@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, type ClipboardEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useNotificationReferences } from './notificationReferenceContextValue';
 import { NotificationReferencePicker } from './NotificationReferencePicker';
@@ -15,10 +15,12 @@ type Props = {
 	ariaLabel: string;
 	disabled?: boolean;
 	testId: string;
+	/** Further field actions, shown after the insert-reference button. */
+	actions?: ReactNode;
 };
 
 /** A text field where references show as removable chips and serialize back to their tokens. */
-export function ReferenceTextField({ id, value, onChange, isMultiline, placeholder, ariaLabel, disabled, testId }: Props) {
+export function ReferenceTextField({ id, value, onChange, isMultiline, placeholder, ariaLabel, disabled, testId, actions }: Props) {
 	const { t } = useI18n('workflow');
 	const { describe } = useNotificationReferences();
 	const rootRef = useRef<HTMLDivElement>(null);
@@ -88,6 +90,7 @@ export function ReferenceTextField({ id, value, onChange, isMultiline, placehold
 					contentEditable={!disabled} suppressContentEditableWarning spellCheck={false}
 					onInput={emit} onKeyDown={onKeyDown} onPaste={onPaste} onMouseDown={onMouseDown} onBlur={onBlur} />
 				<ReferenceInsertButton pickerId={id} testId={`${testId}-insert-reference`} disabled={disabled} />
+				{actions}
 			</div>
 			<NotificationReferencePicker pickerId={id} onApply={insertReference} />
 		</div>

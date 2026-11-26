@@ -321,7 +321,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         notification={{ editor: workflow.notificationEditor, nodes: hydratedNodes, edges: workflow.edges,
           node: hydratedNodes.find((node) => node.id === workflow.notificationEditor?.nodeId) ?? null,
           fieldBindings: loadedFieldBindings, isReadOnly: isGraphLocked,
-          onClose: () => workflow.setNotificationEditor(null), onSave: workflow.onSaveNotification }} />
+          onClose: () => workflow.setNotificationEditor(null),
+          onSave: (nodeId, label, config, nextBindings) => {
+            if (nextBindings) setLoadedFieldBindings(nextBindings);
+            workflow.onSaveNotification(nodeId, label, config);
+          } }} />
     </div>
     </TestRunProvider>
     </GlobalPickerScopeProvider>
