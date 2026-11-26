@@ -10,6 +10,7 @@ import static com.becon.opencelium.backend.testutil.fixture.ConnectorFixture.anI
 import static com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture.aSnapshotOf;
 import static com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture.anOpenEntry;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aConnectorOperation;
+import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aGraphQlMethodDto;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aGraphQlOperation;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aMethodDto;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.anHttpOperation;
@@ -33,6 +34,7 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.rdata.ConnectorTokenCache;
 import com.becon.opencelium.backend.execution.service.GlobalVariableSnapshotService;
 import com.becon.opencelium.backend.execution.service.MethodTestServiceImp;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -61,6 +63,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.TextNode;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,6 +75,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -99,6 +105,9 @@ class MethodTestServiceImpTest {
     private static final int CATEGORY_ID = 7;
     private static final String PAGE_SIZE_REF = "{{global.pageSize}}";
     private static final String TENANT_IN_LOOP_REF = "{{global.tenants[i].id}}";
+    private static final String QUERY_AND_MUTATION =
+            "query Devices { devices { name } } mutation DeleteDevice { deleteDevice(id: 5) { id } }";
+    private static final String CACHED_FINGERPRINT = "fingerprint-of-the-stored-shop";
 
     @Mock
     MethodMngMapper methodMngMapper;
@@ -128,6 +137,7 @@ class MethodTestServiceImpTest {
     ArgumentCaptor<Supplier<GlobalVariableSnapshot>> globalsGivenToMapper;
 
     private FakeHttpServer api;
+    private final ConnectorTokenCache tokenCache = new ConnectorTokenCache(Duration.ofMinutes(5), Clock.systemUTC());
     private MethodTestServiceImp service;
 
     @BeforeEach
@@ -135,7 +145,7 @@ class MethodTestServiceImpTest {
         api = FakeHttpServer.start();
         service = new MethodTestServiceImp(
                 new MockEnvironment(), methodMngMapper, operationExMapper, connectorExMapper,
-                connectorService, invokerService, globalVariableSnapshotService, globalVariableService);
+                connectorService, invokerService, globalVariableSnapshotService, globalVariableService, tokenCache);
     }
 
     @AfterEach
@@ -378,7 +388,7 @@ class MethodTestServiceImpTest {
         Connector shop = aConnector(SHOP_ID, SHOP);
         when(connectorService.getById(SHOP_ID)).thenReturn(shop);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
-        when(connectorExMapper.toMethodConnector(eq(shop), any()))
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache)))
                 .thenThrow(new IllegalStateException("Path $.access_token not found"));
 
         MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
@@ -431,7 +441,7 @@ class MethodTestServiceImpTest {
 
         service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false), null, null);
 
-        verify(connectorExMapper).toMethodConnector(any(Connector.class), globalsGivenToMapper.capture());
+        verify(connectorExMapper).toMethodConnector(any(Connector.class), globalsGivenToMapper.capture(), eq(tokenCache));
         assertThat(globalsGivenToMapper.getValue().get()).isSameAs(openVariables);
     }
 
@@ -449,7 +459,7 @@ class MethodTestServiceImpTest {
         MethodTestServiceImp serviceReadingConnectors = new MethodTestServiceImp(
                 new MockEnvironment(), methodMngMapper, operationExMapper,
                 new ConnectorExMapper(connectorService, operationExMapper, operatorExMapper, invokerService),
-                connectorService, invokerService, globalVariableSnapshotService, globalVariableService);
+                connectorService, invokerService, globalVariableSnapshotService, globalVariableService, tokenCache);
 
         MethodTestResultDTO result =
                 serviceReadingConnectors.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
@@ -471,7 +481,7 @@ class MethodTestServiceImpTest {
 
         service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false), WORKFLOW_ID, null);
 
-        verify(connectorExMapper).toMethodConnector(any(Connector.class), globalsGivenToMapper.capture());
+        verify(connectorExMapper).toMethodConnector(any(Connector.class), globalsGivenToMapper.capture(), eq(tokenCache));
         assertThat(globalsGivenToMapper.getValue().get()).isSameAs(openVariables);
     }
 
@@ -595,6 +605,202 @@ class MethodTestServiceImpTest {
         assertThat(api.requests()).extracting(RecordedRequest::method).containsExactly("POST");
     }
 
+    // ── test: GraphQL reads and writes ────────────────────────────────────────
+
+    @Test
+    @DisplayName("test — GraphQL sends every operation with POST; a query only reads, so it needs no confirmation")
+    void testSendsGraphQlQueryWhenWriteIsNotConfirmed() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query", "query Devices { devices { name } }"));
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests()).hasSize(1);
+    }
+
+    @Test
+    void testSendsGraphQlShorthandQueryWhenWriteIsNotConfirmed() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query", "{ devices { name } }"));
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests()).hasSize(1);
+    }
+
+    @Test
+    void testThrowsGeneralServiceExceptionWhenGraphQlMutationIsNotConfirmed() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query", "mutation DeleteDevice { deleteDevice(id: 5) { id } }"));
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_WRITE_NOT_CONFIRMED))
+                .hasMessageContaining("GraphQL mutation");
+    }
+
+    @Test
+    void testThrowsGeneralServiceExceptionWhenGraphQlSubscriptionIsNotConfirmed() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query", "subscription OnDevice { deviceAdded { name } }"));
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_WRITE_NOT_CONFIRMED))
+                .hasMessageContaining("GraphQL subscription");
+    }
+
+    @Test
+    @DisplayName("test — operationName picks the operation to run: a query is sent even next to a mutation")
+    void testSendsNamedGraphQlQueryWhenDocumentAlsoHoldsMutation() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query", QUERY_AND_MUTATION, "operationName", "Devices"));
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests()).hasSize(1);
+    }
+
+    @Test
+    void testThrowsGeneralServiceExceptionWhenNamedGraphQlOperationIsMutation() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query", QUERY_AND_MUTATION, "operationName", "DeleteDevice"));
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_WRITE_NOT_CONFIRMED))
+                .hasMessageContaining("GraphQL mutation");
+    }
+
+    @Test
+    @DisplayName("test — two operations without operationName cannot be told apart, so it counts as a write")
+    void testThrowsGeneralServiceExceptionWhenGraphQlOperationIsAmbiguous() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query", QUERY_AND_MUTATION));
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_WRITE_NOT_CONFIRMED))
+                .hasMessageContaining("not recognised as a query");
+    }
+
+    @Test
+    @DisplayName("test — fragments are no operations: an introspection-style document is one query")
+    void testSendsGraphQlQueryWhenDocumentHoldsFragments() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query",
+                "query { __schema { ...SchemaParts } } fragment SchemaParts on __Schema { queryType { name } }"));
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("test — text in comments and strings is no GraphQL syntax, not even a brace")
+    void testSendsGraphQlQueryWhenMutationAppearsInStringOrComment() {
+        MethodDTO method = givenGraphQlMethod(Map.of("query",
+                "# mutation DropAll\nquery Search { search(text: \"mutation }\") { id } }"));
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests()).hasSize(1);
+    }
+
+    @Test
+    void testThrowsGeneralServiceExceptionWhenGraphQlQueryIsMissing() {
+        MethodDTO method = givenGraphQlMethod(Map.of("variables", Map.of("id", 5)));
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_WRITE_NOT_CONFIRMED))
+                .hasMessageContaining("not recognised as a query");
+    }
+
+    // ── test: refused token ───────────────────────────────────────────────────
+
+    @ParameterizedTest
+    @ValueSource(ints = {401, 403})
+    @DisplayName("test — a refused cached token is dropped, and the request is sent again after a new login")
+    void testSendsRequestAgainWithNewTokenWhenApiRefusesCachedToken(int status) {
+        api.respondWith(status, "application/json", "{}");
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", BEARER));
+        Connector shop = givenStoredShopConnector();
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache)))
+                .thenReturn(aShopResolvedWith("old-token"), aShopResolvedWith("new-token"));
+        givenCachedShopToken();
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests())
+                .extracting(sent -> sent.header("Authorization"))
+                .containsExactly("Bearer old-token", "Bearer new-token");
+    }
+
+    @Test
+    @DisplayName("test — a GraphQL API such as jdisc refuses a token with 200 and an AccessDeniedException cause")
+    void testSendsRequestAgainWhenGraphQlErrorReportsAccessDenied() {
+        api.respondWith(200, "application/json", """
+                {"errors":[{"message":"Access denied","extensions":{"causes":[{"error":"AccessDeniedException"}]}}]}
+                """);
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", BEARER));
+        Connector shop = givenStoredShopConnector();
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache)))
+                .thenReturn(aShopResolvedWith("old-token"), aShopResolvedWith("new-token"));
+        givenCachedShopToken();
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("test — without a cached login token a new login sends the same values, so nothing is sent again")
+    void testSendsRequestOnceWhenRefusedConnectorHasNoCachedToken() {
+        api.respondWith(401, "application/json", "{}");
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", BEARER));
+        givenShopConnector();
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("test — a token refused again after the new login is not retried a second time")
+    void testRetriesOnlyOnceWhenApiRefusesNewTokenToo() {
+        api.respondWith(401, "application/json", "{}");
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", BEARER));
+        Connector shop = givenStoredShopConnector();
+        // every login caches its token, as the real mapper does
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache))).thenAnswer(invocation -> {
+            givenCachedShopToken();
+            return aShopResolvedWith(TOKEN);
+        });
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(api.requests()).hasSize(2);
+    }
+
+    @Test
+    void testKeepsCachedTokenWhenApiAnswersSuccessfully() {
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", BEARER));
+        givenShopConnector();
+        givenCachedShopToken();
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(tokenCache.find(SHOP_ID, CACHED_FINGERPRINT)).isPresent();
+    }
+
+    @Test
+    void testReturnsConnectorErrorsWhenLoginFailsOnRetry() {
+        api.respondWith(401, "application/json", "{}");
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", BEARER));
+        Connector shop = givenStoredShopConnector();
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache)))
+                .thenReturn(aShopResolvedWith(TOKEN))
+                .thenThrow(new IllegalStateException("Login refused"));
+        givenCachedShopToken();
+
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(result.connectorErrors()).containsExactly(new ConnectorError(SHOP_ID, "Login refused"));
+    }
+
     @Test
     @DisplayName("test — an error answer of the API is a result, not an exception")
     void testReturnsErrorStatusWhenApiAnswersWithError() {
@@ -667,7 +873,7 @@ class MethodTestServiceImpTest {
         resolved.setTimeout(2500);
         when(connectorService.getById(SHOP_ID)).thenReturn(shop);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
-        when(connectorExMapper.toMethodConnector(eq(shop), any())).thenReturn(resolved);
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache))).thenReturn(resolved);
 
         MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, null);
 
@@ -680,7 +886,7 @@ class MethodTestServiceImpTest {
         Connector shop = aConnector(SHOP_ID, SHOP);
         when(connectorService.getById(SHOP_ID)).thenReturn(shop);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
-        when(connectorExMapper.toMethodConnector(eq(shop), any()))
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache)))
                 .thenThrow(new IllegalStateException("Path $.access_token not found"));
 
         MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, null);
@@ -761,7 +967,7 @@ class MethodTestServiceImpTest {
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
         when(globalVariableSnapshotService.takeOpenToAll()).thenReturn(
                 aSnapshotOf(GlobalVariableSnapshot.Entry.ofSecret("tenantKey", 1, new TextNode("t3nant-key"), true)));
-        when(connectorExMapper.toMethodConnector(eq(shop), any())).thenAnswer(invocation -> {
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache))).thenAnswer(invocation -> {
             // a field holds a reference, so the mapper asks for the variables, as the real one does
             Supplier<GlobalVariableSnapshot> globals = invocation.getArgument(1);
             globals.get();
@@ -851,11 +1057,37 @@ class MethodTestServiceImpTest {
 
     /** Stores the shop connector: a public url pointing at the fake API and a private token. */
     private void givenShopConnector() {
+        Connector shop = givenStoredShopConnector();
+        when(connectorExMapper.toMethodConnector(eq(shop), any(), eq(tokenCache)))
+                .thenReturn(aShopResolvedWith(TOKEN));
+    }
+
+    /** Stores the shop connector without saying how it resolves; returns it for the mapper stub. */
+    private Connector givenStoredShopConnector() {
         Connector shop = aConnector(SHOP_ID, SHOP, aStoredField("url", api.baseUrl(), PUBLIC));
         when(connectorService.getById(SHOP_ID)).thenReturn(shop);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
-        when(connectorExMapper.toMethodConnector(eq(shop), any()))
-                .thenReturn(aResolvedConnector(SHOP_ID, Map.of("url", api.baseUrl(), "token", TOKEN)));
+        return shop;
+    }
+
+    /** The shop connector as a login resolves it: the fake API's url and {@code token}. */
+    private MethodConnectorEx aShopResolvedWith(String token) {
+        return aResolvedConnector(SHOP_ID, Map.of("url", api.baseUrl(), "token", token));
+    }
+
+    /** Caches a login token of the shop, as an earlier test of one of its methods would have. */
+    private void givenCachedShopToken() {
+        tokenCache.put(SHOP_ID, CACHED_FINGERPRINT, Map.of("token", TOKEN));
+    }
+
+    /** A GraphQL method with a body of {@code bodyFields}, sent to the fake API. */
+    private MethodDTO givenGraphQlMethod(Map<String, Object> bodyFields) {
+        MethodDTO method = aGraphQlMethodDto(bodyFields);
+        MethodMng methodMng = new MethodMng();
+        when(methodMngMapper.toEntity(method)).thenReturn(methodMng);
+        when(operationExMapper.toOperationAll(List.of(methodMng), null))
+                .thenReturn(List.of(aGraphQlOperation(api.baseUrl() + "/graphql", bodyFields)));
+        return method;
     }
 
     /**

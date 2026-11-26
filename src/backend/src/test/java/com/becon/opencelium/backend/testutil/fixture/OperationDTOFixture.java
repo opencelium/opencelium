@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.enums.execution.ParamLocation;
 import com.becon.opencelium.backend.enums.execution.ParamStyle;
 import com.becon.opencelium.backend.mapper.execution.OperationExMapper;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
+import com.becon.opencelium.backend.resource.connector.BodyDTO;
 import com.becon.opencelium.backend.resource.connector.RequestDTO;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ParameterDTO;
@@ -88,6 +89,12 @@ public final class OperationDTOFixture {
         return aBodyOperation("graphql", MediaType.APPLICATION_JSON_VALUE, bodyFields);
     }
 
+    /** The same request as {@link #aGraphQlOperation(Map)}, sent to {@code endpoint}. */
+    public static OperationDTO aGraphQlOperation(String endpoint, Map<String, Object> bodyFields) {
+        return anHttpOperation(
+                "POST", endpoint, Map.of("Content-Type", MediaType.APPLICATION_JSON_VALUE), bodyFields, "graphql");
+    }
+
     private static OperationDTO anHttpOperation(
             String httpMethod, String endpoint, Map<String, String> header, Map<String, Object> bodyFields,
             String data) {
@@ -134,6 +141,19 @@ public final class OperationDTOFixture {
 
         MethodDTO method = new MethodDTO();
         method.setRequest(request);
+        return method;
+    }
+
+    /** A POST method as the workflow editor sends it, with a GraphQL body made of {@code bodyFields}. */
+    public static MethodDTO aGraphQlMethodDto(Map<String, Object> bodyFields) {
+        BodyDTO body = new BodyDTO();
+        body.setType("object");
+        body.setFormat("json");
+        body.setData("graphql");
+        body.setFields(new LinkedHashMap<>(bodyFields));
+
+        MethodDTO method = aMethodDto("POST");
+        method.getRequest().setBody(body);
         return method;
     }
 }

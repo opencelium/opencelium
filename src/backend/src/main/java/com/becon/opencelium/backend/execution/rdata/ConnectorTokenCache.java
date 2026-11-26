@@ -103,9 +103,14 @@ public class ConnectorTokenCache {
         entries.put(connectorId, new Entry(fingerprint, Map.copyOf(values), clock.instant().plus(ttl)));
     }
 
-    /** Drops the entry of {@code connectorId}, e.g. after the API refused its token. */
-    public void evict(int connectorId) {
-        entries.remove(connectorId);
+    /**
+     * Drops the entry of {@code connectorId}, e.g. after the API refused its token.
+     *
+     * @return whether there was an entry: {@code false} for a connector whose fields are not
+     *     computed by an invoker function, so logging in again would not change them
+     */
+    public boolean evict(int connectorId) {
+        return entries.remove(connectorId) != null;
     }
 
     // length-prefixed, so no two different lists of parts give the same text
