@@ -538,6 +538,21 @@
   gap: 6px;
 }
 
+.notificationJsonTransforms {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.notificationJsonTransformPath {
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
 .notificationJsonEditorBar {
   display: flex;
   align-items: center;

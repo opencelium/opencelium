@@ -1644,6 +1644,12 @@
         "webhookParameter": "Webhook parameters can't be passed to a script. Remove them to use a transformation.",
         "combined": "This field is combined with other text in the message, so a script can't fill it.",
         "unused": "This field isn't part of the message yet."
+      },
+      "json": {
+        "title": "Transformations",
+        "hint": "Text values with a step reference. A transformation is tied to the value's place in the JSON: if you rename or move the key, it is removed.",
+        "empty": "Insert a step reference into a text value to compute it with a script.",
+        "invalid": "Fix the JSON to see the values you can transform."
       }
     }
   },

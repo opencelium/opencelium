@@ -1,8 +1,8 @@
 import { createShortId } from '@shared/lib/createId';
-import { buildRequestResultField, parseFieldPath } from '../../components/request-editor/body-editor/bodyReference';
 import { Language, type Enhancement, type FieldBinding } from '../../types/connection';
 import { getActiveDraft } from './notificationConfig';
 import { parseBody } from './notificationBody';
+import { parseBindingPath, readJsonPath, toBindingPath } from './notificationBodyPath';
 import { buildTemplateScript, getTransformationArgs, getTransformationAvailability } from './notificationTransformation';
 import {
 	listTransformTargets, locateTransformTarget, readTargetValue, transformTargetId,
@@ -13,7 +13,7 @@ import type { NotificationConfig } from './notification.types';
 export type TransformationMap = Record<string, string>;
 
 export const buildTransformationResultVar = (color: string, path: string[]) =>
-	`${color}.(request).${buildRequestResultField('body', path.slice(0, -1), path[path.length - 1])}`;
+	`${color}.(request).body.$.${toBindingPath(path)}`;
 
 const buildArgs = (resultVar: string, value: string): Record<string, string> => Object.fromEntries([
 	['RESULT_VAR', resultVar],
@@ -31,11 +31,19 @@ export const createTransformationEnhancement = (resultVar: string, value: string
 export const withTransformationInputs = (enhancement: Enhancement, resultVar: string, value: string): Enhancement =>
 	({ ...enhancement, args: buildArgs(resultVar, value) });
 
-const normalize = (value: unknown) => String(value ?? '').trim().toLowerCase();
+// Also reads the `a.[0].b` form the dialog wrote before it switched to `a[0].b`.
+const normalize = (value: unknown) => String(value ?? '').trim().toLowerCase().replace(/\.\[/g, '[');
 
 const resultVarOf = (binding: FieldBinding) => normalize(binding.enhancement?.args?.RESULT_VAR);
 
-const ownBodyPrefix = (color: string) => normalize(`${color}.(request).body.$.`);
+// Without the trailing dot: a path that starts with an index reads `body.$[0]` once normalized.
+const ownBodyPrefix = (color: string) => normalize(`${color}.(request).body.$`);
+
+/** The transformation that fills one text value of hand-edited JSON. */
+export const findJsonTransformation = (bindings: readonly FieldBinding[], color: string, path: string[]) => {
+	const resultVar = normalize(buildTransformationResultVar(color, path));
+	return bindings.find((binding) => resultVarOf(binding) === resultVar)?.enhancement.enhanceId;
+};
 
 /** Reads the targets of the saved config back to the bindings that fill them, matched by RESULT_VAR. */
 export const matchTransformations = (
@@ -55,10 +63,11 @@ export const matchTransformations = (
 	}));
 };
 
-const readBodyValue = (body: unknown, fieldPath: string): unknown => {
-	const { namespace, name } = parseFieldPath(fieldPath);
-	return [...namespace, name].reduce<unknown>((current, key) =>
-		current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : undefined, body);
+// Case-insensitive like the colors, but strict on `.[`: a path in the old form is rewritten.
+const isSameArgs = (a: Record<string, string>, b: Record<string, string>) => {
+	const keys = Object.keys(a);
+	const same = (left: unknown, right: unknown) => String(left ?? '').trim().toLowerCase() === String(right ?? '').trim().toLowerCase();
+	return keys.length === Object.keys(b).length && keys.every((key) => same(a[key], b[key]));
 };
 
 type ReconcileArgs = {
@@ -71,8 +80,9 @@ type ReconcileArgs = {
 /**
  * The step's body bindings as they must be saved with `config`. In the editor every binding follows
  * its target to wherever the target sits now (a Slack header shifts the body block), takes the
- * target's references as inputs, and goes when its target did. Hand-edited JSON has no targets, so
- * there a binding stays only while its value still holds a step reference to replace.
+ * target's references as inputs, and goes when its target did. In hand-edited JSON a binding is tied
+ * to its path: it stays while the value there still holds a step reference, and takes that value's
+ * references as inputs.
  */
 export const reconcileTransformationBindings = ({ config, color, bindings, transformations }: ReconcileArgs): FieldBinding[] => {
 	const prefix = ownBodyPrefix(color);
@@ -91,9 +101,11 @@ export const reconcileTransformationBindings = ({ config, color, bindings, trans
 		if (!parsed.ok) return [...bindings];
 		return keepOwn((binding) => {
 			// Sliced from the original spelling: the path's keys are case-sensitive.
-			const resultVar = String(binding.enhancement.args.RESULT_VAR).trim();
-			const value = readBodyValue(parsed.value, resultVar.slice(prefix.length));
-			return typeof value === 'string' && getTransformationAvailability(value) === 'ok' ? binding : null;
+			const path = parseBindingPath(String(binding.enhancement.args.RESULT_VAR).trim().slice(prefix.length));
+			const value = readJsonPath(parsed.value, path);
+			if (typeof value !== 'string' || getTransformationAvailability(value) !== 'ok') return null;
+			const enhancement = withTransformationInputs(binding.enhancement, buildTransformationResultVar(color, path), value);
+			return isSameArgs(enhancement.args, binding.enhancement.args) ? binding : { ...binding, enhancement };
 		});
 	}
 

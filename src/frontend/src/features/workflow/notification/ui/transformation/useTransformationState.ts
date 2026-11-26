@@ -3,11 +3,13 @@ import { createLegacyStore } from '../../../store';
 import { removeFieldBinding, setConnection, setFlowchart, upsertFieldBinding } from '../../../store/connection/connectionSlice';
 import type { FieldBinding } from '../../../types/connection';
 import {
-	createTransformationEnhancement, matchTransformations, reconcileTransformationBindings,
+	createTransformationEnhancement, findJsonTransformation, matchTransformations, reconcileTransformationBindings,
 	withTransformationInputs, buildTransformationResultVar, type TransformationMap,
 } from '../../model/notificationBindings';
 import { getTransformationAvailability, toTransformedValue } from '../../model/notificationTransformation';
-import { locateTransformTarget, transformTargetId, type TransformTarget } from '../../model/notificationTransformTargets';
+import {
+	locateTransformTarget, transformTargetId, type AnyTransformTarget, type TargetLocation,
+} from '../../model/notificationTransformTargets';
 import type { NotificationConfig } from '../../model/notification.types';
 import { getActiveDraft } from '../../model/notificationConfig';
 import { useNotificationReferences } from '../references/notificationReferenceContextValue';
@@ -35,12 +37,24 @@ export const useTransformationState = (config: NotificationConfig) => {
 	const toolId = config.tool;
 	const message = getActiveDraft(config)?.message ?? {};
 
-	const getEnhanceId = (target: TransformTarget) => toolId ? transformations[transformTargetId(toolId, target)] : undefined;
+	// Hand-edited JSON is matched by path on every render: the user may type a binding's value
+	// away and back, and a transformation made in the editor stays bound once the JSON takes over.
+	const getEnhanceId = (target: AnyTransformTarget) => {
+		if (!toolId) return undefined;
+		return target.kind === 'json'
+			? findJsonTransformation(bindingsOf(store), color, target.path)
+			: transformations[transformTargetId(toolId, target)];
+	};
 
-	const add = (target: TransformTarget, value: string): string | null => {
+	const locate = (target: AnyTransformTarget): TargetLocation | null => {
+		if (!toolId) return null;
+		return target.kind === 'json' ? { kind: 'whole', path: target.path } : locateTransformTarget(toolId, message, target);
+	};
+
+	const add = (target: AnyTransformTarget, value: string): string | null => {
 		if (!toolId || !color || getTransformationAvailability(value) !== 'ok') return null;
-		const location = locateTransformTarget(toolId, message, target);
-		if (location.kind !== 'whole') return null;
+		const location = locate(target);
+		if (location?.kind !== 'whole') return null;
 		const enhancement = createTransformationEnhancement(buildTransformationResultVar(color, location.path), value);
 		store.dispatch(upsertFieldBinding({ enhancement }));
 		setTransformations((current) => ({ ...current, [transformTargetId(toolId, target)]: enhancement.enhanceId }));
@@ -48,7 +62,7 @@ export const useTransformationState = (config: NotificationConfig) => {
 		return toTransformedValue(value);
 	};
 
-	const remove = (target: TransformTarget) => {
+	const remove = (target: AnyTransformTarget) => {
 		const enhanceId = getEnhanceId(target);
 		if (!toolId || !enhanceId) return;
 		store.dispatch(removeFieldBinding({ enhanceId }));
@@ -59,7 +73,7 @@ export const useTransformationState = (config: NotificationConfig) => {
 		});
 	};
 
-	const syncInputs = (target: TransformTarget, value: string) => {
+	const syncInputs = (target: AnyTransformTarget, value: string) => {
 		const enhanceId = getEnhanceId(target);
 		const enhancement = bindingsOf(store).find((binding) => binding.enhancement?.enhanceId === enhanceId)?.enhancement;
 		if (!enhancement) return;
@@ -76,7 +90,7 @@ export const useTransformationState = (config: NotificationConfig) => {
 
 	return {
 		context: {
-			store, method: currentMethod, toolId, message, getEnhanceId, add, remove, syncInputs, openEditorId, setOpenEditorId,
+			store, method: currentMethod, toolId, message, getEnhanceId, locate, add, remove, syncInputs, openEditorId, setOpenEditorId,
 		},
 		collectBindings,
 	};

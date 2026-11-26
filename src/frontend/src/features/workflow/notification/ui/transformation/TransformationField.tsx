@@ -8,7 +8,7 @@ import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
 import {
 	getTransformationAvailability, splitTransformationParts, toTransformedValue,
 } from '../../model/notificationTransformation';
-import type { TransformTarget } from '../../model/notificationTransformTargets';
+import type { AnyTransformTarget } from '../../model/notificationTransformTargets';
 import { useNotificationReferences } from '../references/notificationReferenceContextValue';
 import { NotificationReferencePicker } from '../references/NotificationReferencePicker';
 import { ReferenceInsertButton } from '../references/ReferenceInsertButton';
@@ -17,7 +17,7 @@ import { TransformationEditor } from './TransformationEditor';
 
 type Props = {
 	id: string;
-	target: TransformTarget;
+	target: AnyTransformTarget;
 	enhanceId: string;
 	value: string;
 	label: string;

@@ -1644,6 +1644,12 @@
         "webhookParameter": "Webhook-Parameter können nicht an ein Skript übergeben werden. Entferne sie, um eine Transformation zu nutzen.",
         "combined": "Dieses Feld wird in der Nachricht mit anderem Text kombiniert, daher kann kein Skript es füllen.",
         "unused": "Dieses Feld ist noch nicht Teil der Nachricht."
+      },
+      "json": {
+        "title": "Transformationen",
+        "hint": "Textwerte mit einer Schritt-Referenz. Eine Transformation gehört zur Stelle des Werts im JSON: Wenn Sie den Schlüssel umbenennen oder verschieben, wird sie entfernt.",
+        "empty": "Fügen Sie eine Schritt-Referenz in einen Textwert ein, um ihn mit einem Skript zu berechnen.",
+        "invalid": "Korrigieren Sie das JSON, um die transformierbaren Werte zu sehen."
       }
     }
   },
