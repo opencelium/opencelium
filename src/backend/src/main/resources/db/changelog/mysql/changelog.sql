@@ -1018,3 +1018,16 @@ ALTER TABLE `global_variable_change`
 -- Surrounding whitespace of other emails is deliberately left alone: trimming could make two rows
 -- collide on the unique key and halt the migration.
 UPDATE `user` SET `email` = NULL WHERE TRIM(`email`) = '';
+
+--changeset 5.2:15 stripComments:true splitStatements:true endDelimiter:;
+-- An admin can issue a one-time set-password link for an OC user; it is stored here like a token
+-- of the self-service password reset. 'purpose' tells the two apart, so admin links do not count
+-- towards the self-service lockout; every existing row is a self-service token. 'expires_at' is
+-- fixed when a token is issued, because the two kinds live for different times; it is NULL for
+-- rows written before this changeset, whose expiry is still derived from 'created_at'.
+-- 'created_by' is the admin who issued a link, NULL for a self-service token; like other
+-- 'created_by' columns it is a plain audit column, deliberately not a foreign key.
+ALTER TABLE `password_reset_token`
+    ADD COLUMN IF NOT EXISTS `purpose`    VARCHAR(16) NOT NULL DEFAULT 'SELF_SERVICE',
+    ADD COLUMN IF NOT EXISTS `expires_at` TIMESTAMP NULL DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `created_by` INT DEFAULT NULL;

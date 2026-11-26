@@ -358,3 +358,7 @@ versions:
         operation: add
         value: 5.3
         path: opencelium.version
+      - changeset: 7
+        operation: add
+        value: 86400000
+        path: opencelium.forgot-psw.admin-link-activity-time

@@ -52,4 +52,16 @@ public final class PasswordResetTokenFixture {
         token.setCreatedAt(new Date(System.currentTimeMillis() - millisAgo));
         return token;
     }
+
+    /**
+     * Valid, unused set-password link that admin {@code issuedBy} created just now and that
+     * expires {@code expiresInMillis} from now; a negative value gives an expired link.
+     */
+    public static PasswordResetToken anAdminLinkFor(User user, String hashedToken, int issuedBy, long expiresInMillis) {
+        PasswordResetToken token = aFreshTokenFor(user, hashedToken);
+        token.setPurpose(PasswordResetToken.Purpose.ADMIN_LINK);
+        token.setCreatedBy(issuedBy);
+        token.setExpiresAt(new Date(System.currentTimeMillis() + expiresInMillis));
+        return token;
+    }
 }
