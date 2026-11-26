@@ -62,7 +62,7 @@ export type GlobalVariableListItem = {
     language: ScriptLanguage | null
     parameterCount: number | null
     scopeType: ScopeType
-    beingUpdatedBy: BeingUpdatedBy | null
+    beingUpdatedBy: BeingUpdatedBy[]
     usageCount: number
     myPermissions: VariablePermission[]
     version: number
@@ -112,7 +112,8 @@ export type MutableState = {
     setBy: ActorRef | null
     setByExecutionId: number | null
     busyPolicy: BusyPolicy
-    ownerWorkflow: WorkflowRef | null
+    // Sorted by id; empty once every owner workflow is deleted, until a new one is chosen.
+    ownerWorkflows: WorkflowRef[]
 }
 
 // `value` is the initial value a reset goes back to; the value runs read and write is `mutable.currentValue`.
@@ -142,7 +143,7 @@ export type MutableSaveDto = GlobalVariableSaveBase & {
     kind: 'MUTABLE'
     value: JsonValue
     busyPolicy: BusyPolicy
-    ownerWorkflowId: number
+    ownerWorkflowIds: number[]
 }
 export type ScriptSaveDto = GlobalVariableSaveBase & { kind: 'SCRIPT'; script: ScriptDefinition }
 
@@ -163,7 +164,8 @@ export type GlobalVariableValue = {
     updatedAt: string | null
     // null when a run wrote the current value
     updatedBy: ActorRef | null
-    beingUpdatedBy: BeingUpdatedBy | null
+    // One entry per owner workflow running right now, sorted by workflow id.
+    beingUpdatedBy: BeingUpdatedBy[]
 }
 
 export type UsageElement = {
@@ -216,12 +218,12 @@ type PickerItemBase = { name: string; description: string }
 
 export type PickerItem =
     | (PickerItemBase & { kind: 'CONSTANT'; secret: boolean; valuePreview: string | null })
-    // `writable`: the picker's workflow is the owner, so it may write the variable.
+    // `writable`: the picker's workflow is one of the owners, so it may write the variable.
     | (PickerItemBase & {
           kind: 'MUTABLE'
           secret: boolean
           valuePreview: string | null
-          ownerWorkflow: WorkflowRef | null
+          ownerWorkflows: WorkflowRef[]
           writable: boolean
       })
     | (PickerItemBase & { kind: 'SCRIPT'; language: ScriptLanguage; parameters: ScriptParameter[] })

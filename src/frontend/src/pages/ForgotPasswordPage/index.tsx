@@ -1,34 +1,15 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@features/auth/useAuth'
 import { ForgotPasswordForm } from '@features/auth/ui/ForgotPasswordForm'
-import { AppLogo } from '@features/branding/AppLogo'
+import { PublicPageLayout } from '@features/auth/ui/PublicPageLayout'
 
 export default function ForgotPasswordPage() {
     const { isAuthenticated } = useAuth()
     if (isAuthenticated) return <Navigate to="/" replace />
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '100vh',
-                padding: 16,
-                background: 'var(--color-background-app)',
-            }}
-        >
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 24,
-                }}
-            >
-                <AppLogo />
-                <ForgotPasswordForm />
-            </div>
-        </div>
+        <PublicPageLayout>
+            <ForgotPasswordForm />
+        </PublicPageLayout>
     )
 }

@@ -1630,6 +1630,21 @@
     "references": {
       "webhook": "Webhook",
       "global": "Global"
+    },
+    "transformation": {
+      "label": "Transformation",
+      "add": "Compute this value with a script (transformation)",
+      "editScript": "Edit script",
+      "remove": "Remove transformation",
+      "dialogTitle": "Transformation · {{field}}",
+      "done": "Done",
+      "needsStepReference": "A transformation needs at least one step reference as input. Without one it is not saved.",
+      "unavailable": {
+        "noStepReference": "Insert a step reference first. The script receives each reference as VAR_0, VAR_1, …",
+        "webhookParameter": "Webhook parameters can't be passed to a script. Remove them to use a transformation.",
+        "combined": "This field is combined with other text in the message, so a script can't fill it.",
+        "unused": "This field isn't part of the message yet."
+      }
     }
   },
   "runPolicy": {

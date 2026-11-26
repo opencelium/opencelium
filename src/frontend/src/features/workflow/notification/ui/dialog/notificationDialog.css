@@ -418,6 +418,43 @@
   color: var(--color-text-disabled);
 }
 
+/* A field filled by a script: its inputs as chips behind a badge, no free text. */
+.notificationTransformField {
+  align-items: center;
+  border-style: dashed;
+  border-color: var(--color-action-primary);
+}
+
+.notificationTransformInputs {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 30px;
+  padding: 3px 8px;
+}
+
+.notificationTransformBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.notificationTransformEditor {
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+}
+
 /* Inline under its field, like the URL editor's picker: one bordered row, no floating shadow. */
 .notificationReferencePicker .bodyLegacyGeneratorShell {
   box-shadow: none;

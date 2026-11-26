@@ -179,7 +179,8 @@
     "confirm": {
       "title": "Link zum Zurücksetzen erstellen",
       "message": "Einen einmaligen Link erstellen, mit dem \"{{user}}\" ein neues Passwort festlegt? Früher erstellte Links für diesen Benutzer, auch ein offener \"Passwort vergessen\"-Link, funktionieren danach nicht mehr. Das aktuelle Passwort bleibt gültig, bis der Link verwendet wird.",
-      "sendEmail": "Link zusätzlich per E-Mail an den Benutzer senden"
+      "sendEmail": "Link zusätzlich per E-Mail an den Benutzer senden",
+      "emailUnavailable": "E-Mail ist nicht verfügbar: Die Mail-Einstellungen des Servers fehlen oder funktionieren nicht. Kopieren Sie den Link und geben Sie ihn selbst weiter."
     },
     "dialog": {
       "title": "Link zum Zurücksetzen des Passworts",

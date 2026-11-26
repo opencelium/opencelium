@@ -36,6 +36,7 @@ export function PasswordResetLinkAction({ user, iconSize, tooltipPlacement = 'to
             message: (
                 <PasswordResetLinkConfirmMessage
                     userLabel={userLabel}
+                    hasEmail={!!user.email?.trim()}
                     onSendEmailChange={(value) => {
                         sendEmail = value
                     }}
