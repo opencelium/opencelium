@@ -34,7 +34,11 @@ describe('CronEditor with the real picker', () => {
         render(<Harness />);
         fireEvent.click(screen.getByText('Reset form'));
         await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('0 0/5 * * * ?'));
-        fireEvent.click(screen.getByRole('button', {name: 'Clear'}));
+        // antd v6 also labels the select's clear icon "Clear"; target the cron picker's own button.
+        const cronClear = screen.getAllByRole('button', {name: 'Clear'})
+            .find((button) => button.classList.contains('react-js-cron-clear-button'));
+        expect(cronClear).toBeDefined();
+        fireEvent.click(cronClear!);
         await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue(''));
     });
     it('writes a Quartz-safe expression after an explicit weekday selection', async () => {

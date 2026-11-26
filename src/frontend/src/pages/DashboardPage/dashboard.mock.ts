@@ -38,7 +38,7 @@ export const attentionItems: AttentionItem[] = [
     },
     {
         id: 'a-3',
-        title: 'KIA Ticket import timeout',
+        title: 'Ticket import timeout',
         subtitle: 'Retry policy reached limit',
         severity: 'critical',
         timeAgo: '2h ago',
