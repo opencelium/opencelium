@@ -64,6 +64,16 @@
   min-height: 420px;
 }
 
+/* Maximized, the modal body is a scroll container of its own: the dialog fills it instead of
+   sizing from the viewport, and the full-bleed step bar must not make it scroll sideways. */
+.ant-dialog-fullscreen .ant-modal-body:has(> [data-testid='notification-dialog']) {
+  overflow: hidden;
+}
+
+.ant-dialog-fullscreen .notificationDialog {
+  height: 100%;
+}
+
 .notificationStepNav {
   margin: 0 -24px;
   padding: 0 24px;
@@ -411,6 +421,27 @@
 /* Inline under its field, like the URL editor's picker: one bordered row, no floating shadow. */
 .notificationReferencePicker .bodyLegacyGeneratorShell {
   box-shadow: none;
+}
+
+/* A half-width field (button text and link) is narrower than the generator's one-row
+   minimum, which scrolled the whole message panel sideways. There the picker keeps its
+   one row and lines up with the field's right edge, reaching left into the empty space
+   below the neighbouring field; overflow on the start side never scrolls. */
+.notificationReferencePicker {
+  display: flex;
+  justify-content: flex-end;
+  container-type: inline-size;
+}
+
+.notificationReferencePicker .bodyLegacyGeneratorShell {
+  flex: 1 1 auto;
+}
+
+@container (max-width: 520px) {
+  .notificationReferencePicker .bodyLegacyGeneratorShell {
+    flex: none;
+    width: 520px;
+  }
 }
 
 .notificationStatusPill {

@@ -1,4 +1,5 @@
 import type { ComponentProps } from 'react';
+import type { RunPolicyNotice } from '../run-policy/useWorkflowRunPolicyNotice';
 import type { WorkflowHeader } from '../WorkflowHeader/WorkflowHeader';
 
 export type WorkflowPageHeaderProps = {
@@ -6,4 +7,5 @@ export type WorkflowPageHeaderProps = {
 	connectionId?: string;
 	schedulesOpen: boolean;
 	onToggleSchedules: () => void;
+	runPolicy?: RunPolicyNotice | null;
 };

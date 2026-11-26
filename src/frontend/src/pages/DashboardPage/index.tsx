@@ -8,7 +8,6 @@ import PageWrapper from '@pages/PageWrapper/PageWrapper'
 import { MetricTiles } from './components/MetricTiles'
 import { AttentionRequiredCard } from './components/AttentionRequiredCard'
 import { RecentActivityCard } from './components/RecentActivityCard'
-import { SystemHealthCard } from './components/SystemHealthCard'
 import { ExecutionsChartCard } from './components/ExecutionsChartCard'
 import { ResourceUsageCard } from './components/ResourceUsageCard'
 import { TopConnectorsCard } from './components/TopConnectorsCard'
@@ -16,7 +15,6 @@ import { ComingSoonOverlay } from './components/ComingSoonOverlay'
 import { ScheduleCalendarCard } from './components/ScheduleCalendarCard'
 import { DashboardCardBoundary } from './components/DashboardCardBoundary'
 import { useSocketConnectionNotifications } from './useSocketConnectionNotifications'
-import './dashboard.css'
 
 export default function DashboardPage() {
     const { t } = useI18n('dashboard')
@@ -68,14 +66,6 @@ export default function DashboardPage() {
                     </DashboardCardBoundary>
                 </div>
 
-                {canReadSchedules && (
-                    <div className="dashboard-calendar-row">
-                        <DashboardCardBoundary>
-                            <ScheduleCalendarCard />
-                        </DashboardCardBoundary>
-                    </div>
-                )}
-
                 <div
                     data-testid="dashboard-coming-soon"
                     style={{
@@ -84,14 +74,16 @@ export default function DashboardPage() {
                         gap: 16,
                     }}
                 >
+                    {canReadSchedules && (
+                        <DashboardCardBoundary>
+                            <ScheduleCalendarCard />
+                        </DashboardCardBoundary>
+                    )}
                     <ComingSoonOverlay>
                         <AttentionRequiredCard />
                     </ComingSoonOverlay>
                     <ComingSoonOverlay>
                         <RecentActivityCard />
-                    </ComingSoonOverlay>
-                    <ComingSoonOverlay>
-                        <SystemHealthCard />
                     </ComingSoonOverlay>
                 </div>
             </div>

@@ -21,12 +21,6 @@ export type ActivityItem = {
     icon: IconName
 }
 
-export type HealthSlice = {
-    key: 'healthy' | 'warning' | 'critical'
-    value: number
-    label: string
-}
-
 export const attentionItems: AttentionItem[] = [
     {
         id: 'a-1',
@@ -108,8 +102,3 @@ export const recentActivity: ActivityItem[] = [
     },
 ]
 
-export const systemHealth: HealthSlice[] = [
-    { key: 'healthy', value: 78, label: 'Healthy' },
-    { key: 'warning', value: 16, label: 'Warning' },
-    { key: 'critical', value: 6, label: 'Critical' },
-]

@@ -8,6 +8,12 @@ export type User = {
   totpEnabled?: boolean
 }
 
+// `link` holds a one-time secret: show it once, never log, persist or keep it after the dialog closes.
+export type PasswordResetLinkDto = {
+  link: string
+  expiresAt: string
+}
+
 export type UserDetail = {
   name: string,
   surname: string,

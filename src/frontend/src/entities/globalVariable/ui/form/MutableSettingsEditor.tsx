@@ -1,9 +1,12 @@
+import type { ReactNode } from 'react'
 import { Select } from 'antd'
-import { useController, useFormContext } from 'react-hook-form'
+import { Trans } from 'react-i18next'
+import { useController, useFormContext, useWatch } from 'react-hook-form'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { Radio } from '@shared/ui/primitives/Radio'
 import { Typography } from '@shared/ui/primitives/Typography'
+import { Hint } from '@shared/ui/primitives/Hint'
 import { useFetchEntitiesQuery } from '@shared/api/genericApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { ConnectionMeta } from '@entities/connection/command/connectionCache'
@@ -58,12 +61,46 @@ function OwnerWorkflowSelect({ isReadOnly }: { isReadOnly: boolean }) {
     )
 }
 
+// A new tab, so the unsaved variable form stays open.
+function SystemConfigLink({ children }: { children?: ReactNode }) {
+    return (
+        <a href="/system-config" target="_blank" rel="noopener noreferrer" data-testid="global-variable-queue-limits-link">
+            {children}
+        </a>
+    )
+}
+
+const QUEUE_LIMITS_COMPONENTS = { code: <code />, page: <SystemConfigLink /> }
+
+function BusyPolicyScopeHint() {
+    const { t } = useI18n('entities')
+    return (
+        <div data-testid="global-variable-busy-policy-scope-hint">
+            <Hint noPrefix>{t('global-variable.mutable.busyPolicy.scope')}</Hint>
+        </div>
+    )
+}
+
+function QueueLimitsHint() {
+    const busyPolicy = useWatch({ name: 'busyPolicy' }) as BusyPolicy | undefined
+    if (busyPolicy !== 'QUEUE') return null
+    return (
+        <div data-testid="global-variable-queue-limits-hint">
+            <Hint noPrefix>
+                <Trans ns="entities" i18nKey="global-variable.mutable.busyPolicy.queueLimits" components={QUEUE_LIMITS_COMPONENTS} />
+            </Hint>
+        </div>
+    )
+}
+
 export function MutableSettingsEditor({ mode }: { mode: Mode }) {
     const isReadOnly = mode === 'view'
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
             <OwnerWorkflowSelect isReadOnly={isReadOnly} />
             <ChoiceGroup name="busyPolicy" values={BUSY_POLICIES} labelKey="busyPolicy" isReadOnly={isReadOnly} />
+            <BusyPolicyScopeHint />
+            <QueueLimitsHint />
         </div>
     )
 }

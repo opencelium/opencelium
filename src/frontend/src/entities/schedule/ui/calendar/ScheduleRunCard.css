@@ -1,0 +1,136 @@
+.schedule-run {
+	width: 364px;
+	max-width: calc(100vw - 24px);
+	color: var(--color-text-primary);
+}
+
+.schedule-run-head {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 13px 16px 11px;
+	border-top: 3px solid var(--schedule-color);
+	border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.schedule-run-head span {
+	font-size: 12.5px;
+	color: var(--color-text-secondary);
+}
+
+.schedule-run-body {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 14px 16px;
+}
+
+.schedule-run-when {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+}
+
+.schedule-run-when strong {
+	font-size: 15px;
+}
+
+.schedule-run-when > span:not(.schedule-run-badge) {
+	font-family: var(--typography-font-family-mono);
+	font-size: 12.5px;
+	color: var(--color-text-secondary);
+}
+
+.schedule-run dl {
+	display: grid;
+	grid-template-columns: 110px 1fr;
+	gap: 6px 12px;
+	margin: 0;
+	font-size: 12.5px;
+}
+
+.schedule-run dt {
+	color: var(--color-text-secondary);
+}
+
+.schedule-run dd {
+	margin: 0;
+}
+
+.schedule-run dd[data-tone="error"] {
+	color: var(--color-status-error-fg);
+}
+
+.schedule-run-badge {
+	align-self: flex-start;
+	padding: 4px 9px;
+	font-size: 11.5px;
+	line-height: 1;
+	border: 1px solid transparent;
+	border-radius: 999px;
+}
+
+.schedule-run-badge[data-tone="warning"] {
+	color: var(--color-status-warning-fg);
+	background: var(--color-status-warning-bg);
+	border-color: var(--color-status-warning-border);
+}
+
+
+.schedule-run details {
+	padding-top: 10px;
+	border-top: 1px solid var(--color-border-subtle);
+}
+
+.schedule-run summary {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12.5px;
+	color: var(--color-text-secondary);
+	list-style: none;
+	cursor: pointer;
+}
+
+.schedule-run summary::-webkit-details-marker {
+	display: none;
+}
+
+.schedule-run summary::before {
+	content: "›";
+	display: inline-block;
+	transition: transform 0.15s ease;
+}
+
+.schedule-run details[open] summary::before {
+	transform: rotate(90deg);
+}
+
+.schedule-run details code {
+	display: inline-block;
+	margin-top: 8px;
+	padding: 5px 8px;
+	font-family: var(--typography-font-family-mono);
+	font-size: 12px;
+	background: var(--color-background-hover);
+	border: 1px solid var(--color-border-subtle);
+	border-radius: var(--radius-sm);
+	user-select: all;
+}
+
+.schedule-run details code + span {
+	display: block;
+	margin-top: 6px;
+	font-size: 11.5px;
+	color: var(--color-text-secondary);
+}
+
+.schedule-run-foot {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 11px 14px;
+	background: var(--color-background-surface);
+	border-top: 1px solid var(--color-border-subtle);
+}

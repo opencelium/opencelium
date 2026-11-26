@@ -16,8 +16,6 @@ export type NotificationToolDraft = {
 
 export type NotificationEditMode = 'editor' | 'json';
 
-export type NotificationErrorPolicy = 'stop' | 'continue' | 'retry';
-
 export type NotificationHeader = { id: string; name: string; value: string };
 
 export type NotificationConfig = {
@@ -26,8 +24,6 @@ export type NotificationConfig = {
 	tools: Partial<Record<NotificationToolId, NotificationToolDraft>>;
 	mode: NotificationEditMode;
 	extraHeaders: NotificationHeader[];
-	errorPolicy: NotificationErrorPolicy;
-	retryOn429: boolean;
 };
 
 export type NotificationDialogStep = 1 | 2 | 3 | 4;

@@ -54,6 +54,7 @@ import {
     ExportOutlined,
     SendOutlined,
     PictureOutlined,
+    UnlockOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -154,6 +155,7 @@ const iconMap = {
     'external-link': ExportOutlined,
     send: SendOutlined,
     image: PictureOutlined,
+    'password-reset': UnlockOutlined,
 };
 
 export const AntIcon: IconComponent = ({

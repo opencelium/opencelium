@@ -5,6 +5,7 @@ import type { WorkflowIssueTone } from '../../../problems/workflowProblems';
 import type { MinimapDot, MinimapGroup, MinimapModel } from './minimap.model';
 import { contains, fitViewBox, flowViewRect, type MinimapViewBox } from './minimapGeometry';
 import { groupColor } from './minimapPalette';
+import { bellPath, diamondPath } from './minimapShapes';
 import { useElementSize } from './useElementSize';
 
 /**
@@ -32,12 +33,12 @@ type Props = {
 
 type Drag = { pointerId: number; lastX: number; lastY: number; unitsPerPx: number };
 
-const diamondPath = (x: number, y: number, r: number) => `M ${x} ${y - r} L ${x + r} ${y} L ${x} ${y + r} L ${x - r} ${y} Z`;
-
 function MinimapMarker({ dot, color, radius }: { dot: MinimapDot; color: string | undefined; radius: number }) {
 	switch (dot.shape) {
 		case 'start': return <circle className="workflowMinimapStart" cx={dot.x} cy={dot.y} r={radius} />;
 		case 'circle': return <circle cx={dot.x} cy={dot.y} r={radius} fill={color} />;
+		// A bell covers less of its box than a disc, so it is drawn a little larger to weigh the same.
+		case 'bell': return <path d={bellPath(dot.x, dot.y, radius * 1.2)} fill={color} />;
 		case 'diamond': return <path d={diamondPath(dot.x, dot.y, radius)} fill={color} />;
 		default: {
 			const _exhaustive: never = dot.shape;

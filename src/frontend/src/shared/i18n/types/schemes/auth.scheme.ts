@@ -47,6 +47,11 @@ export interface AuthSchema {
                 message: string
                 redirect: string
             }
+            invalidLink: {
+                title: string
+                message: string
+                requestNew: string
+            }
             fields: {
                 password: {
                     label: string

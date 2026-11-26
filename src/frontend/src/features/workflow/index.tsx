@@ -26,6 +26,7 @@ import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
 import { applyProblemFocus } from './problems/applyProblemFocus';
 import { GlobalPickerScopeProvider } from '@entities/globalVariable/ui/picker/GlobalPickerScopeProvider';
 import { workflowPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
+import { useWorkflowRunPolicyNotice } from './components/run-policy/useWorkflowRunPolicyNotice';
 import { useFocusElementFromUrl } from './hooks/useFocusElementFromUrl';
 import { NotificationEditorContext } from './notification/ui/NotificationEditorContext';
 import { useNotificationEditorOpener } from './notification/ui/useNotificationEditorOpener';
@@ -86,6 +87,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   });
   useFocusElementFromUrl({ isLoading, nodes: hydratedNodes, edges: workflow.edges, selectNode: selectAndCenterNode });
   const playgroundNodeId = playground.dialog?.nodeId;
+  const runPolicy = useWorkflowRunPolicyNotice({ connectionId: Number(activeConnectionId) || null,
+    nodes: hydratedNodes, fieldBindings: loadedFieldBindings });
   const openNotificationEditor = useNotificationEditorOpener({ setNotificationEditor: workflow.setNotificationEditor,
     closeOtherEditors: workflow.closeNodeEditors });
   const isGraphLocked = readOnly || isTestRunLocked;
@@ -125,6 +128,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
     <div className="page" data-testid="workflow-page">
       <WorkflowPageHeader connectionId={schedulesConnectionId} schedulesOpen={schedulesOpen}
+        runPolicy={runPolicy}
         onToggleSchedules={() => setSchedulesOpen((open) => {
           if (!open) {
             workflow.setHistoryOpen(false);

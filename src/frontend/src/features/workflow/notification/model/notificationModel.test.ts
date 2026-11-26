@@ -123,8 +123,12 @@ describe('normalizeNotificationConfig', () => {
 		expect(config.tool).toBeNull();
 		expect(Object.keys(config.tools)).toEqual(['slack']);
 		expect(config.tools.slack?.webhookUrl).toBe('u');
-		expect(config.errorPolicy).toBe('stop');
-		expect(config.retryOn429).toBe(true);
+	});
+
+	it('drops the on-error and 429 settings older steps were saved with', () => {
+		const config = normalizeNotificationConfig({ tool: 'slack', errorPolicy: 'retry', retryOn429: false });
+		expect(config).not.toHaveProperty('errorPolicy');
+		expect(config).not.toHaveProperty('retryOn429');
 	});
 });
 

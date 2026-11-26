@@ -3,7 +3,8 @@ import {useI18n} from '@shared/i18n/hooks/useI18n'
 import {useSubscriptionIssue} from '@entities/subscription/model/useSubscriptionIssue'
 import {CronCountdown} from '@entities/schedule/ui/CronCountdown'
 import {PlayControl, type PlayVariant, type RingStatus} from './PlayControl'
-import type {Schedule, ScheduleExecutionRun} from '../model/types'
+import type {Schedule} from '../model/types'
+import {lastRunOutcome} from '../model/lastRunOutcome'
 import './StatusCell.css'
 
 type Props = {
@@ -13,16 +14,10 @@ type Props = {
     showCountdown?: boolean
 }
 
-function computeEndTime(run?: ScheduleExecutionRun): number {
-    if (!run?.startTime) return 0
-    return run.startTime + (run.duration ?? 0)
-}
-
 function resolveRing(schedule: Schedule): RingStatus | null {
-    const successEnd = computeEndTime(schedule.lastExecution?.success)
-    const failEnd = computeEndTime(schedule.lastExecution?.fail)
-    if (successEnd === 0 && failEnd === 0) return null
-    return successEnd >= failEnd ? 'success' : 'exception'
+    const outcome = lastRunOutcome(schedule)
+    if (outcome === null) return null
+    return outcome === 'success' ? 'success' : 'exception'
 }
 
 export const StatusCell = memo(function StatusCell({schedule, showCountdown = true}: Props) {

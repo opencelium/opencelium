@@ -73,6 +73,7 @@ import { ConditionReferenceChip } from './ConditionValueInput/ConditionReference
 import { useSettleOnOutsideClick } from '../reference-chip/useSettleOnOutsideClick';
 import '../request-editor/body-editor/bodyLegacy.css';
 import '../dialogHeader.css';
+import { useMaximizableModal } from '../dialog-maximize/useMaximizableModal';
 import './conditionBuilder.css';
 
 type Props = {
@@ -973,6 +974,11 @@ export function ConditionBuilderDialog({
 	// loop iteration it's currently paused in (a condition operand only ever
 	// resolves `direction: 'response'`, so no method color is needed here).
 	const operatorIndexPath = getCurrentOperator(connection, node)?.index;
+	const { modalProps, toggle: maximizeToggle } = useMaximizableModal({
+		open,
+		layout: { width: '90vw', className: `wfDialog conditionBuilderModal conditionBuilderModal-${operatorType}` },
+		testId: 'workflow-condition-maximize',
+	});
 
 	return (
 		<Modal
@@ -981,9 +987,8 @@ export function ConditionBuilderDialog({
 			destroyOnHidden
 			focusable={{ focusTriggerAfterClose: false }}
 			title={t(isLoop ? 'conditionBuilder.dialogTitleLoop' : 'conditionBuilder.dialogTitleIf')}
-			width="90vw"
+			{...modalProps}
 			centered={false}
-			className={`wfDialog conditionBuilderModal conditionBuilderModal-${operatorType}`}
 			closeIcon={<span className="wfDialogClose">×</span>}
 			onCancel={onClose}
 			footer={[
@@ -1004,6 +1009,7 @@ export function ConditionBuilderDialog({
 				</Button>,
 			]}
 		>
+			{maximizeToggle}
 			<div key={renderKey} className="conditionBuilder" data-testid="workflow-condition-builder">
 				<LiveInspectHint />
 				<ConditionReorderProvider tree={tree} isEnabled={operatorType === 'if'} onChange={setTree}>

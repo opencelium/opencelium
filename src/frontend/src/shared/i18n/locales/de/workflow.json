@@ -861,7 +861,7 @@
   },
   "references": {
     "responseStatus": "Antwort-Status",
-    "rootObject": "Das Wurzelobjekt",
+    "rootObject": "Gesamte Antwort",
     "rootObjectHint": "Der gesamte Antworttext, unverändert.",
     "firstArrayElement": "Erstes Element des Arrays",
     "firstArrayElementHint": "Das erste Element des Arrays als einzelner Wert. Mit einem Feldnamen fortfahren, um ein Feld daraus zu nehmen.",
@@ -1063,7 +1063,8 @@
     "zoomOut": "Verkleinern",
     "fitView": "Workflow an den Bildschirm anpassen",
     "legend": {
-      "system": "System",
+      "system": "HTTP-Anfrage",
+      "notification": "Benachrichtigung",
       "trigger": "Ausgelöster Workflow",
       "operator": "Logikblock",
       "otherConnectors": "Weitere Konnektoren"
@@ -1502,15 +1503,7 @@
       "body": "Body",
       "bodyGenerated": "aus Editor erzeugt",
       "bodyOverridden": "manuell angepasst",
-      "editBody": "In „Nachricht“ bearbeiten",
-      "errorPolicy": "Bei Fehlerstatus (≥ 400)",
-      "errorPolicies": {
-        "stop": "Workflow abbrechen",
-        "continue": "Fehler loggen und fortfahren",
-        "retry": "3× wiederholen, dann abbrechen"
-      },
-      "rateLimits": "Rate-Limits",
-      "retryOn429": "Bei 429 „Retry-After“ abwarten und erneut senden"
+      "editBody": "In „Nachricht“ bearbeiten"
     },
     "response": {
       "tab": "Response",
@@ -1638,5 +1631,10 @@
       "webhook": "Webhook",
       "global": "Global"
     }
+  },
+  "runPolicy": {
+    "queue": "Läuft immer nur einmal gleichzeitig: Ein zweiter Start wartet, bis die laufende Ausführung endet (wegen {{names}}).",
+    "refuse": "Läuft immer nur einmal gleichzeitig: Ein zweiter Start wird abgelehnt (wegen {{names}}).",
+    "hint": "Festgelegt durch das Verhalten bei laufender Ausführung dieser veränderbaren globalen Variablen, nicht durch den Workflow."
   }
 }

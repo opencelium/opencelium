@@ -88,3 +88,22 @@
 .wf-schedule-empty {
   margin-top: 24px;
 }
+
+.wf-schedules-pill:has(.wf-schedules-pill__info) {
+  position: relative;
+  padding-right: 18px;
+}
+
+.wf-schedules-pill__info {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: inline-flex;
+  line-height: 0;
+}
+
+.wf-schedules-pill__policy {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
