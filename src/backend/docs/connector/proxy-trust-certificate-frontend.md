@@ -5,9 +5,9 @@ Audience: frontend developers and QA. Backend change: OC-1678 (fix in `5169a76b6
 
 **TL;DR — no frontend change is needed for OC-1678.** No endpoint, request or response field
 changed. What changed is how the backend talks to external APIs through the server's outbound
-proxy, so some runs that used to fail now succeed. Two related gaps on
-`POST /connection/remoteapi` were *not* changed and need a decision (see
-[Known gaps](#known-gaps--not-changed-by-oc-1678)).
+proxy, so some runs that used to fail now succeed. Two related gaps were on
+`POST /connection/remoteapi`, which has since been removed (see
+[Known gaps](#known-gaps--resolved-by-removing-post-connectionremoteapi)).
 
 ---
 
@@ -60,34 +60,19 @@ Only on installations with an outbound proxy configured:
 Nothing to do in the UI. If you had workarounds or hints for "proxy + trust certificate does
 not work", they can go.
 
-## Known gaps — not changed by OC-1678
+## Known gaps — resolved by removing `POST /connection/remoteapi`
 
-Both concern `POST /connection/remoteapi`, which the GraphQL editor uses to fetch schemas and
-run queries (`remoteApiRequest.ts`).
+Both gaps concerned `POST /connection/remoteapi`, which the GraphQL editor used to fetch schemas
+and run queries (`remoteApiRequest.ts`). The endpoint has been removed: it let any logged-in
+user make the backend call any URL with any headers. Calls to it now fail, so the GraphQL editor
+has to move to `POST /connection/method/test`, which builds the request on the server from the
+method and its connector.
 
-### 1. No proxy login
-
-The endpoint uses the proxy host and port but never the proxy username/password. Behind a
-proxy that requires a login, the call fails and `remoteApiRequest` returns `{ ok: false }`.
-This is a backend follow-up; the frontend can't fix it.
-
-### 2. `sslOn` means the opposite on each side — needs a decision
-
-- The **frontend** sends the connector's *Trust any Certificate* value as `sslOn`:
-  `useGraphQlFetcher.ts:14` and `DynamicTokenGraphQlStrategy.ts:68` both set
-  `sslOn: connector.sslCert` (`StaticTokenGraphQlStrategy.ts` passes it through).
-- The **backend** reads `sslOn` as "validate the certificate": it trusts any certificate only
-  when `sslOn` is **false** (`ConnectionController`, added in `f6f5dcd41`, with a
-  `TODO: rename isSslON`).
-
-Result: with *Trust any Certificate* **on**, the GraphQL requests check the certificate; with it
-**off**, they trust any certificate. Pick one fix:
-
-- **Frontend:** send `sslOn: !connector.sslCert`, or
-- **Backend:** drop the inversion so `sslOn` means "trust any certificate", ideally renaming
-  the field to match the connector (`sslCert` / `trustCertificate`).
-
-Don't do both, or the behaviour flips back.
+- **No proxy login.** The endpoint used the proxy host and port but never the proxy
+  username/password, so behind a proxy that requires a login its calls failed.
+- **`sslOn` meant the opposite on each side.** It was then fixed on both sides (frontend
+  OC-1581, backend OC-1692), which flipped the behaviour back: certificate checks were skipped
+  for connectors with *Trust any Certificate* off.
 
 ## How QA can check OC-1678
 

@@ -8,7 +8,6 @@
 
 package com.becon.opencelium.backend.slice.controller;
 
-import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.configuration.interceptors.MasterPasswordInterceptor;
 import com.becon.opencelium.backend.controller.ConnectionController;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
@@ -51,7 +50,6 @@ import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedConstruction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -60,9 +58,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,14 +71,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -109,8 +101,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @DisplayName("ConnectionController — web slice")
 class ConnectionControllerTest {
-
-    private static final String REMOTE_API_URL = "https://remote.example.test/graphql";
 
     @Autowired
     private MockMvc mockMvc;
@@ -562,61 +552,6 @@ class ConnectionControllerTest {
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(referenceValidationService);
-    }
-
-    // ── POST /connection/remoteapi ────────────────────────────────────────────
-
-    @Test
-    void sendRequestToApiValidatesCertificateWhenSslOnIsFalse() throws Exception {
-        List<Boolean> trustAllFlags = trustAllFlagsUsedFor("""
-                { "url": "%s", "method": "POST", "sslOn": false }
-                """.formatted(REMOTE_API_URL));
-
-        assertThat(trustAllFlags).containsExactly(false);
-    }
-
-    @Test
-    void sendRequestToApiSkipsCertificateValidationWhenSslOnIsTrue() throws Exception {
-        List<Boolean> trustAllFlags = trustAllFlagsUsedFor("""
-                { "url": "%s", "method": "POST", "sslOn": true }
-                """.formatted(REMOTE_API_URL));
-
-        assertThat(trustAllFlags).containsExactly(true);
-    }
-
-    @Test
-    void sendRequestToApiValidatesCertificateWhenSslOnIsAbsent() throws Exception {
-        List<Boolean> trustAllFlags = trustAllFlagsUsedFor("""
-                { "url": "%s", "method": "POST" }
-                """.formatted(REMOTE_API_URL));
-
-        assertThat(trustAllFlags).containsExactly(false);
-    }
-
-    /**
-     * Sends {@code body} to {@code /connection/remoteapi} and returns the "trust all certificates"
-     * flag of every {@link RestCustomizer} the request built. The customizer answers the remote
-     * call itself, so no network is used.
-     */
-    private List<Boolean> trustAllFlagsUsedFor(String body) throws Exception {
-        List<Boolean> trustAllFlags = new ArrayList<>();
-        try (MockedConstruction<RestCustomizer> ignored = mockConstruction(RestCustomizer.class,
-                (customizer, context) -> {
-                    trustAllFlags.add((Boolean) context.arguments().get(2));
-                    doAnswer(invocation -> {
-                        MockRestServiceServer.bindTo(invocation.<RestTemplate>getArgument(0)).build()
-                                .expect(requestTo(REMOTE_API_URL))
-                                .andRespond(withSuccess("{\"data\":{}}", MediaType.APPLICATION_JSON));
-                        return null;
-                    }).when(customizer).customize(any());
-                })) {
-            mockMvc.perform(post("/connection/remoteapi")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(body))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").exists());
-        }
-        return trustAllFlags;
     }
 
     /** Lets the test endpoint create and start the temporary scheduler of a test run. */
