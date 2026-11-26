@@ -108,6 +108,32 @@ available and appropriate, an advisory contains:
 * remediation information,
 * the actions users need to take.
 
+.. _about-security-advisories:
+
+Published advisories
+--------------------
+
+The table below lists the published advisories. It is loaded live from the
+OpenCelium Service Portal, so it is always current — you can search it, filter
+by severity and open each entry for details and recommended actions.
+
+The same table is on the website:
+`opencelium.io — Security & Coordinated Vulnerability Disclosure
+<https://www.opencelium.io/security-coordinated-vulnerability-disclosure/?lang=en>`_.
+Use that link if the table does not appear here, for example in the PDF version
+of this documentation or with JavaScript turned off.
+
+.. raw:: html
+
+   <script src="https://service.opencelium.io/api/public/opencelium-security-advisories/en/js/main_en.js" defer></script>
+   <div style="margin-bottom: 2em">
+     <oc-security-advisories lang="en" theme="light"></oc-security-advisories>
+   </div>
+   <noscript>
+     <p>The advisory table needs JavaScript. See the
+     <a href="https://www.opencelium.io/security-coordinated-vulnerability-disclosure/?lang=en">security page on opencelium.io</a>.</p>
+   </noscript>
+
 Contact
 =======
 
