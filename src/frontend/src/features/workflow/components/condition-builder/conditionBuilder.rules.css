@@ -82,11 +82,6 @@
 	min-width: 0;
 }
 
-/* A chosen reference: one chip in the space the selects took, same row height. */
-.conditionValueChip {
-	min-height: 32px;
-}
-
 .conditionMethodSelect {
 	width: 180px;
 }
