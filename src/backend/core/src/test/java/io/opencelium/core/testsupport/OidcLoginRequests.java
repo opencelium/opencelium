@@ -9,6 +9,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
@@ -128,16 +129,30 @@ public final class OidcLoginRequests {
 
 	/**
 	 * Saves the OIDC providers through the settings API as the default admin, each with the client ID and the client
-	 * secret; they replace each other OIDC provider.
+	 * secret; they replace each other OIDC provider. No OIDC provider gives the email-link option, so it is off.
 	 *
 	 * @param issuerUrls the issuer URL of each provider ID
 	 */
 	public static void saveProviders(MockMvcTester mvc, String clientId, String clientSecret,
 			Map<String, String> issuerUrls) {
+		saveProviders(mvc, clientId, clientSecret, issuerUrls, Set.of());
+	}
+
+	/**
+	 * Saves the OIDC providers as {@link #saveProviders(MockMvcTester, String, String, Map)} does, with the email-link
+	 * option on for each provider ID of {@code emailLink}. Each other OIDC provider does not give the option, so it is
+	 * off.
+	 *
+	 * @param issuerUrls the issuer URL of each provider ID
+	 * @param emailLink  the provider IDs whose email-link option is on
+	 */
+	public static void saveProviders(MockMvcTester mvc, String clientId, String clientSecret,
+			Map<String, String> issuerUrls, Set<String> emailLink) {
 		String providers = issuerUrls.entrySet().stream()
 			.map(provider -> "{\"id\": \"" + provider.getKey() + "\", \"display-name\": \"Keycloak\","
 					+ " \"issuer-url\": \"" + provider.getValue() + "\", \"client-id\": \"" + clientId
-					+ "\", \"client-secret\": \"" + clientSecret + "\"}")
+					+ "\", \"client-secret\": \"" + clientSecret + "\""
+					+ (emailLink.contains(provider.getKey()) ? ", \"email-link\": true" : "") + "}")
 			.collect(Collectors.joining(", "));
 		MvcTestResult change = SettingsRequests.change(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
 				"{\"oidc.providers\": [" + providers + "]}");

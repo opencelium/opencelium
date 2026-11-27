@@ -40,4 +40,4 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Hand test:** 1. In `mongosh`, give the default admin the email of `bob`. 2. Set `email-link` of `kc` to true, and log in as `bob`: the default admin gets the OIDC link. 3. Lock the default admin in `mongosh`, and log in as `bob` again: the browser goes to `/login/oidc#error=user-locked`. 4. Set `email-link` of `kc` to false, and give the default admin the email of `carol`. 5. Log in as `carol`: the browser goes to `/login/oidc#error=email-taken`.
 - **Size:** approximately 120 lines
 - **Depends on:** task 5
-- **Status:** open
+- **Status:** in work
