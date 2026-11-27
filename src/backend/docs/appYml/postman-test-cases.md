@@ -13,7 +13,7 @@ Authorization: Bearer <admin-jwt>
 Content-Type: application/json
 ```
 
-**Config file under test:** path comes from `opencelium.config.file-path` in `application.yml` (defaults to `src/main/resources/application.yml`). Confirm the process has read+write permission.
+**Config file under test:** the `application.yml` the backend was started with — `src/main/resources/application.yml`, or the file the `OPENCELIUM_CONFIG_FILEPATH` environment variable points at. Confirm the process has read+write permission.
 
 **Reset between destructive tests:** `git checkout src/main/resources/application.yml`.
 

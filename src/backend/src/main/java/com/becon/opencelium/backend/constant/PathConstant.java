@@ -48,16 +48,15 @@ public interface PathConstant {
     /** System property that overrides the location of {@code application.yml}. */
     String APP_YML_PROPERTY = "opencelium.config.file-path";
 
-    /**
-     * Environment variable that overrides the location of {@code application.yml}. Spring's
-     * relaxed binding maps it onto {@link #APP_YML_PROPERTY}, so the config editor follows it too.
-     */
+    /** Environment variable that overrides the location of {@code application.yml}. */
     String APP_YML_ENV = "OPENCELIUM_CONFIG_FILEPATH";
 
     /**
      * Returns the absolute location of the {@code application.yml} the application runs with.
      *
-     * <p>Resolved before the Spring context exists, because the YAML migrator patches the file
+     * <p>The single source of that location: the YAML migrator patches this file, Spring loads it
+     * as its default {@code spring.config.location}, and the config editor reads and writes it.
+     * Resolved before the Spring context exists, because the YAML migrator patches the file
      * before Spring reads it. Precedence matches Spring's: the {@value #APP_YML_PROPERTY} system
      * property, then the {@value #APP_YML_ENV} environment variable, then {@link #APP_YML}. A
      * relative value is resolved against the working directory.

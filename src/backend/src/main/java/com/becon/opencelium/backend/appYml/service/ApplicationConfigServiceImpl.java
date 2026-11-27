@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.appYml.service;
 
 import com.becon.opencelium.backend.appYml.dto.ApplicationConfigResponse;
 import com.becon.opencelium.backend.appYml.dto.ConfigNode;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.ApplicationConfigReadException;
 import com.becon.opencelium.backend.exception.ApplicationConfigValidationException;
 import com.becon.opencelium.backend.exception.ApplicationConfigWriteException;
@@ -27,15 +28,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.api.lowlevel.Compose;
 import org.snakeyaml.engine.v2.nodes.Node;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -44,25 +44,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Reads and patches the {@code application.yml} the application runs with.
+ *
+ * <p>The file is located through {@link PathConstant#appYmlPath()} — the same resolution that
+ * gives Spring its {@code spring.config.location} and the YAML migrator its target — so the
+ * editor always shows and writes the file that was actually loaded.
+ */
 @Service
 public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
     private final YamlConfigReader reader;
     private final YamlConfigWriter writer;
     private final AtomicFileWriter fileWriter;
-    private final String configuredPath;
+    private final Path configPath;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Autowired
+    public ApplicationConfigServiceImpl(
+            YamlConfigReader reader,
+            YamlConfigWriter writer,
+            AtomicFileWriter fileWriter
+    ) {
+        this(reader, writer, fileWriter, PathConstant.appYmlPath());
+    }
+
+    /** Reads and patches {@code configPath} instead of the file the application runs with. */
     public ApplicationConfigServiceImpl(
             YamlConfigReader reader,
             YamlConfigWriter writer,
             AtomicFileWriter fileWriter,
-            @Value("${opencelium.config.file-path:./application.yml}") String configuredPath
+            Path configPath
     ) {
         this.reader = reader;
         this.writer = writer;
         this.fileWriter = fileWriter;
-        this.configuredPath = configuredPath;
+        this.configPath = configPath;
     }
 
     @Override
@@ -84,7 +101,6 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
             collectField(field, plan);
         }
 
-        Path target = resolveWritablePath();
         String original = readContent();
 
         PatchPlan effective = validateInvariant(original, plan);
@@ -104,7 +120,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
         verifyParseable(merged);
 
-        fileWriter.write(target, merged);
+        fileWriter.write(configPath, merged);
     }
 
     /**
@@ -401,36 +417,22 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
     // ── File access ──────────────────────────────────────────────────────────
 
+    /**
+     * Reads the file from disk only. There is deliberately no classpath fallback: a copy packaged
+     * into the jar is a build-time snapshot, not the file the application runs with, and could
+     * not be saved back anyway.
+     */
     private String readContent() {
-        Path filesystemPath = Paths.get(configuredPath);
-        if (Files.exists(filesystemPath)) {
-            try {
-                return Files.readString(filesystemPath, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new ApplicationConfigReadException("Failed to read " + filesystemPath, e);
-            }
-        }
         try {
-            return new String(
-                    new ClassPathResource("application.yml").getInputStream().readAllBytes(),
-                    StandardCharsets.UTF_8
-            );
-        } catch (IOException e) {
+            return Files.readString(configPath, StandardCharsets.UTF_8);
+        } catch (NoSuchFileException e) {
             throw new ApplicationConfigReadException(
-                    "Configuration file not found at " + configuredPath + " or on classpath", e
-            );
+                    "Configuration file not found at " + configPath + ". Set the environment "
+                            + "variable " + PathConstant.APP_YML_ENV
+                            + " to the location of application.yml.", e);
+        } catch (IOException e) {
+            throw new ApplicationConfigReadException("Failed to read " + configPath, e);
         }
-    }
-
-    private Path resolveWritablePath() {
-        Path filesystemPath = Paths.get(configuredPath);
-        if (!Files.exists(filesystemPath)) {
-            throw new ApplicationConfigWriteException(
-                    "Cannot write to " + configuredPath + ": file does not exist on disk. "
-                            + "Configure opencelium.config.file-path to point at a writable copy."
-            );
-        }
-        return filesystemPath;
     }
 
     private record PatchPlan(ObjectNode valueTree, List<String> disablePaths, List<String> activatePaths) {
