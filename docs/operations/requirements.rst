@@ -34,7 +34,7 @@ Software
      - Recommended
      - Notes
    * - Java
-     - 17 (JRE)
+     - 17 (JRE-headless)
      - 17 LTS (OpenJDK / Temurin)
      - The backend is built for Java 17. Newer Java versions are **not yet
        validated** for 5.3 — see :ref:`requirements-java`.
@@ -46,19 +46,14 @@ Software
        ``utf8mb4_general_ci``. MariaDB 11.6 and later are handled (the backend
        uses ``READ COMMITTED`` instead of the new snapshot isolation).
    * - MongoDB
-     - 6.0
-     - 8.0 or later
-     - 5.3 is in use with MongoDB 8.2.
+     - 7.0
+     - 9.1 or later
+     - 5.3 is in use with MongoDB 8.3.
    * - nginx
      - any version that proxies WebSockets
      - current stable, or the package of your distribution
      - Apache works too (``conf/apache-oc_default.conf``). See
        :ref:`requirements-proxy`.
-   * - Node.js
-     - 20.19 or 22.12
-     - 22 LTS
-     - **Only needed to build the frontend yourself.** The packages and the ZIP
-       already contain the built frontend.
 
 Download links:
 `nginx <https://nginx.org/en/download.html>`_ ·
@@ -90,7 +85,7 @@ Installation guides and packages exist for:
 
 - Ubuntu 24.04 LTS "Noble Numbat" (DEB package and ZIP)
 - Debian GNU/Linux 12 "Bookworm" (ZIP)
-- SUSE Linux Enterprise Server 15 SP5 or later SP (RPM package and ZIP)
+- SUSE Linux Enterprise Server 16 SP1 or later SP (RPM package and ZIP)
 - Red Hat Enterprise Linux 9 (ZIP)
 - Docker (any host with Docker Engine and Compose v2)
 
