@@ -14,6 +14,8 @@ import com.becon.opencelium.backend.appYml.service.ApplicationConfigServiceImpl;
 import com.becon.opencelium.backend.appYml.service.AtomicFileWriter;
 import com.becon.opencelium.backend.appYml.service.YamlConfigReader;
 import com.becon.opencelium.backend.appYml.service.YamlConfigWriter;
+import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.exception.ApplicationConfigReadException;
 import com.becon.opencelium.backend.exception.ApplicationConfigValidationException;
 import com.becon.opencelium.backend.exception.ApplicationConfigWriteException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,7 +48,7 @@ class ApplicationConfigServiceImplTest {
                 new YamlConfigReader(),
                 new YamlConfigWriter(),
                 new AtomicFileWriter(tempDir.resolve("backups"), 10),
-                target.toString()
+                target
         );
     }
 
@@ -198,7 +200,7 @@ class ApplicationConfigServiceImplTest {
                 new YamlConfigReader(),
                 throwing,
                 new AtomicFileWriter(tempDir.resolve("backups"), 10),
-                target.toString()
+                target
         );
 
         JsonNode fields = json.readTree("""
@@ -484,7 +486,7 @@ class ApplicationConfigServiceImplTest {
         };
         ApplicationConfigServiceImpl service = new ApplicationConfigServiceImpl(
                 new YamlConfigReader(), corrupting,
-                new AtomicFileWriter(tempDir.resolve("backups"), 10), target.toString());
+                new AtomicFileWriter(tempDir.resolve("backups"), 10), target);
 
         JsonNode fields = json.readTree("""
                 [ { "path": "spring.mail.username", "status": "active", "value": "Test123" } ]
@@ -507,6 +509,59 @@ class ApplicationConfigServiceImplTest {
 
         assertThatThrownBy(() -> service(target, tempDir).patch(notArray))
                 .isInstanceOf(ApplicationConfigValidationException.class);
+    }
+
+    @Test
+    @DisplayName("read — a missing file is reported with its path; no classpath copy is served instead")
+    void readThrowsReadExceptionNamingPathWhenFileIsMissing(@TempDir Path tempDir) {
+        Path missing = tempDir.resolve("application.yml");
+
+        assertThatThrownBy(() -> service(missing, tempDir).read())
+                .isInstanceOf(ApplicationConfigReadException.class)
+                .hasMessageContaining("Configuration file not found at " + missing)
+                .hasMessageContaining(PathConstant.APP_YML_ENV);
+    }
+
+    @Test
+    @DisplayName("patch — a missing file is reported and not created")
+    void patchThrowsReadExceptionAndCreatesNoFileWhenFileIsMissing(@TempDir Path tempDir)
+            throws IOException {
+        Path missing = tempDir.resolve("application.yml");
+        JsonNode fields = json.readTree("""
+                [ { "path": "server.port", "status": "active", "value": 8080 } ]
+                """);
+
+        assertThatThrownBy(() -> service(missing, tempDir).patch(fields))
+                .isInstanceOf(ApplicationConfigReadException.class)
+                .hasMessageContaining("Configuration file not found at " + missing);
+        assertThat(missing).doesNotExist();
+    }
+
+    @Test
+    @DisplayName("read — without an explicit path the file comes from PathConstant.appYmlPath(),"
+            + " the same location Spring and the YAML migrator use")
+    void readUsesAppYmlPathWhenConstructedWithoutPath(@TempDir Path tempDir) throws IOException {
+        Path target = tempDir.resolve("custom-application.yml");
+        Files.writeString(target, "server:\n  port: 7070\n", StandardCharsets.UTF_8);
+        String previous = System.getProperty(PathConstant.APP_YML_PROPERTY);
+        System.setProperty(PathConstant.APP_YML_PROPERTY, target.toString());
+        try {
+            ApplicationConfigServiceImpl svc = new ApplicationConfigServiceImpl(
+                    new YamlConfigReader(),
+                    new YamlConfigWriter(),
+                    new AtomicFileWriter(tempDir.resolve("backups"), 10));
+
+            ConfigNode port = find(svc.read().fields(), "server.port");
+
+            assertThat(port).isNotNull();
+            assertThat(port.value()).hasToString("7070");
+        } finally {
+            if (previous == null) {
+                System.clearProperty(PathConstant.APP_YML_PROPERTY);
+            } else {
+                System.setProperty(PathConstant.APP_YML_PROPERTY, previous);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
