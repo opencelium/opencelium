@@ -764,6 +764,7 @@ These decisions are open on purpose. The first feature that needs one closes it:
 - **The collection of the tenant settings and of the secrets of a tenant in the self-host mode.** In the self-host mode the tenant documents and the data of the installation are in 1 database (decision 20).
 - **The database of the indexes of a tenant collection in the cloud mode.** At the start, core makes the indexes of a tenant collection, for example `sessions`, in the database that the yml file names. In the cloud mode the tenant documents are in the database of each tenant (decision 11).
 - **The login record of a Service Portal login.** A login record is a tenant document (decision 29). A Service Portal login has no tenant before the Service Portal answers, so its login record must have another place.
+- **The encryption of a connection that carries a secret.** Core sends a secret to another system, for example the bind password to an LDAP server and the broker password to the broker. No decision says if core permits such a connection without TLS (decision 13).
 
 ## 8. Glossary
 
