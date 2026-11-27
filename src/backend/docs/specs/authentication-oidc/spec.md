@@ -21,7 +21,7 @@ The refresh, the logout and the current OpenCelium user are the same as in the a
 These terms apply in this specification:
 
 - An **identity provider (IdP)** is the service of the customer that authenticates a person, for example Microsoft Entra ID, Okta, Keycloak or Google.
-- An **OIDC provider** is the configuration of 1 IdP in core. It has a provider ID, a display name, the issuer URL, the client ID, the client secret and the email-link option.
+- An **OIDC provider** is the configuration of 1 IdP in core. It has a provider ID, a display name, the issuer URL, the client ID, the client secret and the email-link option. A provider ID has 1 to 40 characters: the letters a to z, the digits and the hyphen. Its first and last characters are not hyphens.
 - The **ID token** is the JWT that the IdP gives to core after a login at the IdP. Its claims `iss` and `sub` identify the account of the person at the IdP.
 - An **OIDC link** connects 1 pair of `iss` and `sub` to 1 OpenCelium user. Core makes it at the first OIDC login of the pair.
 - The **email-link option** of an OIDC provider lets core link an ID token to an OpenCelium user with the same email.

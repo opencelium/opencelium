@@ -18,14 +18,7 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Criteria:** none. **Status:** done
 
 ## Task 2: feat(core): keep the OIDC providers in the settings API
-- **Criteria:** AO-01 (rules 2 and 3, and HTTPS in rule 1; the discovery document in task 3), AO-09 (the refused change; the other parts in tasks 3 and 4)
-- **Read:** plan: Modules and packages, decision 3, Interfaces and contracts (The setting, Error codes); architecture: 6.5, decisions 13, 20, 23, 24, 30
-- **Function:** An installation admin saves and reads the OIDC providers through the settings API, and each response masks the client secret. In the cloud mode, core refuses an OIDC provider.
-- **Tests:** `SettingListTest` (unit), `OidcProvidersTest` (unit), `OidcProvidersEndpointTest` (full application), `OidcCloudTest` (full application)
-- **Hand test:** 1. Start core in the self-host mode, and log in as the default admin. 2. Save 1 OIDC provider with an HTTPS issuer URL and a client secret through `PATCH /api/settings`. 3. Send `GET /api/settings`: the client secret shows `****`, and the email-link option is off. 4. Save it again with an `http://` issuer URL: core answers 400 with `invalid-settings`. 5. In `mongosh`, the settings document holds a secret reference and no plaintext of the client secret.
-- **Size:** approximately 380 lines
-- **Depends on:** task 1
-- **Status:** in work
+- **Criteria:** AO-01, AO-09. **Status:** done
 
 ## Task 3: feat(core): list the OIDC providers as login options
 - **Criteria:** AO-01 (the discovery document of rule 1), AO-02, AO-09 (the login options)

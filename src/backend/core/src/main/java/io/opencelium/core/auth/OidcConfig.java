@@ -18,8 +18,8 @@ class OidcConfig {
 
 	@Bean
 	SettingDefinition oidcProvidersSetting(OpenCeliumProperties properties) {
-		return new SettingDefinition(OidcProviders.KEY, SettingType.LIST, List.of(), 0, Integer.MAX_VALUE, null,
-				new OidcProviders(properties.deploymentMode()));
+		return new SettingDefinition(OidcProviders.KEY, SettingType.LIST, List.of(), 0, Integer.MAX_VALUE,
+				OidcProviders.ITEMS, new OidcProviders(properties.deploymentMode()));
 	}
 
 }

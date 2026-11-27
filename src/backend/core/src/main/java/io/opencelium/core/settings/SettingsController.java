@@ -44,7 +44,10 @@ class SettingsController {
 	/** The media type of a JSON merge patch, which a change also accepts. */
 	static final String MERGE_PATCH_JSON = "application/merge-patch+json";
 
-	/** The largest body of a change; a change of all settings with values of the longest form is far smaller. */
+	/**
+	 * The largest body of a change. It also limits the number of items of a list setting, whose definition has no
+	 * fixed upper bound: a change with more items than the body holds gets {@code bad-request}.
+	 */
 	static final int MAX_BODY_BYTES = 64 * 1024;
 
 	private static final TypeReference<Map<String, Object>> CHANGES = new TypeReference<>() {

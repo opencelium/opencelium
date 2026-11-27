@@ -1,6 +1,7 @@
 package io.opencelium.core.settings;
 
 import java.net.InetAddress;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import io.opencelium.core.config.TerminalText;
@@ -45,8 +46,8 @@ public enum SettingType {
 	BOOLEAN,
 
 	/**
-	 * A JSON array of JSON objects, the items of the list of the setting definition. The list gives the fields of an
-	 * item and their rules; the bounds of the setting definition are the number of items.
+	 * A JSON array with a number of items inside the bounds. The type examines only the array and its size; the list of
+	 * the setting definition examines the items ({@link SettingList}).
 	 */
 	LIST;
 
@@ -69,7 +70,8 @@ public enum SettingType {
 			case INTEGER -> isWholeNumber(value) && inside(((Number) value).longValue(), min, max);
 			case HOST -> value instanceof String host && inside(host.length(), min, max)
 					&& (isHostName(host) || isIpv6Address(host));
-			case BOOLEAN, LIST -> throw new UnsupportedOperationException();
+			case BOOLEAN -> value instanceof Boolean;
+			case LIST -> value instanceof List<?> items && inside(items.size(), min, max);
 		};
 	}
 

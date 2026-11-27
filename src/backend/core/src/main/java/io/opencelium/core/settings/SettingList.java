@@ -1,8 +1,14 @@
 package io.opencelium.core.settings;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import io.opencelium.common.secret.SecretReference;
 
@@ -18,13 +24,34 @@ import io.opencelium.common.secret.SecretReference;
  * again, so core sends a kept secret only to the address that it was given for.
  *
  * @param fields       the fields of an item, in the order of a read
- * @param idField      the name of the field that identifies an item; its value is unique in the list
+ * @param idField      the name of the text field that identifies an item; its value is unique in the list
  * @param secretField  the name of the field of type {@link SettingType#SECRET}, or {@code null} when an item has no
- *                     secret
- * @param addressField the name of the field with the address that the secret of an item is sent to, or {@code null}
- *                     when an item has no secret
+ *                     secret; no other field has the type {@link SettingType#SECRET}, because the database would keep
+ *                     its value as plaintext
+ * @param addressField the name of the text field with the address that the secret of an item is sent to, or
+ *                     {@code null} when an item has no secret
  */
 public record SettingList(List<ItemField> fields, String idField, String secretField, String addressField) {
+
+	/**
+	 * @throws IllegalArgumentException when the names do not fit the fields, as described at the components; a list
+	 *                                  with such a form is a mistake of the feature, found at the start
+	 */
+	public SettingList {
+		fields = List.copyOf(fields);
+		if (!hasField(fields, idField, SettingType.TEXT)) {
+			throw new IllegalArgumentException("The ID field of a list setting is not a text field of the list.");
+		}
+		if (fields.stream()
+			.anyMatch(field -> field.type() == SettingType.SECRET && !field.name().equals(secretField))) {
+			throw new IllegalArgumentException("A list setting has a secret field that is not its secret field.");
+		}
+		if (secretField != null && !(hasField(fields, secretField, SettingType.SECRET)
+				&& hasField(fields, addressField, SettingType.TEXT))) {
+			throw new IllegalArgumentException("The secret field of a list setting is not a secret field,"
+					+ " or its address field is not a text field.");
+		}
+	}
 
 	/**
 	 * Examines the form of the value of a change, without the stored items:
@@ -40,7 +67,17 @@ public record SettingList(List<ItemField> fields, String idField, String secretF
 	 * @return {@code true} when the value has the form of this list
 	 */
 	boolean validate(Object value) {
-		throw new UnsupportedOperationException();
+		if (!(value instanceof List<?> items)) {
+			return false;
+		}
+		Set<Object> ids = new HashSet<>();
+		for (Object item : items) {
+			if (!(item instanceof Map<?, ?> itemFields) || !hasValidFields(itemFields)
+					|| !ids.add(itemFields.get(idField))) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -52,7 +89,23 @@ public record SettingList(List<ItemField> fields, String idField, String secretF
 	 * @return the items as the settings API shows them, in the order of {@code stored}
 	 */
 	List<Map<String, Object>> masked(List<? extends Map<String, ?>> stored) {
-		throw new UnsupportedOperationException();
+		List<Map<String, Object>> shown = new ArrayList<>();
+		for (Map<String, ?> item : stored) {
+			Map<String, Object> shownItem = new LinkedHashMap<>();
+			for (ItemField field : fields) {
+				Object value = item.get(field.name());
+				if (field.name().equals(secretField)) {
+					if (value != null) {
+						shownItem.put(field.name(), SettingsService.MASK);
+					}
+				}
+				else if (value != null || field.defaultValue() != null) {
+					shownItem.put(field.name(), value != null ? value : field.defaultValue());
+				}
+			}
+			shown.add(shownItem);
+		}
+		return shown;
 	}
 
 	/**
@@ -66,7 +119,23 @@ public record SettingList(List<ItemField> fields, String idField, String secretF
 	 */
 	Optional<Map<String, SecretReference>> keptSecrets(List<? extends Map<String, ?>> stored,
 			List<? extends Map<String, ?>> change) {
-		throw new UnsupportedOperationException();
+		Map<String, SecretReference> kept = new LinkedHashMap<>();
+		if (secretField == null) {
+			return Optional.of(kept);
+		}
+		Map<Object, Map<String, ?>> storedById = new LinkedHashMap<>();
+		stored.forEach(item -> storedById.put(item.get(idField), item));
+		for (Map<String, ?> item : change) {
+			if (item.containsKey(secretField)) {
+				continue;
+			}
+			Optional<SecretReference> reference = secretOf(storedById.get(item.get(idField)), item);
+			if (reference.isEmpty()) {
+				return Optional.empty();
+			}
+			kept.put((String) item.get(idField), reference.get());
+		}
+		return Optional.of(kept);
 	}
 
 	/**
@@ -79,7 +148,50 @@ public record SettingList(List<ItemField> fields, String idField, String secretF
 	 * @return the secret references to delete
 	 */
 	List<SecretReference> removedSecrets(List<? extends Map<String, ?>> before, List<? extends Map<String, ?>> after) {
-		throw new UnsupportedOperationException();
+		Set<SecretReference> kept = referencesOf(after);
+		return referencesOf(before).stream().filter(reference -> !kept.contains(reference)).toList();
+	}
+
+	/** The secret of the stored item, when the item of the change has the same address; else empty. */
+	private Optional<SecretReference> secretOf(Map<String, ?> stored, Map<String, ?> item) {
+		if (stored == null || !Objects.equals(stored.get(addressField), item.get(addressField))) {
+			return Optional.empty();
+		}
+		return SettingsService.referenceOf(stored.get(secretField));
+	}
+
+	private Set<SecretReference> referencesOf(List<? extends Map<String, ?>> items) {
+		Set<SecretReference> references = new LinkedHashSet<>();
+		if (secretField != null) {
+			items.forEach(item -> SettingsService.referenceOf(item.get(secretField)).ifPresent(references::add));
+		}
+		return references;
+	}
+
+	private boolean hasValidFields(Map<?, ?> item) {
+		if (!item.keySet().stream().allMatch(name -> fields.stream().anyMatch(field -> field.name().equals(name)))) {
+			return false;
+		}
+		for (ItemField field : fields) {
+			if (item.containsKey(field.name())) {
+				if (!field.type().validate(item.get(field.name()), field.min(), field.max())) {
+					return false;
+				}
+			}
+			else if (isRequired(field)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** An item needs its ID, and each field without a default; only the secret field can be missing without one. */
+	private boolean isRequired(ItemField field) {
+		return field.name().equals(idField) || (!field.name().equals(secretField) && field.defaultValue() == null);
+	}
+
+	private static boolean hasField(List<ItemField> fields, String name, SettingType type) {
+		return fields.stream().anyMatch(field -> field.name().equals(name) && field.type() == type);
 	}
 
 	/**
@@ -92,6 +204,14 @@ public record SettingList(List<ItemField> fields, String idField, String secretF
 	 * @param max          the upper bound of a valid value, as in a setting definition
 	 */
 	public record ItemField(String name, SettingType type, Object defaultValue, int min, int max) {
+
+		/** @throws IllegalArgumentException when the type is {@link SettingType#LIST} */
+		public ItemField {
+			Objects.requireNonNull(name, "name");
+			if (type == SettingType.LIST) {
+				throw new IllegalArgumentException("A field of an item of a list setting cannot be a list.");
+			}
+		}
 
 	}
 
