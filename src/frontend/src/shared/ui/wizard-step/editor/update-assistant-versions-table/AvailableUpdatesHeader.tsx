@@ -1,8 +1,8 @@
 import { useGetAppVersionQuery } from '@entities/updateAssistant/api/updateAssistantApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { Icon } from '@shared/ui/primitives/Icon'
+import { docsUrl } from '@shared/docs/docsUrl'
 
-const UPDATE_GUIDE_URL = 'https://docs.opencelium.io/en/prod/operations/updating.html'
 
 export function AvailableUpdatesHeader() {
     const { t } = useI18n('entities')
@@ -18,7 +18,7 @@ export function AvailableUpdatesHeader() {
             )}
             <a
                 className="ua-header__guide"
-                href={UPDATE_GUIDE_URL}
+                href={docsUrl('operations/updating')}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="update-assistant-update-guide-link"

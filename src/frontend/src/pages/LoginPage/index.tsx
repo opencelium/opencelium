@@ -3,12 +3,11 @@ import { Navigate, useLocation } from 'react-router-dom'
 import type { Location } from 'react-router-dom'
 import { useAuth } from '@features/auth/useAuth'
 import { LoginForm } from '@features/auth/ui/LoginForm'
-import { AppLogo } from '@features/branding/AppLogo'
 import { useAppDispatch, useAppSelector } from '@shared/lib/storeHooks'
 import { selectIntentionalLogout } from '@entities/auth/model/authSelectors'
 import { authActions } from '@entities/auth/model/authSlice'
 import { isRegisteredPath } from '@app/router/isRegisteredPath'
-import { AppFooter } from '@shared/ui/layout/AppFooter'
+import { PublicPageLayout } from '@features/auth/ui/PublicPageLayout'
 
 export default function LoginPage() {
     const { isAuthenticated } = useAuth()
@@ -32,36 +31,8 @@ export default function LoginPage() {
     if (isAuthenticated) return <Navigate to={redirectTo} replace />
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: '100vh',
-                background: 'var(--color-background-app)',
-            }}
-        >
-            <div
-                style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 16,
-                }}
-            >
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 24,
-                    }}
-                >
-                    <AppLogo />
-                    <LoginForm />
-                </div>
-            </div>
-            <AppFooter hasBorder={false} />
-        </div>
+        <PublicPageLayout>
+            <LoginForm />
+        </PublicPageLayout>
     )
 }

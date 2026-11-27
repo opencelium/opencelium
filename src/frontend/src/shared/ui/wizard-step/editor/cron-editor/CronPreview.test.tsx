@@ -2,6 +2,10 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import * as cronTime from "@shared/lib/cron/upcomingRuns";
 import { CronPreview } from "./CronPreview";
+// Provider-free stand-in; the real link renders primitives that need SystemProvider.
+vi.mock('@shared/ui/actions/DocsLink', () => ({
+	DocsLink: ({ children }: { children?: import('react').ReactNode }) => <span>{children}</span>,
+}));
 
 vi.mock("@shared/i18n/hooks/useI18n", () => ({
   useI18n: () => ({

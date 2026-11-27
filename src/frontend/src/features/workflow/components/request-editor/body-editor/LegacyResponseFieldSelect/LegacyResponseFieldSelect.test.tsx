@@ -5,6 +5,10 @@ import type { MethodWithId } from '../../../../types/connection';
 import type { ReferencePathFeedback } from '../referenceValidation.utils';
 import { useReferenceValidation } from '../useReferenceValidation';
 import { LegacyResponseFieldSelect } from './LegacyResponseFieldSelect';
+// Provider-free stand-in; the real link renders primitives that need SystemProvider.
+vi.mock('@shared/ui/actions/DocsLink', () => ({
+	DocsLink: ({ children }: { children?: import('react').ReactNode }) => <span>{children}</span>,
+}));
 
 vi.mock('@shared/i18n/hooks/useI18n', () => ({
 	useI18n: () => ({ t: (key: string) => key, lang: 'en' }),

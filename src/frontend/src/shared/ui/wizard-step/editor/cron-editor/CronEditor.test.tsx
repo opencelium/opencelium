@@ -2,6 +2,10 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {FormProvider, useForm} from 'react-hook-form';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {CronEditor} from './CronEditor';
+// Provider-free stand-in; the real link renders primitives that need SystemProvider.
+vi.mock('@shared/ui/actions/DocsLink', () => ({
+	DocsLink: ({ children }: { children?: import('react').ReactNode }) => <span>{children}</span>,
+}));
 vi.mock("@shared/i18n/hooks/useI18n", () => ({useI18n: () => ({t: (key: string) => key, lang: "en"})}));
 vi.mock('@shared/ui/form/FormInput', () => ({
     FormInput: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
@@ -34,7 +38,11 @@ describe('CronEditor with the real picker', () => {
         render(<Harness />);
         fireEvent.click(screen.getByText('Reset form'));
         await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('0 0/5 * * * ?'));
-        fireEvent.click(screen.getByRole('button', {name: 'Clear'}));
+        // antd v6 also labels the select's clear icon "Clear"; target the cron picker's own button.
+        const cronClear = screen.getAllByRole('button', {name: 'Clear'})
+            .find((button) => button.classList.contains('react-js-cron-clear-button'));
+        expect(cronClear).toBeDefined();
+        fireEvent.click(cronClear!);
         await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue(''));
     });
     it('writes a Quartz-safe expression after an explicit weekday selection', async () => {

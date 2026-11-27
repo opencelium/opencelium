@@ -1,6 +1,7 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { Icon } from '@shared/ui/primitives/Icon';
+import { DocsLink } from '@shared/ui/actions/DocsLink';
 
 const NASHORN_DOCS_URL = 'https://docs.oracle.com/en/java/javase/14/nashorn/';
 
@@ -12,6 +13,7 @@ export function PlaygroundHeader({ hasDocsLink }: { hasDocsLink: boolean }) {
 				<Icon name="flask" size={17} color="inherit" />
 				{t('sandbox.title')}
 				<small>{t('sandbox.serverRun')}</small>
+				<DocsLink page='guides/script-playground' testId='script-playground-docs' />
 			</strong>
 			{hasDocsLink && (
 				<Button

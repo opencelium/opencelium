@@ -2,6 +2,7 @@ import type { Ref } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Input } from '@shared/ui/primitives/Input';
 import { Icon } from '@shared/ui/primitives/Icon';
+import { DocsLink } from '@shared/ui/actions/DocsLink';
 import type { NotificationToolId } from '../../model/notification.types';
 import { getNotificationTool } from '../../tools/notificationTools';
 import { NotificationToolMark } from '../NotificationToolMark';
@@ -36,6 +37,7 @@ export function NotificationDialogHeader({ color, toolId, label, inputRef, isRea
 					{t('notification.dialog.kind')}
 				</span>
 			)}
+			<DocsLink page='guides/send-notifications' testId='notification-dialog-docs' />
 		</div>
 	);
 }

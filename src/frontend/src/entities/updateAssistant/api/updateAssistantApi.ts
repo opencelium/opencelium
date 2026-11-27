@@ -1,5 +1,5 @@
 import { baseApi } from '@shared/api/baseApi'
-import type { AppVersion, InstallationInfo, SystemHealth, UpdateVersion } from '../model/types'
+import type { AppVersion, HealthComponent, InstallationInfo, SystemHealth, UpdateVersion } from '../model/types'
 import { UPDATE_ASSISTANT_TAG } from './updateAssistant.tags'
 
 export const updateAssistantApi = baseApi.injectEndpoints({
@@ -22,6 +22,13 @@ export const updateAssistantApi = baseApi.injectEndpoints({
         getSystemHealth: b.query<SystemHealth, void>({
             query: () => '/actuator/health',
             providesTags: [{ type: UPDATE_ASSISTANT_TAG as any, id: 'HEALTH' }],
+        }),
+
+        // Only the mail indicator: the full health check also probes databases and the OS.
+        getEmailHealth: b.query<HealthComponent, void>({
+            query: () => '/actuator/health/email',
+            // Callers treat an unreadable status as unknown, so no toast.
+            extraOptions: { ignoreError: true },
         }),
 
         getOnlineVersions: b.query<UpdateVersion[], void>({
@@ -57,6 +64,7 @@ export const {
     useGetAppVersionQuery,
     useGetInstallationInfoQuery,
     useGetSystemHealthQuery,
+    useGetEmailHealthQuery,
     useGetOnlineVersionsQuery,
     useGetOfflineVersionsQuery,
     useMigrateUpdateMutation,
