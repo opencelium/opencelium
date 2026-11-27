@@ -6,9 +6,12 @@ import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import org.openjdk.nashorn.api.scripting.JSObject;
 import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.script.Compilable;
@@ -16,6 +19,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.Writer;
+import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +48,35 @@ public class NashornEngine implements ScriptEngine {
     private static final String SANDBOX_CLEANUP =
             "delete this.load; delete this.loadWithNewGlobal; delete this.quit; delete this.exit;";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NashornEngine.class);
+
+    /**
+     * Uses what scripts commonly use - loops, functions, strings, regular expressions, numbers,
+     * exceptions, JSON and dates - with an object binding and an object result, so that {@link
+     * #warmUp()} runs through the same Nashorn and conversion code as a real script.
+     */
+    private static final String WARM_UP_SCRIPT = """
+            var names = [];
+            var total = 0;
+            for (var i = 0; i < data.length; i++) {
+              names.push(String(data[i].name).trim().toUpperCase().replace(/\\s+/g, '-'));
+              total += Math.round(parseFloat(data[i].price) * data[i].amount);
+            }
+            try {
+              JSON.parse('{');
+            } catch (e) {
+              names.push(typeof e.message);
+            }
+            ({names: names.filter(function (name) { return name.length > 0; }), total: total,
+              day: new Date(Date.UTC(2026, 0, 2)).toISOString().substring(0, 10)});
+            """;
+
+    private static final Map<String, Object> WARM_UP_BINDINGS =
+            Map.of("data", List.of(Map.of("name", " warm up ", "price", "1.5", "amount", 2)));
+
+    private static final Map<String, Object> WARM_UP_RESULT =
+            Map.of("names", List.of("WARM-UP", "string"), "total", 3, "day", "2026-01-02");
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
@@ -65,6 +98,31 @@ public class NashornEngine implements ScriptEngine {
 
         // Initialize 'compilator' engine
         this.compilable = initCompilatorEngine();
+    }
+
+    /**
+     * Runs a script once, the way an execution runs one, while the application starts.
+     *
+     * <p>A script that runs too long is stopped with {@link Thread#stop()}. Nashorn initialises
+     * most of its classes during the first script it runs, and a stop that falls into the static
+     * initialiser of one of them leaves that class failed for the whole JVM: every later script
+     * fails with {@link NoClassDefFoundError} until a restart. Nothing stops the thread that
+     * starts the application, so the classes this script needs are initialised safely here. A
+     * built-in that no script has used yet is still initialised by the first script that uses it.
+     */
+    @PostConstruct
+    public void warmUp() {
+        long start = System.nanoTime();
+        try {
+            Object result = executeSandboxed(WARM_UP_SCRIPT, WARM_UP_BINDINGS, Writer.nullWriter());
+            if (!WARM_UP_RESULT.equals(result)) {
+                LOGGER.warn("The Nashorn warm-up script gave {} instead of {}", result, WARM_UP_RESULT);
+                return;
+            }
+            LOGGER.debug("Nashorn warmed up in {} ms", Duration.ofNanos(System.nanoTime() - start).toMillis());
+        } catch (ScriptExecutionException | InvalidScriptException e) {
+            LOGGER.warn("The Nashorn warm-up script failed; JavaScript enhancements may fail too", e);
+        }
     }
 
     /**

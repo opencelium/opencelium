@@ -62,7 +62,7 @@ public class GlobalVariableWriter {
     private final int maxRunEntries;
 
     /**
-     * @param scriptTimeoutMs how long an enhancement that imports a script variable may run
+     * @param scriptTimeoutMs how long an enhancement may run
      * @param maxRunEntries   how many RUN_WRITE entries the change log keeps per variable, at
      *                        least one
      */
@@ -122,7 +122,7 @@ public class GlobalVariableWriter {
             return testRun;
         }
 
-        /** Returns how long an enhancement of this run that imports a script variable may run. */
+        /** Returns how long an enhancement of this run may run. */
         public Duration scriptTimeLimit() {
             return scriptTimeLimit;
         }

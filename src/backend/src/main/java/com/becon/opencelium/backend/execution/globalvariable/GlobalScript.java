@@ -650,9 +650,12 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
      * Runs {@code work} on a thread of its own and stops that thread once {@code limit} has
      * passed. Nashorn cannot be interrupted inside a loop, so a script that runs on is stopped
      * with {@link Thread#stop()}: it shares nothing with the run but the values it was given,
-     * which it cannot corrupt. On Java 20 and later, where that is gone, the thread is left to
-     * end by itself and the run goes on all the same. An interrupt of the calling thread, such as
-     * the termination of a run, stops the work too.
+     * which it cannot corrupt. Nashorn's own classes are shared by the whole JVM, though, and a
+     * stop inside the initialiser of one of them breaks it for every later script, which is why
+     * {@code NashornEngine#warmUp()} initialises them at startup. On Java 20 and later, where
+     * {@code Thread.stop()} is gone, the thread is left to end by itself and the run goes on all
+     * the same. An interrupt of the calling thread, such as the termination of a run, stops the
+     * work too.
      *
      * @param what names the work in the error, e.g. the enhancement
      * @throws TimeLimitExceeded       if the work takes longer than {@code limit}

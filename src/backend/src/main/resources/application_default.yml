@@ -334,9 +334,10 @@ opencelium:
   #   max-value-bytes - largest value of one global variable, in bytes      #
   #                                                                         #
   #   max-script-bytes  - largest code of one script variable, in bytes     #
-  #   script-timeout-ms - how long, in milliseconds, an enhancement that    #
-  #                       imports a script variable may run in a workflow,  #
-  #                       and how long a test run of a script may take      #
+  #   script-timeout-ms - how long, in milliseconds, an enhancement may     #
+  #                       run in a workflow, whether or not it imports a    #
+  #                       script variable, and how long a test run of a     #
+  #                       script may take                                   #
   #                                                                         #
   #   queue - a workflow that uses a mutable global variable runs one       #
   #           execution at a time; with busy policy Queue a further start   #

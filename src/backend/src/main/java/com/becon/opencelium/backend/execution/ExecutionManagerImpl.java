@@ -249,34 +249,27 @@ public class ExecutionManagerImpl implements ExecutionManager {
             code = GlobalVariableWriter.ScriptSets.wrap(code);
         }
 
+        // the args are resolved here, on the run's thread, which holds the run's logger; each arg
+        // names itself, so the engine converts the resolved values as it converts references
+        Map<String, Object> values = resolveArgs(imported.valueArgs());
+        Map<String, String> names = new LinkedHashMap<>();
+        values.keySet().forEach(name -> names.put(name, name));
+        String runCode = code;
+
         Object result;
-        if (imported.functions().isEmpty()) {
-            result = scriptEngine.execute(code, script.args(), this::getValue);
-        } else {
-            // the args are resolved here, on the run's thread, which holds the run's logger
-            Map<String, Object> values = resolveArgs(imported.valueArgs());
-            String importingCode = code;
-            String what = capitalize(describeEnhancement(bindId));
-            try {
-                if (language == LanguageType.JS) {
-                    result = GlobalScript.runWithin(scriptTimeLimit(), what,
-                            () -> scriptEngine.execute(importingCode, values));
-                } else {
-                    // each arg names itself, so the polyglot engine converts the resolved values as
-                    // it does for an enhancement without imports
-                    Map<String, String> names = new LinkedHashMap<>();
-                    values.keySet().forEach(name -> names.put(name, name));
-                    result = GlobalScript.runWithin(scriptTimeLimit(), what,
-                            () -> scriptEngine.execute(importingCode, names, values::get));
-                }
-            } catch (ScriptExecutionException e) {
-                // the imported functions stand before the code, so the engine's line numbers point
-                // into generated code and would mislead
-                if (e.getMessage() == null || !ENGINE_LOCATION.matcher(e.getMessage()).find()) {
-                    throw e;
-                }
-                throw new ScriptExecutionException(withoutEngineLocation(e.getMessage()), e);
+        try {
+            // a script cannot be interrupted, so every enhancement runs under the time limit,
+            // whether or not it imports a script variable
+            result = GlobalScript.runWithin(scriptTimeLimit(), capitalize(describeEnhancement(bindId)),
+                    () -> scriptEngine.execute(runCode, names, values::get));
+        } catch (ScriptExecutionException e) {
+            // imported functions stand before the code, so the engine's line numbers point into
+            // generated code and would mislead; without imports they point into the user's code
+            if (imported.functions().isEmpty() || e.getMessage() == null
+                    || !ENGINE_LOCATION.matcher(e.getMessage()).find()) {
+                throw e;
             }
+            throw new ScriptExecutionException(withoutEngineLocation(e.getMessage()), e);
         }
         if (!callsSet) {
             return result;

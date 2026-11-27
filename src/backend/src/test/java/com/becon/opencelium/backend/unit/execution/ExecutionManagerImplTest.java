@@ -724,6 +724,62 @@ class ExecutionManagerImplTest {
         }
     }
 
+    // ── enhancements without imports ──────────────────────────────────────────
+
+    @Test
+    @DisplayName("executeScript — an enhancement without imports is stopped once its time limit passes")
+    void executeScriptThrowsWhenEnhancementWithoutImportsRunsTooLong() {
+        givenScriptEngines();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("js", "while (true) {}", Map.of()), Duration.ofMillis(300));
+
+        assertThatThrownBy(() -> manager.executeScript("b1"))
+                .isInstanceOf(GlobalScript.TimeLimitExceeded.class)
+                .hasMessage("An enhancement ran longer than 300 ms and was stopped");
+    }
+
+    @Test
+    void executeScriptBindsResolvedArgWhenEnhancementHasNoImports() {
+        givenScriptEngines();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("js", "RESULT_VAR = VAR_0 + '!';", Map.of("VAR_0", "{{global.tenantPrefix}}")),
+                Duration.ofSeconds(5));
+
+        assertThat(manager.executeScript("b1")).isEqualTo("ACME!");
+    }
+
+    @Test
+    @DisplayName("executeScript — a python3 enhancement without imports gets its resolved args through the extractor")
+    @SuppressWarnings("unchecked")
+    void executeScriptPassesResolvedArgToPolyglotEngineWhenEnhancementHasNoImports() {
+        PolyglotEngine python = mock(PolyglotEngine.class);
+        when(python.supports(any())).thenReturn(true);
+        when(python.isUp()).thenReturn(true);
+        when(python.execute(anyString(), any(Map.class), any())).thenAnswer(invocation -> {
+            Map<String, String> bindings = invocation.getArgument(1);
+            Function<String, Object> extractor = invocation.getArgument(2);
+            return extractor.apply(bindings.get("VAR_0"));
+        });
+        givenScriptEngines(python);
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("python3", "RESULT_VAR = VAR_0", Map.of("VAR_0", "{{global.tenantPrefix}}")),
+                Duration.ofSeconds(5));
+
+        assertThat(manager.executeScript("b1")).isEqualTo("ACME");
+    }
+
+    @Test
+    @DisplayName("executeScript — without imports the engine's line number points into the user's code and is kept")
+    void executeScriptKeepsEngineLocationWhenEnhancementWithoutImportsFails() {
+        givenScriptEngines();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("js", "var a = 1;\nundefinedFunction();", Map.of()), Duration.ofSeconds(5));
+
+        assertThatThrownBy(() -> manager.executeScript("b1"))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("in <eval> at line number 2");
+    }
+
     @Test
     @DisplayName("getValue — a script has no value: {{global.formatDate}} outside enhancement args fails")
     void getValueThrowsWhenReferenceNamesScriptVariable() {
