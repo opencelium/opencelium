@@ -12,6 +12,7 @@ export const FormSwitch: React.FC<FormSwitchProps> = ({
     name,
     label,
     labelKey,
+    labelExtra,
     textKey,
     disabled,
     readOnly,
@@ -32,6 +33,7 @@ export const FormSwitch: React.FC<FormSwitchProps> = ({
                 <FormControl
                     label={label}
                     labelKey={labelKey}
+                    labelExtra={labelExtra}
                     error={error}
                     testId={testId}
                 >
