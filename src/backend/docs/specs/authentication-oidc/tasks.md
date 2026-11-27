@@ -15,14 +15,7 @@ The hand tests of tasks 3 to 7 use Keycloak in a container as the IdP. Do not st
 The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID and the client secret of `core`.
 
 ## Task 1: docs: record the OIDC login decisions in the architecture document
-- **Criteria:** none. The task records plan decisions 1, 2 and 3.
-- **Read:** plan: Decisions 1, 2, 3, Definition of done; architecture: 3.4, 6.7, 6.9, decisions 18, 19, 21, 24, Open decisions
-- **Function:** Section 7 of the architecture document has the records of the login code, the login record and the setting with a list of items. The security document shows the 2 redirect logins with the login code.
-- **Tests:** none, because the task changes only documents.
-- **Hand test:** 1. Open `docs/architecture.md` in the PR: section 7 has records 28, 29 and 30 with their reasons. 2. Read the open decisions: they name the login record of a Service Portal login. 3. Open each new link to a section or to a decision: each link goes to its target. 4. Open `docs/security/README.md`: the 2 redirect diagrams render and show the login code and its exchange.
-- **Size:** approximately 130 lines of documents, no code
-- **Depends on:** nothing
-- **Status:** open
+- **Criteria:** none. **Status:** done
 
 ## Task 2: feat(core): keep the OIDC providers in the settings API
 - **Criteria:** AO-01 (rules 2 and 3, and HTTPS in rule 1; the discovery document in task 3), AO-09 (the refused change; the other parts in tasks 3 and 4)

@@ -113,9 +113,10 @@ The module `core` has one package for each feature (modular monolith, decision 1
 
 | Block | Responsibility | Package |
 |---|---|---|
-| **Security filter chain** | 2 security filter chains authenticate the tokens that core issues (decision 18). The refresh chain applies to the refresh and the logout, and it accepts only a refresh token. The main chain applies to each other request, and it accepts only a session JWT. The session service starts, refreshes, and ends the sessions. The login strategies are plug-ins and depend on the deployment mode: local (with 2FA/TOTP), LDAP, OIDC, and Service Portal (decision 10). | `core.auth` |
+| **Security filter chain** | 3 security filter chains authenticate the tokens that core issues (decisions 18, 28). The refresh chain applies to the refresh and the logout, and it accepts only a refresh token. The login-code chain applies to the exchange of a login code, and it accepts only a login code. The main chain applies to each other request, and it accepts only a session JWT. The session service starts, refreshes, and ends the sessions. The login strategies are plug-ins and depend on the deployment mode: local (with 2FA/TOTP), LDAP, OIDC, and Service Portal (decision 10). | `core.auth` |
+| **OIDC login** | The OIDC login strategy keeps 1 login record for each OIDC login (decision 29). The OIDC client reads the discovery document of an IdP, sends the authorization request with PKCE and the token request, and examines the ID token. The OIDC client has no endpoint, no database access, and no setting. | The login strategy in `core.auth`. The OIDC client in `core.auth.oidc`. |
 | **Access control** | RBAC and ACL enforcement, with one authorization manager (decision 7). The method security of Spring Security applies a permission rule to an endpoint, for example the rule "installation admin" (decision 22). | `core.authz` |
-| **Users** | The OpenCelium users of a tenant, with the password hash and never the password. Password changes, the first-admin command, generated passwords, and the lock of a user whose generated password is older than 24 h. The lock runs in the self-host mode only, because the Service Portal owns the users in the cloud mode (decision 10). The user repository is on the tenant-document access (decision 16). | `core.user` |
+| **Users** | The OpenCelium users of a tenant, with the password hash and never the password. Password changes, the first-admin command, generated passwords, and the lock of a user whose generated password is older than 24 h. The lock runs in the self-host mode only, because the Service Portal owns the users in the cloud mode (decision 10). The OIDC links of an OpenCelium user, and the rules that find or make the OpenCelium user of an OIDC login. The user repository is on the tenant-document access (decision 16). | `core.user` |
 | **Current tenant** | The tenant runner binds the current tenant of a request or a background task (decision 15). The request filter, the task decorator and each background task call it. The principal contract gives the tenant of a principal. The tenant-document access is the 1 path from a repository to its tenant documents. | `core.tenant` |
 | **Tenant catalog** | The system database and the per-tenant Mongo connections (decision 11). | `core.tenant` |
 | **Management** | CRUD of workflows, connectors, and invokers. The invoker XML parser and importer. | `core.workflow`, `core.connector`, `core.invoker` |
@@ -128,7 +129,7 @@ The module `core` has one package for each feature (modular monolith, decision 1
 | **Notifications** | The notification channel SPI: email, Slack, and others. | `core.notification` |
 | **Admin status** | Service and worker status, and the queued jobs. | `core.admin` |
 | **Audit** | Append-only storage and a query API. | `core.audit` |
-| **Settings** | The setting registry collects the setting definitions of the features. The settings service reads and changes the installation settings in the `settings` collection. The settings API `GET/PATCH /api/settings` gives them to an installation admin (decisions 13, 19, 22, 24). | `core.settings` |
+| **Settings** | The setting registry collects the setting definitions of the features. The settings service reads and changes the installation settings in the `settings` collection. The settings API `GET/PATCH /api/settings` gives them to an installation admin (decisions 13, 19, 22, 24). A setting can hold a list of items, and each item can hold 1 secret (decision 30). | `core.settings` |
 | **Keys** | The root key, the DEK wrap and unwrap, the generation guard, and the start canary (decision 14). The system DEK of the first start and the signing key of the installation (decision 17). The token signature: it signs each token that core issues and examines each signature. | `core.secrets.keys` |
 | **Secret storage** | The secret provider implementation (decision 14). It keeps each secret of the installation as a ciphertext in the `secrets` collection (decision 24). | `core.secrets` |
 | **Bootstrap configuration** | The `opencelium.*` bootstrap properties, the defaults, the env file reader (decision 26), and the failure analyzer. | `core.config` |
@@ -278,7 +279,7 @@ All bootstrap values are validated at the start. A bad value, or a mandatory val
 A secret is kept in the database, but encrypted through the secret provider SPI. All other code holds only a secret reference, which does not show the value. Two more rules apply:
 
 - Plaintext is only in memory, only at the moment of use. The code does not cache plaintext.
-- No API returns a secret value. A write endpoint accepts a value and returns a reference. A read endpoint returns masked output. A lost credential is entered again. It is not recovered.
+- No API returns a secret value. A write endpoint accepts a value, and its response shows masked output. A read endpoint returns masked output. A lost credential is entered again. It is not recovered.
 
 **3. Not 1 and not 2?** Then: **runtime setting (database).**
 
@@ -396,7 +397,7 @@ In self-hosted mode the yml server is *the* database. In cloud mode it is the **
 - The **session JWT** expires after a short time. Each request to a protected endpoint carries it, and core reads no database to accept it.
 - The **refresh token** gives a new session JWT and a new refresh token. A logout with it ends the session.
 
-Core signs the 2 tokens with the signing key of the installation (decision 17). IdP and portal tokens do not reach the frontend. The sequence diagrams of the 3 login flows are in [docs/security/README.md](security/README.md).
+Core signs the 2 tokens with the signing key of the installation (decision 17). IdP and portal tokens do not reach the frontend. After a redirect login, the HTTP client exchanges a login code for the 2 tokens (decision 28). The sequence diagrams of the 3 login flows are in [docs/security/README.md](security/README.md). The diagrams of the 2 redirect logins show the exchange of the login code.
 
 **Authorization** is RBAC and per-resource ACLs (decision 7). It uses the principal. Security filters have no permission logic. Enforcement is in core for the API access, and in the execution engine for the resolution of parameters and credentials at runtime.
 
@@ -417,7 +418,7 @@ The intended result: most product logic (the graph walk, IF, LOOP, data mapping)
 
 ### 6.9 Build checks
 
-ArchUnit rules make these 5 rules build failures. Decisions 21 and 25 give the limits of the rules.
+ArchUnit rules make these 5 rules build failures. Decisions 21, 25 and 29 give the limits of the rules.
 
 1. No class uses `@Value`.
 2. Only `core.secrets` uses key material for cryptography (decision 21).
@@ -592,6 +593,8 @@ The decisions are recorded so that they are not discussed again without a reason
     - **The refresh.** A refresh gives a new session JWT and a new refresh token, and the old refresh token stops. A second use of a refresh token ends the session, also when 2 refreshes come at the same time. A refresh for a locked or deleted OpenCelium user also ends the session.
     - **The end of a session.** A refresh does not move the end of the session, and no token expires after that end. A logout ends the session, but core accepts a session JWT of that session until it expires. The times of a session are values of the code, not bootstrap values and not runtime settings (decision 13).
 
+    *(The login code of a redirect login and the login-code chain are in decision 28.)*
+
 19. **An error response of the REST API has the problem-details form with an error code. Each path of the REST API starts with `/api`.** *(Changes the path of the settings endpoint of decision 13.)*
 
     *Why:* An HTTP client must read the error responses of all features in 1 way, without a message text that can change. The problem-details form of RFC 9457 is a standard that Spring supports, so core adds no form of its own. An error code in 1 more field gives the HTTP client 1 stable value to compare. A request without a valid token gets the response of the bearer-token standard, which has a header and no body. The first part `/api` keeps the paths of the REST API apart from the pages of the frontend, for example `/login`. Thus a proxy can send the path `/api` to core and each other path to the frontend.
@@ -602,7 +605,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - A request without a token that core accepts gets the status code 401, the header `WWW-Authenticate`, and no body (decision 18).
     - Each path of the REST API of core starts with `/api`. For example, the settings endpoint of decision 13 has the path `/api/settings`.
 
-    *(The response to a refused permission and the more fields of an error response are in decision 23. The error response to a request that reaches no endpoint of a feature is on the [open decisions](#open-decisions) list.)*
+    *(The response to a refused permission and the more fields of an error response are in decision 23. The error of a redirect login is in decision 28. The error response to a request that reaches no endpoint of a feature is on the [open decisions](#open-decisions) list.)*
 
 20. **A setting and a secret belong to the installation or to 1 tenant. The system DEK encrypts the secrets of the installation.** *(Extends decisions 11, 13 and 14.)*
 
@@ -624,6 +627,8 @@ The decisions are recorded so that they are not discussed again without a reason
     - **The password hash.** A password hash is outside the rule. The users block makes the hash, and an admin login compares the password of an OpenCelium user with it.
     - **Random values.** A random value that is not key material is outside the rule. Examples are a generated password, a session ID and a token ID.
     - **Other packages.** For an operation with key material, a package calls a building block of `core.secrets`. It holds no key (decision 17).
+
+    *(A public key of an IdP is in decision 29.)*
 
 22. **Core examines a permission in 1 place, the access control. The roles of a session JWT are authorities for it.** *(Extends decisions 7, 10 and 18.)*
 
@@ -658,7 +663,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - **The ciphertext.** The secret storage keeps each secret of the installation as 1 document of the `secrets` collection. The collection is in the database that the yml file names.
     - **The associated data.** The associated data of a secret has the owner, the secret ID, and the DEK version. Thus a ciphertext under another secret ID or another owner does not decrypt.
 
-    *(The collection of the secrets of a tenant is on the [open decisions](#open-decisions) list. The change notifications of the settings service and how a change reaches another core instance are also on that list.)*
+    *(The form of a setting with a list of items is in decision 30. The collection of the secrets of a tenant is on the [open decisions](#open-decisions) list. The change notifications of the settings service and how a change reaches another core instance are also on that list.)*
 
 25. **The build rule for the secret fields examines the name and the type of a field. The build rule for the tenant documents examines each read and each write of a collection.** *(Extends decisions 13, 15, 16, 20 and 21.)*
 
@@ -695,6 +700,52 @@ The decisions are recorded so that they are not discussed again without a reason
     - **The mode and the tenant.** The completion runner runs in the self-host mode only, and it binds `self-host-tenant` through the tenant runner (decision 15). In the cloud mode the Service Portal owns the OpenCelium users, so core makes no admin (decision 10). The operations on the marker are in the exceptions of [6.9](#69-build-checks).
     - **No setup token and no setup state.** The first admin logs in through the local strategy, with the normal admin login. Core keeps no setup state after the first start, and the API has no block for a new installation.
 
+28. **A redirect login gives the frontend a login code, a signed token of a third type. The HTTP client exchanges the login code for the 2 tokens of the session.** *(Extends decisions 10, 15 and 17. Changes the clause of decision 18 on the 2 security filter chains. Changes the clause of decision 19 on the form of an error response, for a redirect login only.)*
+
+    *Why:* A redirect login ends with a redirect of the browser, and a redirect has no body for the 2 tokens of decision 18. A token in a URL stays in the history of the browser, and a cookie or a server session is against decision 18. The exchange arrives without a session JWT, so in the cloud mode only a signed token gives the tenant before the tenant bind (decision 15). A random code in a collection gives no tenant, and a collection in the system database adds 1 more exception to [6.9](#69-build-checks). A person can copy the URL, so a login verifier binds the login code to the browser that started the login (RFC 9700). The frontend cannot read a response that core gives to the browser, so an error also goes to the frontend in the URL.
+
+    - **The redirect login.** A redirect login is a login that redirects the browser to an IdP or to the Service Portal. The OIDC login strategy and the redirect path of the Service Portal use the login code (decision 10).
+    - **The login code.** The login code is a signed token of a third type, and core signs it with the signing key (decision 17). It holds the ID of the OpenCelium user, the tenant ID, the session ID, a code ID, and the hash of the login verifier. It holds no token and no code of an IdP or of the Service Portal (decision 10).
+    - **The type.** The JWT header field `typ` gives the type of the login code (decision 18). Core accepts a login code only at the exchange endpoint. Core does not accept it as a session JWT or as a refresh token.
+    - **The login-code chain.** A third security filter chain, the login-code chain, applies to the exchange endpoint only, and it accepts only a login code as the bearer token. Thus the request filter binds the tenant of the login code, also in the cloud mode (decision 15). The refresh chain and the main chain do not change.
+    - **The session.** Core starts the session before it redirects the browser to the frontend. Until the exchange, the session record holds the code ID of the login code. It holds no login code and no login verifier (decision 18).
+    - **The login verifier.** The HTTP client makes a random login verifier and sends only its hash when it starts the login. The login code holds that hash, and the HTTP client gives the login verifier at the exchange. Core refuses an exchange with a wrong login verifier, and the login code stays valid. The login verifier and its hash are not key material (decision 21).
+    - **The exchange.** The HTTP client sends the login code as a bearer token and gets the 2 tokens in the body of the response (decision 18). Only an exchange with the correct login verifier uses the login code, and a login code has 1 use. A second use ends the session, but core accepts a session JWT of that session until it expires (decision 18). An exchange for a locked or deleted OpenCelium user ends the session, as a refresh does (decision 18).
+    - **The life of a login code.** A login code expires after a short time. That time is a fixed value, not a bootstrap value and not a runtime setting (decision 13).
+    - **The redirect to the frontend.** Core redirects the browser to the frontend, and no parameter of a request changes the target. The login code or the error code is after the `#` of the URL, so the browser sends it to no server.
+    - **An error.** An error of an endpoint that the browser opens is a redirect to the frontend with an error code and without a body. The URL shows no message text and no value of the request. The exchange endpoint keeps the problem-details form, and the plan of the feature lists each error code (decision 19).
+
+29. **Core keeps 1 login record for each OIDC login, as a tenant document. A public key of an IdP is not key material.** *(Extends decisions 10, 15, 16, 21 and 25.)*
+
+    *Why:* Until the IdP answers, core must keep the state, the nonce and the PKCE verifier of a login. A server session is against decision 18, and a signed value in the browser cannot refuse a second answer and shows the PKCE verifier. A document in the database lets each core instance complete the login, and a read with a delete gives the record 1 use. The self-host mode binds `self-host-tenant` also on an open endpoint (decision 15), so the record is a tenant document without a new exception to [6.9](#69-build-checks). The PKCE verifier gives no access without the code of the IdP and the client secret, so the record holds no secret (decision 13). The build rule for cryptography finds each key type, and a public key of an IdP is not a key of core (decision 21).
+
+    - **The login record.** Core keeps 1 login record for each OIDC login in the `oidc_logins` collection, as a tenant document (decision 16). The record holds the state, the nonce, the PKCE verifier, the provider ID, and the hash of the login verifier (decision 28).
+    - **No secret.** The record holds no token and no code of the IdP, and it holds no client secret. The PKCE verifier gives no access without the code of the IdP and the client secret.
+    - **1 use.** When the IdP answers, core reads and deletes the record in 1 operation of the tenant-document access (decision 15). Thus each core instance can complete the login, and a second answer finds no record.
+    - **The life of a login record.** A TTL index deletes the record of a login that the person does not complete. Core also refuses an answer of the IdP after that time. The time is a fixed value, not a bootstrap value and not a runtime setting (decision 13).
+    - **The tenant.** In the self-host mode, the open endpoints of the login run with the current tenant `self-host-tenant` (decision 15). The OIDC login strategy is not available in the cloud mode (decision 10).
+    - **Random values.** The state, the nonce, the PKCE verifier, and the login verifier are random values and not key material. A hash of such a value uses no key. Thus they are outside the cryptography rule (decision 21).
+    - **The public key of an IdP.** A public key of an IdP is not key material, because core does not find or generate it for its own cryptography. The OIDC client examines the signature of an ID token with that key. The OIDC client signs nothing, encrypts nothing, and holds no key of core (decision 17).
+    - **The 1 building block.** Only the OIDC client of `core.auth.oidc` examines a signature outside `core.secrets`, and only with a public key of an IdP.
+
+    *(The login record of a Service Portal login is on the [open decisions](#open-decisions) list. The database of the indexes of a tenant collection in the cloud mode is also on that list.)*
+
+30. **A setting can hold a list of items, and each item can hold 1 secret. The settings document keeps the list in 1 field, with a secret reference in each item.** *(Extends decisions 13, 20 and 24.)*
+
+    *Why:* An installation can have more than 1 OIDC provider, each with a client secret, and decision 24 gives a secret setting only 1 secret. Setting keys for each item limit the number of items, and endpoints of the feature add a second path next to the settings API. A list in 1 field of the settings document changes all its items or none in 1 update, without a transaction (decision 24). A read shows a masked value for each secret, so a client that sends a read back must not replace a secret with the mask. An item thus needs an ID that does not change, so that core finds the secret that the item keeps. When an item keeps its secret and gets a new address, core sends the secret to that address, which is against decision 13.
+
+    - **The list.** A setting definition can declare a list of items as the value of its setting. It names the fields of an item, the ID field, and at most 1 secret field. The settings package knows no feature (decision 24).
+    - **The rule of the feature.** A setting definition can have a rule of its feature for a valid value. The settings service applies the rule before it changes the settings document.
+    - **The database value.** The settings document keeps the list in the field of its setting key. Each item keeps a secret reference in its secret field, and the secret storage keeps the ciphertext (decision 24).
+    - **A change.** A change gives the full list. 1 update of the settings document applies the change, or it changes nothing (decision 24).
+    - **The masked value.** A read and the response to a change show a masked value for the secret of each item. A change that gives the masked value as a secret is not valid. No API gives the plaintext or the secret reference (decision 13).
+    - **A kept secret.** An item of a change without a secret keeps the secret of the item with the same ID. An item with a new address for its secret must give the secret again, for example an OIDC provider with a new issuer URL. Thus core sends a kept secret only to the address of that secret (decision 13).
+    - **A removed secret.** After the update, core deletes the secret of each removed item and each replaced secret. A reset of the setting deletes the secret of each item.
+    - **The read of a feature.** A feature reads its setting only through the settings service (decision 13). The settings service gives the feature each item with its secret reference, and never the plaintext. The feature reads the plaintext through the secret provider SPI at the moment of use, and it zeroes the bytes after use (decision 24).
+    - **The first list.** The first setting with a list is `oidc.providers`, an installation setting. Each client secret of the setting is a secret of the installation (decision 20).
+
+    *(The change notifications of the settings service stay on the [open decisions](#open-decisions) list.)*
+
 ### Open decisions
 
 These decisions are open on purpose. The first feature that needs one closes it:
@@ -712,6 +763,7 @@ These decisions are open on purpose. The first feature that needs one closes it:
 - **Who changes an installation setting in the cloud mode.** No OpenCelium user passes the rule "installation admin" in the cloud mode (decision 22), so the operator of a cloud installation must have another path.
 - **The collection of the tenant settings and of the secrets of a tenant in the self-host mode.** In the self-host mode the tenant documents and the data of the installation are in 1 database (decision 20).
 - **The database of the indexes of a tenant collection in the cloud mode.** At the start, core makes the indexes of a tenant collection, for example `sessions`, in the database that the yml file names. In the cloud mode the tenant documents are in the database of each tenant (decision 11).
+- **The login record of a Service Portal login.** A login record is a tenant document (decision 29). A Service Portal login has no tenant before the Service Portal answers, so its login record must have another place.
 
 ## 8. Glossary
 
