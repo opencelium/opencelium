@@ -2,9 +2,11 @@ package io.opencelium.core.settings;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.bson.Document;
 import org.junit.jupiter.api.Test;
@@ -22,9 +24,19 @@ import static org.mockito.Mockito.when;
 
 /**
  * A failure in the middle of a change of a secret setting leaves no new ciphertext behind when the update fails, and
- * keeps the change when only the delete of the replaced secret fails.
+ * keeps the change when only the delete of the replaced secret fails. The same applies to the secret of an item of a
+ * list setting.
  */
 class SettingsServiceFailureTest {
+
+	/** A list setting of the test: accounts at remote systems, each with the password for its address. */
+	private static final SettingDefinition ACCOUNTS = new SettingDefinition("remote.accounts", SettingType.LIST,
+			List.of(), 0, 10,
+			new SettingList(List.of(new SettingList.ItemField("id", SettingType.TEXT, null, 1, 20),
+					new SettingList.ItemField("address", SettingType.TEXT, null, 1, 200),
+					new SettingList.ItemField("password", SettingType.SECRET, null, 1, 100)), "id", "password",
+					"address"),
+			null);
 
 	private final SettingRegistry registry = new SettingRegistry(List.of(BrokerSettings.PASSWORD));
 
@@ -40,6 +52,24 @@ class SettingsServiceFailureTest {
 
 		assertThatThrownBy(() -> settings.change(Map.of("broker.password", "Pass-1")))
 				.hasMessage("the database is down");
+
+		assertThat(secrets.stored).hasSize(1);
+		assertThat(secrets.deleted).isEqualTo(secrets.stored);
+	}
+
+	@Test
+	void changeDeletesTheNewSecretOfAListItemWhenTheUpdateFails() {
+		var listSettings = new SettingsService(new SettingRegistry(List.of(ACCOUNTS)), repository, secrets);
+		when(repository.installationValues()).thenReturn(Optional.empty());
+		when(repository.change(anyMap(), anyCollection())).thenThrow(new IllegalStateException("the database is down"));
+		Map<String, Object> account = new LinkedHashMap<>();
+		account.put("id", "a");
+		account.put("address", "https://a.example.com");
+		account.put("password", UUID.randomUUID().toString());
+
+		assertThatThrownBy(() -> listSettings.change(Map.of("remote.accounts", List.of(account))))
+			.isExactlyInstanceOf(IllegalStateException.class)
+			.hasMessage("the database is down");
 
 		assertThat(secrets.stored).hasSize(1);
 		assertThat(secrets.deleted).isEqualTo(secrets.stored);
