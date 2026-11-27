@@ -377,5 +377,10 @@
     },
     "done": "The current value was reset",
     "failed": "The current value could not be reset."
+  },
+  "docs": {
+    "secret": "About secrets and the secret key",
+    "busyPolicy": "How the busy policy works",
+    "script": "How script variables work"
   }
 }

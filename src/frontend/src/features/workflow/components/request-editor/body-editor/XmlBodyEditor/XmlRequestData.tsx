@@ -1,10 +1,11 @@
-import { useRef, useState, type CSSProperties } from 'react';
+import { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Alert, Card, Input, Segmented, Space, Tag } from 'antd';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { XmlNodeCard } from '../xml/XmlNodeCard/XmlNodeCard';
-import { addChildNode, removeNode, updateNode } from '../xml/xmlTree';
+import { addChildNode, removeNode, serializeCompactXml, updateNode } from '../xml/xmlTree';
+import { XmlBackendLimitsWarning } from '../xml/XmlBackendLimitsWarning/XmlBackendLimitsWarning';
 import type { useXmlBodyEditor } from '../xml/useXmlBodyEditor';
 
 type Props = {
@@ -17,6 +18,7 @@ export function XmlRequestData({ readOnly, editor }: Props) {
 	const [isMaximized, setIsMaximized] = useState(false);
 	const [maximizedStyle, setMaximizedStyle] = useState<CSSProperties>();
 	const contentBoxRef = useRef<HTMLDivElement>(null);
+	const body = useMemo(() => serializeCompactXml(editor.tree), [editor.tree]);
 	const toggleMaximized = () => {
 		setIsMaximized((current) => {
 			const next = !current;
@@ -37,7 +39,7 @@ export function XmlRequestData({ readOnly, editor }: Props) {
 			<div className='bodyLegacyXmlToolbar'>
 				<Segmented<'tree' | 'raw'> value={editor.mode} onChange={(mode) => {
 					editor.setMode(mode);
-					if (mode === 'raw') editor.setRawError(null);
+					editor.setRawError(null);
 				}} options={[{ label: t('xmlBody.tree'), value: 'tree' },
 					{ label: t('xmlBody.rawData'), value: 'raw' }]} />
 				<Tooltip content={t(isMaximized ? 'actions.minimizeRequestData' : 'actions.maximizeRequestData')}>
@@ -50,6 +52,7 @@ export function XmlRequestData({ readOnly, editor }: Props) {
 				</Tooltip>
 			</div>
 			{editor.rawError && <Alert type='error' message={editor.rawError} />}
+			<XmlBackendLimitsWarning body={body} />
 			{editor.mode === 'raw' ? (
 				<Card title={t('xmlBody.rawXml')} className='bodyLegacyXmlCard'>
 					<Input.TextArea className='xmlRaw bodyLegacyXmlRaw' value={editor.rawXml}

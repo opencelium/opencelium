@@ -141,6 +141,7 @@ export const scheduleDefinition: EntityDefinition = {
             ),
         },
         titleKey: `${baseKey}.list.title`,
+        docs: { page: 'guides/schedule-and-notify' },
         subtitleKey: `${baseKey}.list.subTitle`,
         subtitleComponents: {
             legend: <LegendRow />,

@@ -58,6 +58,7 @@ export const globalVariableDefinition: EntityDefinition = {
 
     list: {
         titleKey: `${baseKey}.list.title`,
+        docs: { page: 'guides/global-variables' },
         subtitleKey: `${baseKey}.list.subTitle`,
         // Client-side paging until the generic list can page on the server; the contract caps nothing below 1000.
         fetchUrl: `${GLOBAL_VARIABLE_PATH}/all?page=0&size=1000&sort=name,asc`,

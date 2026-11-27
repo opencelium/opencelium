@@ -1,5 +1,6 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { CopyButton } from '@shared/ui/actions/CopyButton'
+import { DocsLink } from '@shared/ui/actions/DocsLink'
 import { Hint } from '@shared/ui/primitives/Hint'
 import { Input } from '@shared/ui/primitives/Input'
 import { Typography } from '@shared/ui/primitives/Typography'
@@ -35,6 +36,9 @@ export function PasswordResetLinkDialogContent({ link, userLabel, isEmailSent }:
                 {t('user.resetLink.dialog.expiresAt', { expiry })}
             </Typography>
             <Hint noPrefix>{t('user.resetLink.dialog.securityHint')}</Hint>
+            <DocsLink page="guides/users-and-permissions" anchor="guide-users-password-link" testId="user-reset-link-docs">
+                {t('user.docs.resetLink')}
+            </DocsLink>
         </div>
     )
 }

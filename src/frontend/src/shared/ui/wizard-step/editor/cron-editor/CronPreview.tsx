@@ -5,6 +5,7 @@ import {
   upcomingRuns,
 } from "@shared/lib/cron/upcomingRuns";
 import { CronPreviewMonth } from "./CronPreviewMonth";
+import { DocsLink } from "@shared/ui/actions/DocsLink";
 import "./CronPreview.css";
 
 function formatUntil(
@@ -54,8 +55,13 @@ export function CronPreview({ cron }: { cron: string }) {
   return (
     <section className="cron-preview" data-testid="schedule-cron-preview">
       <div className="cron-preview__heading">
-        <strong>{t("schedule.preview.title")}</strong>
-        <span>{t("schedule.preview.zone", { zone: timeZone })}</span>
+        <strong style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          {t("schedule.preview.title")}
+          <DocsLink page="guides/schedule-and-notify" anchor="cron-expressions" testId="schedule-cron-preview-docs" />
+        </strong>
+        <DocsLink page="reference/configuration" anchor="ref-config-server-time-zone" testId="schedule-cron-preview-zone-docs">
+          {t("schedule.preview.zone", { zone: timeZone })}
+        </DocsLink>
       </div>
       {runs === null ? (
         <p

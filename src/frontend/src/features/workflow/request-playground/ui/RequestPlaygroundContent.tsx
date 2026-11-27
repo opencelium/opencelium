@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Dialog } from '@shared/ui/primitives/Dialog';
+import { DialogHeaderActions } from '@shared/ui/primitives/Dialog/DialogHeaderSlotContext';
+import { DocsLink } from '@shared/ui/actions/DocsLink';
 import { Splitter } from '@shared/ui/primitives/Splitter';
 import type { WorkflowMethodConfig } from '../../types/request-config.types';
 import type { WorkflowNodeModel } from '../../types/workflow.types';
@@ -99,6 +101,9 @@ export function RequestPlaygroundContent({ session, execution, liveNode, isReadO
 			title={<PlaygroundTitle session={session} />}
 			footer={<PlaygroundFooter onApply={apply} onClose={onClose}
 				canApply={!isReadOnly && session.hasEdits && appliedEdits !== session.edits} />}>
+			<DialogHeaderActions>
+				<DocsLink page='guides/request-playground' testId='request-playground-docs' />
+			</DialogHeaderActions>
 			<div className='rpBody'>
 				<div className='rpSplit'>
 					<Splitter panels={[

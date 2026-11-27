@@ -1,5 +1,6 @@
 import { Trans } from 'react-i18next';
 import {Hint} from "@shared/ui/primitives/Hint";
+import { docsUrl } from '@shared/docs/docsUrl';
 
 const HintMessage = () => {
     return (
@@ -7,7 +8,7 @@ const HintMessage = () => {
             <Trans i18nKey="entities:update-assistant.health.hint">
                 {"Please, do not forget to "}
                 <a
-                    href="https://docs.opencelium.io/en/prod/operations/backup-and-restore.html"
+                    href={docsUrl('operations/backup-and-restore')}
                     target="_blank"
                     rel="noopener noreferrer"
                 >

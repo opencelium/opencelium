@@ -15,9 +15,9 @@ import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial
 import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
 import { CHANGELOG_ROUTE } from '@features/changelog/model/changelog.route'
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types'
+import { openDocs as openDocsPage } from '@shared/docs/docsUrl'
 import './helpMenu.css'
 
-const DOCS_URL = 'https://docs.opencelium.io/en/prod/'
 const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login'
 const DASHBOARD_ROUTE = '/'
 const WORKFLOW_CREATE_ROUTE = '/workflow/create'
@@ -89,7 +89,7 @@ export function HelpMenuEntries({ tours, onSelect }: { tours: HelpTours; onSelec
 
     const openDocs = () => {
         onSelect()
-        window.open(DOCS_URL, '_blank', 'noopener,noreferrer')
+        openDocsPage('')
     }
 
     const openChangelog = () => {

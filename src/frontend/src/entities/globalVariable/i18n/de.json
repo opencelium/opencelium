@@ -377,5 +377,10 @@
     },
     "done": "Der aktuelle Wert wurde zurückgesetzt",
     "failed": "Der aktuelle Wert konnte nicht zurückgesetzt werden."
+  },
+  "docs": {
+    "secret": "Zu Geheimnissen und dem Geheimschlüssel",
+    "busyPolicy": "So funktioniert die Belegt-Regel",
+    "script": "So funktionieren Skriptvariablen"
   }
 }

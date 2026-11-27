@@ -1,6 +1,8 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { countItems, formatReleaseDate } from '@features/changelog/model/changelog.utils'
 import type { ChangelogRelease, CurrentReleaseKind } from '@features/changelog/model/types'
+import { getReleaseDocs } from '@features/changelog/model/releaseDocs'
+import { DocsLink } from '@shared/ui/actions/DocsLink'
 
 type Props = {
     release: ChangelogRelease
@@ -12,6 +14,7 @@ export function ReleaseHeader({ release, currentKind, hasSummary = false }: Prop
     const { t, lang } = useI18n('entities')
     const featureCount = countItems(release, 'features')
     const fixCount = countItems(release, 'fixes')
+    const docs = getReleaseDocs(release.version)
 
     return (
         <div className="changelog-release-header">
@@ -23,6 +26,16 @@ export function ReleaseHeader({ release, currentKind, hasSummary = false }: Prop
             )}
             {release.isMajor && <span className="changelog-badge changelog-badge--major">{t('changelog.badges.major')}</span>}
             <span className="changelog-release-header__date">{formatReleaseDate(release.date, lang)}</span>
+            {docs && (
+                <DocsLink page={docs.page} testId={`changelog-whats-new-${release.version}`}>
+                    {t('changelog.docs.whatsNew', { version: release.version })}
+                </DocsLink>
+            )}
+            {docs?.upgradeAnchor && !hasSummary && (
+                <DocsLink page={docs.page} anchor={docs.upgradeAnchor} testId={`changelog-upgrade-${release.version}`}>
+                    {t('changelog.docs.upgrade')}
+                </DocsLink>
+            )}
             {hasSummary && (
                 <span className="changelog-release-header__summary">
                     {[

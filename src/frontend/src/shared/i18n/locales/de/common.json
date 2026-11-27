@@ -178,6 +178,9 @@
     "edit": "Bearbeiten",
     "delete": "Löschen"
   },
+  "docs": {
+    "tooltip": "Dokumentation öffnen"
+  },
   "copy": {
     "tooltip": "In die Zwischenablage kopieren",
     "empty": "Nichts zu kopieren",
