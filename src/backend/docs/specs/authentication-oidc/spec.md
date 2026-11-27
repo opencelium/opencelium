@@ -26,6 +26,7 @@ These terms apply in this specification:
 - An **OIDC link** connects 1 pair of `iss` and `sub` to 1 OpenCelium user. Core makes it at the first OIDC login of the pair.
 - The **email-link option** of an OIDC provider lets core link an ID token to an OpenCelium user with the same email.
 - A **login code** is a value that core gives to the browser after an OIDC login. The HTTP client exchanges it for the session JWT and the refresh token.
+- A **login verifier** is a random value of the HTTP client. It binds a login code to the HTTP client that started the login. It has 43 to 128 characters. Its characters are the letters A to Z and a to z, the digits, `-`, `.`, `_` and `~`.
 - The **login options** are the list of the OIDC providers that the login page shows.
 
 ## Acceptance criteria

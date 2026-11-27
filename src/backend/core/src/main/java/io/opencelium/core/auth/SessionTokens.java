@@ -145,7 +145,11 @@ final class SessionTokens {
 	 *                                     status code 401
 	 */
 	static UsernamePasswordAuthenticationToken authenticationOfLoginCode(Jwt loginCode) {
-		throw new UnsupportedOperationException();
+		if (loginCode.getId() == null || loginCode.getClaimAsString(LoginCodes.LOGIN_VERIFIER_HASH_CLAIM) == null) {
+			throw new InvalidBearerTokenException("The login code lacks a claim.");
+		}
+		return UsernamePasswordAuthenticationToken.authenticated(principalOf(loginCode, Set.of()), loginCode,
+				List.of());
 	}
 
 	private static UserPrincipal principalOf(Jwt token, Set<String> roles) {

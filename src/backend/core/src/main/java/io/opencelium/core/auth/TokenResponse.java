@@ -3,7 +3,8 @@ package io.opencelium.core.auth;
 import java.time.Instant;
 
 /**
- * The response of a login and of a refresh: the 2 tokens of the session and their expiry, in UTC.
+ * The response of a login, of a refresh and of the exchange of a login code: the 2 tokens of the session and their
+ * expiry, in UTC.
  *
  * @param sessionJwtExpiresAt   the claim {@code exp} of the session JWT
  * @param refreshTokenExpiresAt the claim {@code exp} of the refresh token

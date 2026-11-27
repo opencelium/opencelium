@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -24,6 +25,9 @@ import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -61,6 +65,7 @@ import static io.opencelium.core.testsupport.OidcLoginRequests.newLoginVerifier;
 import static io.opencelium.core.testsupport.OidcLoginRequests.s256;
 import static io.opencelium.core.testsupport.OidcLoginRequests.saveProviders;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 /**
@@ -70,7 +75,9 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * <ul>
  * <li>Only the HTTP client that started the login can exchange the login code: a login verifier whose hash is not the
  * hash of the start gets {@code invalid-login-verifier}, and the login code stays valid. A body without a login
- * verifier gets {@code bad-request}.</li>
+ * verifier, a body that is not JSON, and a login verifier of another form get {@code bad-request}, and the login code
+ * stays valid. A login verifier has 43 to 128 characters: the letters A to Z and a to z, the digits, {@code -},
+ * {@code .}, {@code _} and {@code ~}. A character outside ASCII never takes the place of another character.</li>
  * <li>A login code expires 1 minute after its issue, and it has 1 use: a second use gets {@code session-ended} and ends
  * the session, but the session JWT of the first exchange stays valid until it expires. A second use with a wrong login
  * verifier ends nothing. Of 2 exchanges of 1 login code at the same time, exactly 1 gives the tokens, and the session
@@ -236,6 +243,65 @@ class LoginCodeExchangeTest {
 		MvcTestResult exchange = exchangeWithBody(mvc, loginCode, "this is not JSON");
 
 		assertProblem(exchange, HttpStatus.BAD_REQUEST, "bad-request");
+	}
+
+	@Test
+	void exchangeGivesBadRequestWhenTheBodyIsAForm() {
+		String loginVerifier = newLoginVerifier();
+		String loginCode = loginCodeFor(loginVerifier);
+
+		MvcTestResult exchange = mvc.post().uri(LoginRequests.LOGIN_CODE_PATH)
+			.header(HttpHeaders.AUTHORIZATION, "Bearer " + loginCode)
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.content("loginVerifier=" + loginVerifier)
+			.exchange();
+
+		assertProblem(exchange, HttpStatus.BAD_REQUEST, "bad-request");
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("loginVerifiersOfAnotherForm")
+	void exchangeGivesBadRequestAndKeepsTheLoginCodeValidWhenTheLoginVerifierHasAnotherForm(String form,
+			String otherForm) {
+		String loginVerifier = newLoginVerifier();
+		String loginCode = loginCodeFor(loginVerifier);
+
+		MvcTestResult exchange = exchange(mvc, loginCode, otherForm);
+
+		assertProblem(exchange, HttpStatus.BAD_REQUEST, "bad-request");
+		assertThat(exchange(mvc, loginCode, loginVerifier)).as("the exchange with the correct login verifier")
+			.hasStatusOk();
+	}
+
+	/** The name of each form, and a value of that form; no value needs a JSON escape. */
+	static Stream<Arguments> loginVerifiersOfAnotherForm() {
+		return Stream.of(arguments("an empty login verifier", ""), arguments("42 characters", "a".repeat(42)),
+				arguments("129 characters", "a".repeat(129)),
+				arguments("a character outside ASCII", "é" + "a".repeat(42)),
+				arguments("a character of ASCII outside the form", "+" + "a".repeat(42)));
+	}
+
+	@Test
+	void exchangeGivesBadRequestWithoutTokensWhenTheLoginVerifierHasACharacterOutsideAsciiInPlaceOfAQuestionMark() {
+		String tail = "a".repeat(42);
+		String loginCode = loginCodeFor("?" + tail);
+
+		MvcTestResult exchange = exchange(mvc, loginCode, "é" + tail);
+
+		assertProblem(exchange, HttpStatus.BAD_REQUEST, "bad-request");
+		assertThat(sessionRecord(sessionIdOf(loginCode))).as("the session record").isNotNull()
+			.containsEntry("codeId", claimsOf(loginCode).getJWTID());
+	}
+
+	@Test
+	void exchangeGivesTheTokensWhenTheLoginVerifierHas128CharactersOfEachKindOfTheForm() {
+		String loginVerifier = "-._~" + "Az09".repeat(31);
+		String loginCode = loginCodeFor(loginVerifier);
+
+		MvcTestResult exchange = exchange(mvc, loginCode, loginVerifier);
+
+		assertThat(exchange).as("the exchange with a login verifier of 128 characters").hasStatusOk();
+		assertThat(me(mvc, sessionJwtOf(exchange))).as("the session JWT of the exchange").hasStatusOk();
 	}
 
 	@Test
