@@ -20,6 +20,8 @@ export interface ButtonProps {
 	iconRight?: IconName;
 	style?: CSSProperties | undefined;
 	color?: ButtonColorType,
+	/** Accessible name; required for icon-only buttons, whose tooltip does not reach the focusable button. */
+	ariaLabel?: string;
 	/** Stable selector for e2e tests; emitted as `data-testid`. */
 	testId?: string;
 	className?: string;

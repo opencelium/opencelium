@@ -15,7 +15,8 @@ export function XmlNodeDialogs(props: XmlNodeDialogsProps) {
   };
 
   return <>
-    <XmlTagDialog open={props.isTagDialogOpen} value={props.tagName}
+    {/* Keyed by the name, so the field starts from the current name after a rename. */}
+    <XmlTagDialog key={props.tagName} open={props.isTagDialogOpen} value={props.tagName}
       onClose={props.onCloseTag} onSave={(value) => {
         props.onUpdateNode(props.nodeId, { name: value });
         props.onCloseTag();

@@ -17,5 +17,9 @@
     "features_other": "{{count}} features",
     "fixes_one": "{{count}} fix",
     "fixes_other": "{{count}} fixes"
+  },
+  "docs": {
+    "whatsNew": "What's new in {{version}}",
+    "upgrade": "Check before upgrading"
   }
 }

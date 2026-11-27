@@ -1,3 +1,4 @@
+import type { DocsPage } from '@shared/docs/docsUrl'
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
 import type {CrudAction, PermissionComponent, PolicyDefinition} from "@/engine/policy";
 import type {CommandNode} from "@shared/command/types.ts";
@@ -378,6 +379,8 @@ export type ListDefinition = {
 
     /** i18n key (entities namespace) for the page title; falls back to entity.plural / `${name}s`. */
     titleKey?: string
+    /** The docs page explaining this list's entity; a docs link is shown next to the title. */
+    docs?: { page: DocsPage; anchor?: string }
     /** i18n key (entities namespace) for the page subtitle. */
     subtitleKey?: string
     /**

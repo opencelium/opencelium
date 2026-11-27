@@ -11,6 +11,7 @@ import { ScriptCodeEditor } from './ScriptCodeEditor'
 import { ScriptParametersEditor } from './ScriptParametersEditor'
 import { ScriptTestRun } from './ScriptTestRun'
 import { useScriptTestRun } from './useScriptTestRun'
+import { GlobalVariableKindDocsLink } from '../form/GlobalVariableKindDocsLink'
 
 export function ScriptVariableEditor({ mode }: { mode: Mode }) {
     const { t } = useI18n('entities')
@@ -53,6 +54,7 @@ export function ScriptVariableEditor({ mode }: { mode: Mode }) {
 
     return (
         <div style={{ width: '100%' }} data-testid="global-variable-script-editor">
+            <GlobalVariableKindDocsLink kind="SCRIPT" />
             {isReadOnly ? definition : (
                 <Tabs
                     value={tab}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Select } from '@shared/ui/primitives/Select';
 import { Typography } from '@shared/ui/primitives/Typography';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { DocsLink } from '@shared/ui/actions/DocsLink';
 import { ReferenceRemapChoices } from '../components/reference-remap/ReferenceRemapChoices';
 import type { ReferenceRemapPlan } from '../utils/graph.referenceRemap';
 import type { WorkflowNodeModel } from '../types/workflow.types';
@@ -26,6 +27,9 @@ export function PasteCheckContent({ preview, choices, blocked, onConnector, onRe
 	return (
 		<div className='pasteCheck' data-testid='workflow-node-paste-check-dialog'>
 			<Typography variant='body'>{t(isNothingPasteable ? 'pasteCheck.nothingToPaste' : 'pasteCheck.intro')}</Typography>
+			<DocsLink page='guides/build-a-workflow' anchor='guide-copy-between-workflows' testId='workflow-paste-check-docs'>
+				{t('pasteCheck.docs')}
+			</DocsLink>
 			{blocked.length > 0 && (
 				<ul className='pasteCheckBlocked'>
 					{blocked.map((node) => (

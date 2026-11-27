@@ -377,5 +377,11 @@
     },
     "done": "The current value was reset",
     "failed": "The current value could not be reset."
+  },
+  "docs": {
+    "busyPolicy": "How the busy policy works",
+    "script": "How script variables work",
+    "constant": "How values are typed",
+    "mutable": "How mutable variables work"
   }
 }

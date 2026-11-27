@@ -2,6 +2,7 @@ import {beforeEach, describe, expect, it, vi} from 'vitest'
 import {fireEvent, render, screen} from '@testing-library/react'
 import {cloneElement, isValidElement, type ReactElement, type ReactNode} from 'react'
 import {useDashboardTourStore} from '@features/onboarding/dashboard-tour/model/dashboardTour.store'
+import {DOCS_BASE_URL} from '@shared/docs/docsUrl'
 
 const mocks = vi.hoisted(() => ({
     isAdmin: true,
@@ -128,7 +129,7 @@ describe('HelpMenu', () => {
         fireEvent.click(screen.getByTestId('topbar-docs'))
 
         expect(open).toHaveBeenCalledWith(
-            'https://docs.opencelium.io/en/prod/',
+            DOCS_BASE_URL,
             '_blank',
             'noopener,noreferrer',
         )

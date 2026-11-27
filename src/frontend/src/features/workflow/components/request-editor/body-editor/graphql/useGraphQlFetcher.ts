@@ -1,32 +1,32 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import type { Fetcher, FetcherParams } from '@graphiql/toolkit';
-import type { Connector } from '@entities/connector/model/types';
-import type { GraphQlLogin } from './graphQlBodyEditor.types';
-import { isGraphQlAccessDenied } from './graphQlBodyEditor.utils';
-import { resolveGraphQlAuthStrategy } from './strategies/resolveGraphQlAuthStrategy';
+import { errorBus } from '@shared/errors/api/errorBus';
+import { normalizeError } from '@shared/errors/api/normalizeError';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import { useTestMethodMutation } from '../../../../request-playground/model/playgroundApi';
+import type { MethodWithId } from '../../../../types/connection';
+import { buildGraphQlTestRequest, isGraphQlMutation, toGraphQlResult, type GraphQlResult } from './graphQlTestRequest';
 
-export function useGraphQlFetcher(connector: Connector | null, accessToken: string,
-	login: GraphQlLogin) {
-	const hasRetriedRef = useRef(false);
-	return useCallback<Fetcher>(async (params: FetcherParams) => {
-		if (!connector) return {};
-		const runQuery = (token: string) => resolveGraphQlAuthStrategy(connector).query({
-			url: connector.requestData?.url ?? '', accessToken: token, trustAnyCertificate: connector.sslCert,
-			query: params.query,
-			variables: params.variables as Record<string, unknown> | undefined,
-			operationName: params.operationName,
-		});
-		const outcome = await runQuery(accessToken);
-		if (!outcome.ok) return { errors: [{ message: 'Request failed' }] };
-		if (isGraphQlAccessDenied(outcome.result) && !hasRetriedRef.current) {
-			hasRetriedRef.current = true;
-			const freshToken = await login(connector);
-			hasRetriedRef.current = false;
-			if (!freshToken) return outcome.result as never;
-			const retryOutcome = await runQuery(freshToken);
-			return (retryOutcome.ok ? retryOutcome.result
-				: { errors: [{ message: 'Request failed' }] }) as never;
-		}
-		return outcome.result as never;
-	}, [accessToken, connector, login]);
+/**
+ * GraphiQL's requests (schema load and queries) go through the method test, so the backend signs
+ * them in with the connector's credentials. A mutation changes the real system and is confirmed first.
+ */
+export function useGraphQlFetcher(method: MethodWithId) {
+	const { t } = useI18n('workflow');
+	const confirm = useConfirm();
+	const [testMethod] = useTestMethodMutation();
+
+	return useCallback<Fetcher>(async (params: FetcherParams): Promise<GraphQlResult> => {
+		if (isGraphQlMutation(params) && !await confirm({
+			title: t('graphqlBody.confirmMutation.title'),
+			message: t('graphqlBody.confirmMutation.message'),
+		})) return { errors: [{ message: t('graphqlBody.mutationCancelled') }] };
+
+		const response = await testMethod(buildGraphQlTestRequest(method, params));
+		if ('data' in response && response.data) return toGraphQlResult(response.data);
+		const appError = normalizeError(response.error);
+		if (appError.type === 'UNAUTHORIZED' || appError.type === 'FORBIDDEN') errorBus.emit(appError);
+		return { errors: [{ message: appError.serverMessage ?? t('graphqlBody.requestFailed') }] };
+	}, [confirm, method, t, testMethod]);
 }

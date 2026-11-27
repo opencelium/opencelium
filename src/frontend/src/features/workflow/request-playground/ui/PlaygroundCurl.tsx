@@ -3,6 +3,7 @@ import type { Connector } from '@entities/connector/model/types';
 import { MasterPasswordGate } from '@features/master-password';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
+import { DocsLink } from '@shared/ui/actions/DocsLink';
 import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
@@ -69,6 +70,7 @@ function UnlockedCurl({ curl, connectors }: Props) {
 						{t(curl.state.kind === 'idle' ? 'requestPlayground.curl.generate' : 'requestPlayground.curl.regenerate')}
 					</Button>
 					<CopyButton value={command} testId='request-playground-curl-copy' />
+					<DocsLink page='guides/request-playground' anchor='guide-request-playground-curl' testId='request-playground-curl-docs' />
 				</div>
 			</div>
 			<CurlBody curl={curl} connectors={connectors} />

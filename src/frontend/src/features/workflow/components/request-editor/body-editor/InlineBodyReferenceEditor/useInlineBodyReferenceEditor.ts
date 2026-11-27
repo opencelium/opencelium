@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { isInEditorPopupLayer } from '../../editorPopupLayers';
 import { getInlineBodyReferencePosition } from './inlineBodyReferencePosition';
 
 export function useInlineBodyReferenceEditor(referenceId: string, onClose?: () => void) {
@@ -12,9 +13,7 @@ export function useInlineBodyReferenceEditor(referenceId: string, onClose?: () =
     const onMouseDown = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (!target || !popupRef.current || popupRef.current.contains(target)) return;
-      if (target.closest('.bodyLegacyWebhookModalRoot') || target.closest('.ant-select-dropdown')) {
-        return;
-      }
+      if (isInEditorPopupLayer(target)) return;
       setHidden(true);
       onClose?.();
     };
