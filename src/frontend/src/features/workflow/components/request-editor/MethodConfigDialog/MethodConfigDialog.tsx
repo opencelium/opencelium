@@ -13,13 +13,14 @@ export function MethodConfigDialog(props: MethodConfigDialogProps) {
 	const { t } = useI18n('workflow');
 	const { store, persistCurrentConfig } = useMethodConfigDialogState(props);
 	const isUrlMode = mode === 'url';
-	// Body and header already open at almost the full viewport; only the URL editor gets the toggle.
-	const { modalProps, toggle: maximizeToggle } = useMaximizableModal({
+	const { modalProps, toggle: maximizeToggle, isMaximized } = useMaximizableModal({
 		open: open && !!node,
 		layout: isUrlMode ? { width: 1180, className: 'wfDialog' } : { width: '94vw', style: { top: 18 }, className: 'wfDialog' },
 		testId: 'workflow-method-dialog-maximize',
-		isEnabled: isUrlMode,
 	});
+	// Maximized, the fullscreen body is a flex item filling the viewport, so the editor fills it
+	// instead of keeping the fixed height sized for the floating dialog.
+	const isFillingBody = !isUrlMode && isMaximized;
 
 	if (!open || !node) return null;
 	const title = mode === 'body' ? t('methodConfig.body')
@@ -36,7 +37,8 @@ export function MethodConfigDialog(props: MethodConfigDialogProps) {
 			styles={{
 				body: {
 					paddingTop: 8,
-					...(!isUrlMode ? { height: 'calc(100vh - 191px)', overflow: 'hidden' } : null),
+					...(isFillingBody ? { display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+						: !isUrlMode ? { height: 'calc(100vh - 191px)', overflow: 'hidden' } : null),
 				},
 			}}
 			footer={[
@@ -54,7 +56,8 @@ export function MethodConfigDialog(props: MethodConfigDialogProps) {
 				style={{
 					display: 'flex',
 					flexDirection: 'column',
-					height: !isUrlMode ? 'calc(100vh - 199px)' : undefined,
+					...(isFillingBody ? { flex: 1, minHeight: 0 }
+						: { height: !isUrlMode ? 'calc(100vh - 199px)' : undefined }),
 				}}>
 				<LiveInspectHint />
 				<div style={!isUrlMode ? { flex: 1, minHeight: 0 } : undefined}>
