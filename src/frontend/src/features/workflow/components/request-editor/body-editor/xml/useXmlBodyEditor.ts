@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { js2xml, xml2js } from 'xml-js';
+import { parseXmlBody, serializeXmlBody } from '../../../../utils/xmlBody';
 import { useMethodContext } from '../../../../providers/MethodContext';
 import type { RootState } from '../../../../store';
 import { updateConnection, updatePayload } from '../../../../store/connection/connectionSlice';
@@ -15,12 +15,6 @@ import {
 } from './xmlTree';
 import { useXmlEnhancementActions } from './useXmlEnhancementActions';
 import { useXmlSelectionState } from './useXmlSelectionState';
-
-const XML_JS_OPTIONS = {
-  compact: true,
-  attributesKey: '__oc__attributes',
-  textKey: '__oc__value',
-} as const;
 
 export function useXmlBodyEditor() {
   const dispatch = useDispatch();
@@ -38,7 +32,7 @@ export function useXmlBodyEditor() {
 
   useEffect(() => {
     try {
-      setRawXml(js2xml(serializeCompactXml(tree), { ...XML_JS_OPTIONS, spaces: 2 }));
+      setRawXml(serializeXmlBody(serializeCompactXml(tree)));
       setRawError(null);
     } catch {
       setRawXml('');
@@ -85,7 +79,7 @@ export function useXmlBodyEditor() {
     applyRawXml: (readOnly?: boolean) => {
       if (readOnly) return;
       try {
-        const parsed = xml2js(rawXml || '<root />', XML_JS_OPTIONS);
+        const parsed = parseXmlBody(rawXml);
         const nextTree = createTreeFromCompactXml(parsed);
         setTree(nextTree);
         setRawError(null);

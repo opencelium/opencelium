@@ -8,6 +8,7 @@ import type { PlaygroundSession } from '../../hooks/usePlaygroundSession';
 import type { PlaygroundValues } from '../../hooks/usePlaygroundValues';
 import { fromEditText, setBodyValue } from '../../model/bodyEdit';
 import { buildBodyPreview, type LineEdit } from '../../model/bodyPreview';
+import { buildXmlBodyPreview } from '../../model/xmlBodyPreview';
 import { readBodyFields } from '../../model/collectPlaygroundInputs';
 import { buildChipInputs } from '../../model/previewRequest';
 import { BodyRawEditor } from './BodyRawEditor';
@@ -33,6 +34,7 @@ export function BodyTab({ session, values, missingKeys, onSelectInput }: Props) 
 	const [mode, setMode] = useState<BodyMode>('pretty');
 	const { config, draft, inputs, connector, setEdits } = session;
 	const fields = readBodyFields(draft.request.body);
+	const chipInputs = buildChipInputs({ inputs, values: values.values, connector, requestData: values.requestData });
 	const editValue = ({ path, raw }: LineEdit, text: string) => setEdits((current) =>
 		({ ...current, body: setBodyValue(current.body ?? config.body, path, fromEditText(text, raw)) }));
 
@@ -56,13 +58,14 @@ export function BodyTab({ session, values, missingKeys, onSelectInput }: Props) 
 				)}
 			</div>
 			{mode === 'raw'
-				? <BodyRawEditor body={config.body} onChange={(body) => setEdits((current) => ({ ...current, body }))} />
+				? <BodyRawEditor key={config.bodyFormat} body={config.body} format={config.bodyFormat}
+					onChange={(body) => setEdits((current) => ({ ...current, body }))} />
 				: fields && typeof fields === 'object' && Object.keys(fields).length > 0
 					? <div className='rpCodeBox'>
 						<BodyCodeView missingKeys={missingKeys} testId='request-playground-body' onSelect={onSelectInput}
 							onEditValue={editValue}
-							lines={buildBodyPreview(fields, buildChipInputs({ inputs, values: values.values, connector,
-								requestData: values.requestData }))} />
+							lines={config.bodyFormat === 'xml' ? buildXmlBodyPreview(fields, chipInputs)
+								: buildBodyPreview(fields, chipInputs)} />
 					</div>
 					: <div className='rpEmptyNote'>{t('requestPlayground.body.empty')}</div>}
 		</div>

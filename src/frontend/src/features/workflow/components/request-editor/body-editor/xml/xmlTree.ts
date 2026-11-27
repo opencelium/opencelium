@@ -1,4 +1,5 @@
 import { createShortId } from '@shared/lib/createId';
+import { xmlRootEntry } from '../../../../utils/xmlBody';
 
 type XmlAttributes = Record<string, string>;
 
@@ -6,6 +7,7 @@ export type XmlTreeNode = {
   id: string;
   name: string;
   text: string;
+  declaration?: unknown;
   attributes: XmlAttributes;
   children: XmlTreeNode[];
 };
@@ -46,8 +48,8 @@ const parseNode = (name: string, raw: unknown): XmlTreeNode => {
 
 export const createTreeFromCompactXml = (value: unknown) => {
   const object = normalizeObject(value);
-  const [rootName, rootValue] = Object.entries(object)[0] || ['root', { [VALUE]: '' }];
-  return parseNode(rootName, rootValue);
+  const [rootName, rootValue] = xmlRootEntry(object) || ['root', { [VALUE]: '' }];
+  return { ...parseNode(rootName, rootValue), ...(object._declaration ? { declaration: object._declaration } : {}) };
 };
 
 const groupChildren = (children: XmlTreeNode[]) => {
@@ -72,7 +74,8 @@ export const serializeTreeNode = (node: XmlTreeNode): Record<string, unknown> =>
   return next;
 };
 
-export const serializeCompactXml = (node: XmlTreeNode) => ({ [node.name]: serializeTreeNode(node) });
+export const serializeCompactXml = (node: XmlTreeNode) => ({ [node.name]: serializeTreeNode(node),
+  ...(node.declaration ? { _declaration: node.declaration } : {}) });
 
 export const updateNode = (root: XmlTreeNode, nodeId: string, updater: (node: XmlTreeNode) => XmlTreeNode): XmlTreeNode => {
   if (root.id === nodeId) return updater(root);

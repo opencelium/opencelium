@@ -1238,6 +1238,7 @@
       "rawHint": "Changes apply to this test only, until you choose <b>Apply to method</b>.",
       "setReference": "[set reference]",
       "invalidJson": "Not valid JSON – the last valid body is sent.",
+      "invalidXml": "Not valid XML – the last valid body is sent.",
       "empty": "This request has no body.",
       "format": {
         "json": "JSON",
