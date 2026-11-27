@@ -47,7 +47,7 @@ Software
        uses ``READ COMMITTED`` instead of the new snapshot isolation).
    * - MongoDB
      - 7.0
-     - current stable, or the package of your distribution
+     - 9.1 or later
      - 5.3 is in use with MongoDB 8.3.
    * - nginx
      - any version that proxies WebSockets
