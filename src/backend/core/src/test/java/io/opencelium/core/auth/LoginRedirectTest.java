@@ -39,12 +39,17 @@ import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.settings.SettingReader;
 import io.opencelium.core.testsupport.fake.FakeIdp;
 
+import static io.opencelium.core.testsupport.OidcLoginRequests.CALLBACK_PATH;
 import static io.opencelium.core.testsupport.OidcLoginRequests.LOGIN_PATH;
 import static io.opencelium.core.testsupport.OidcLoginRequests.LOGIN_VERIFIER_HASH;
 import static io.opencelium.core.testsupport.OidcLoginRequests.assertErrorRedirect;
+import static io.opencelium.core.testsupport.OidcLoginRequests.locationOf;
 import static io.opencelium.core.testsupport.OidcLoginRequests.newLoginVerifierHash;
 import static io.opencelium.core.testsupport.OidcLoginRequests.start;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 /**
@@ -52,13 +57,18 @@ import static org.mockito.BDDMockito.given;
  * the origin of core, with the error code after the {@code #}: no host, no body, no message text and no value of the
  * request. No parameter and no header of the request changes the target.
  * <p>
- * The slice has the endpoint of the start, the beans of the OIDC login strategy with the fake IdP as the HTTP client
- * of the calls to an IdP, and the OIDC providers {@code kc} and {@code kc-down} of the self-host mode. The fake IdP
- * serves the discovery document of {@code kc} and never one of {@code kc-down}. The slice has no security filter chain
- * and no tenant: the full-application tests show that the endpoint is open, and the login records. No case of the
- * slice reaches the login record of a start.
+ * The answer of the IdP at the redirect URI ends the same way: the redirect to {@code /login/oidc} has the login code
+ * of the new session or the error code after the {@code #}, no host and no body, and no parameter and no header of the
+ * request changes it.
+ * <p>
+ * The slice has the endpoints of the start and of the answer, the beans of the OIDC login strategy with the fake IdP
+ * as the HTTP client of the calls to an IdP, and the OIDC providers {@code kc} and {@code kc-down} of the self-host
+ * mode. The fake IdP serves the discovery document of {@code kc} and never one of {@code kc-down}. The slice has no
+ * security filter chain and no tenant: the full-application tests show that the endpoints are open, the login records
+ * and the sessions. No case of the slice reaches the login record of a start. The completion of a login is a mock
+ * here, which gives the login code or the error; the full-application tests show which answer of the IdP gives which.
  */
-@WebMvcTest(controllers = OidcLoginController.class,
+@WebMvcTest(controllers = { OidcLoginController.class, OidcCallbackController.class },
 		// The application has no Spring Security user with a generated password, and the slice has none too.
 		excludeAutoConfiguration = UserDetailsServiceAutoConfiguration.class,
 		// The tenant filter needs the tenant runner, and the slice runs without filters.
@@ -79,6 +89,14 @@ class LoginRedirectTest {
 
 	private static final String ATTACKER_HOST = "attacker.example.com";
 
+	/** A login code as the completion of a login gives it: a signed token in the compact form. */
+	private static final String LOGIN_CODE = "eyJ0eXAiOiJsb2dpbi1jb2RlIn0." + UUID.randomUUID() + "."
+			+ UUID.randomUUID();
+
+	private static final String IDP_CODE = UUID.randomUUID().toString();
+
+	private static final String STATE = UUID.randomUUID().toString();
+
 	private static final FakeIdp IDP = new FakeIdp();
 
 	@TestBean(name = FakeIdp.BEAN_NAME, methodName = "fakeIdp")
@@ -89,6 +107,9 @@ class LoginRedirectTest {
 
 	@MockitoBean
 	OidcLoginRepository logins;
+
+	@MockitoBean
+	OidcLoginCompletion completion;
 
 	@Autowired
 	MockMvcTester mvc;
@@ -169,6 +190,80 @@ class LoginRedirectTest {
 		MvcTestResult start = request.exchange();
 
 		assertErrorRedirect(start, errorCode);
+	}
+
+	@Test
+	void callbackRedirectsToTheTargetWithTheLoginCodeWhenTheLoginGivesALoginCode() {
+		given(completion.complete(eq("kc"), any(), any(), any(), any()))
+			.willReturn(new OidcLoginOutcome.LoginCode(LOGIN_CODE));
+
+		MvcTestResult callback = answerOfTheIdp("kc").exchange();
+
+		assertThat(locationOf(callback)).isEqualTo("/login/oidc#code=" + LOGIN_CODE);
+		assertThat(callback.getResponse().getContentAsByteArray()).as("the body of the redirect").isEmpty();
+	}
+
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("errorsOfTheAnswer")
+	void callbackRedirectsToTheErrorTargetWhenTheLoginRefusesTheAnswerOfTheIdp(OidcLoginError error,
+			String errorCode) {
+		given(completion.complete(any(), any(), any(), any(), any())).willReturn(new OidcLoginOutcome.Refused(error));
+
+		MvcTestResult callback = answerOfTheIdp("kc").exchange();
+
+		assertErrorRedirect(callback, errorCode);
+	}
+
+	@Test
+	void callbackKeepsTheTargetWithTheLoginCodeWhenTheRequestNamesAnotherTargetOrAnotherHost() {
+		given(completion.complete(eq("kc"), any(), any(), any(), any()))
+			.willReturn(new OidcLoginOutcome.LoginCode(LOGIN_CODE));
+
+		MvcTestResult callback = withAnotherTargetAndHost(answerOfTheIdp("kc")).exchange();
+
+		assertThat(locationOf(callback)).isEqualTo("/login/oidc#code=" + LOGIN_CODE);
+		assertThat(callback.getResponse().getContentAsByteArray()).as("the body of the redirect").isEmpty();
+	}
+
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("errorsOfTheAnswer")
+	void callbackKeepsTheErrorTargetWhenTheRequestNamesAnotherTargetOrAnotherHost(OidcLoginError error,
+			String errorCode) {
+		given(completion.complete(any(), any(), any(), any(), any())).willReturn(new OidcLoginOutcome.Refused(error));
+
+		MvcTestResult callback = withAnotherTargetAndHost(answerOfTheIdp("kc")).exchange();
+
+		assertErrorRedirect(callback, errorCode);
+	}
+
+	/** The answer of the IdP at the redirect URI of the OIDC provider: a code and a state in the query. */
+	private MockMvcTester.MockMvcRequestBuilder answerOfTheIdp(String providerId) {
+		return mvc.get().uri(CALLBACK_PATH, providerId).param("code", IDP_CODE).param("state", STATE);
+	}
+
+	/** The request with parameters that name another target, and with headers that name another host. */
+	private static MockMvcTester.MockMvcRequestBuilder withAnotherTargetAndHost(
+			MockMvcTester.MockMvcRequestBuilder request) {
+		return request.param("redirect_uri", ATTACKER + "/login/oidc")
+			.param("target", ATTACKER)
+			.param("redirect", ATTACKER)
+			.param("return_to", ATTACKER)
+			.param("next", ATTACKER)
+			.header(HttpHeaders.HOST, ATTACKER_HOST)
+			.header("Forwarded", "proto=https;host=" + ATTACKER_HOST)
+			.header("X-Forwarded-Host", ATTACKER_HOST)
+			.header("X-Forwarded-Proto", "https")
+			.header("X-Forwarded-Prefix", "/elsewhere")
+			.header(HttpHeaders.ORIGIN, ATTACKER)
+			.header(HttpHeaders.REFERER, ATTACKER + "/");
+	}
+
+	/** The error of each refused answer of the IdP, and its error code. */
+	static Stream<Arguments> errorsOfTheAnswer() {
+		return Stream.of(arguments(OidcLoginError.UNKNOWN_PROVIDER, "unknown-provider"),
+				arguments(OidcLoginError.LOGIN_EXPIRED, "login-expired"),
+				arguments(OidcLoginError.IDP_ERROR, "idp-error"),
+				arguments(OidcLoginError.INVALID_ID_TOKEN, "invalid-id-token"));
 	}
 
 	/**

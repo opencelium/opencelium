@@ -115,6 +115,16 @@ public final class TenantDocuments {
 	}
 
 	/**
+	 * Reads and deletes the first document of the current tenant that matches the condition, in 1 operation of the
+	 * database: of 2 calls for 1 document, only 1 gets it.
+	 *
+	 * @return the deleted document, or nothing when no document of the current tenant matches the condition
+	 */
+	public <T extends TenantDocument> Optional<T> findAndDelete(Class<T> type, Criteria condition) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	/**
 	 * Deletes each document of the current tenant that matches the condition.
 	 *
 	 * @return the number of deleted documents

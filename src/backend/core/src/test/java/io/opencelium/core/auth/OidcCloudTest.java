@@ -43,6 +43,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The start of an OIDC login is open in the cloud mode too, and it knows no OIDC provider, also when the settings
  * document holds one: it redirects the browser to the login page of the frontend with the error code
  * {@code unknown-provider}, without a request to the IdP.
+ * <p>
+ * The redirect URI of an OIDC provider is open in the cloud mode too, and it ends the same way: an answer of an IdP
+ * there gets the error code {@code unknown-provider} without a request to the IdP and without a session. Before the
+ * tenant catalog no tenant has a database, so a read of a login record or the write of a session record would end the
+ * request with an error and not with the redirect.
  */
 @MongoIntegrationTest
 @AutoConfigureMockMvc
@@ -126,6 +131,21 @@ class OidcCloudTest {
 
 		OidcLoginRequests.assertErrorRedirect(start, "unknown-provider");
 		assertThat(IDP.requests()).as("the requests to an IdP").isEmpty();
+	}
+
+	@Test
+	void callbackRedirectsToTheErrorTargetOfUnknownProviderWithoutARequestToTheIdpOrASessionWhenTheModeIsCloud() {
+		storeTheProviderInTheSettingsDocument();
+
+		MvcTestResult callback = mvc.get().uri(OidcLoginRequests.CALLBACK_PATH, "kc")
+			.param("code", UUID.randomUUID().toString())
+			.param("state", UUID.randomUUID().toString())
+			.exchange();
+
+		OidcLoginRequests.assertErrorRedirect(callback, "unknown-provider");
+		assertThat(IDP.requests()).as("the requests to an IdP").isEmpty();
+		assertThat(mongo.getCollection("sessions").countDocuments()).as("the sessions in the system database")
+			.isZero();
 	}
 
 	/**

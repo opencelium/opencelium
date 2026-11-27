@@ -34,7 +34,7 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Hand test:** 1. Save the OIDC provider `kc`, and make a login verifier and its SHA-256 hash. 2. In a browser, open the login of `kc` with the hash, and log in at Keycloak as `alice`. 3. The address bar shows `/login/oidc#code=` with a login code, and `users` has 1 OpenCelium user with an OIDC link. 4. Log in as `alice` again: `users` still has 1 OpenCelium user with the OIDC link of `alice`. 5. Open the callback URL of step 2 again from the history: the browser goes to `/login/oidc#error=login-expired`.
 - **Size:** approximately 400 lines
 - **Depends on:** task 4
-- **Status:** open
+- **Status:** in work
 
 ## Task 6: feat(core): exchange a login code for the tokens of a session
 - **Criteria:** AO-05, AO-08 (a locked or deleted OpenCelium user at the exchange; the answer of the IdP in task 7)
