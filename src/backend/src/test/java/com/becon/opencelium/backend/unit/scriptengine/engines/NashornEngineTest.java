@@ -1,15 +1,21 @@
 package com.becon.opencelium.backend.unit.scriptengine.engines;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.becon.opencelium.backend.reference.ReferenceScanner;
 import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
 import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
 import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.LoggerFactory;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 
@@ -348,5 +354,29 @@ class NashornEngineTest {
 
         assertThat(outcome.result()).isEqualTo("done");
         assertThat(outcome.writes()).extracting(GlobalVariableWriter.ScriptSets.Write::value).containsExactly(1);
+    }
+
+    // ── warmUp ────────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("warmUp — the warm-up script gives its expected result, so nothing is logged as a warning")
+    void warmUpLogsNoWarningWhenScriptGivesExpectedResult() {
+        Logger logger = (Logger) LoggerFactory.getLogger(NashornEngine.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            engine.warmUp();
+        } finally {
+            logger.detachAppender(appender);
+        }
+
+        assertThat(appender.list).extracting(ILoggingEvent::getLevel).doesNotContain(Level.WARN);
+    }
+
+    @Test
+    @DisplayName("warmUp — Spring calls it once the engine is created, before any execution can start")
+    void warmUpRunsWhenSpringCreatesEngine() throws NoSuchMethodException {
+        assertThat(NashornEngine.class.getMethod("warmUp").isAnnotationPresent(PostConstruct.class)).isTrue();
     }
 }
