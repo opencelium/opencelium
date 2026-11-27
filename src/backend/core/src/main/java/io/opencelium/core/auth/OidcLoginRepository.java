@@ -17,4 +17,11 @@ class OidcLoginRepository {
 		this.documents = documents;
 	}
 
+	/**
+	 * @throws IllegalArgumentException when the login record is not of the current tenant
+	 */
+	void insert(OidcLoginRecord login) {
+		documents.insert(login);
+	}
+
 }

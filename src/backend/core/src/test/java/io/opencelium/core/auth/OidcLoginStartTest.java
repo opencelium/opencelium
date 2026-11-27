@@ -354,7 +354,7 @@ class OidcLoginStartTest {
 		saveTheProvider("stopped", STOPPED_ISSUER_URL);
 		IDP.reset();
 		IDP.serveDiscoveryDocument(ISSUER_URL);
-		// Past the life of a discovery document that core kept at the save, so that the start reads the document.
+		// Past the life of a kept discovery document, so that the start reads the document also if core kept one.
 		CLOCK.advance(LIFE_OF_A_KEPT_DISCOVERY_DOCUMENT.plusMinutes(1));
 
 		MvcTestResult start = start(mvc, "stopped", newLoginVerifierHash());

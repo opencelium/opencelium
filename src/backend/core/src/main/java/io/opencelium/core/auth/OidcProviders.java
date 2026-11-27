@@ -83,8 +83,13 @@ final class OidcProviders implements SettingRule {
 	}
 
 	private static boolean isValid(Map<?, ?> provider) {
-		return provider.get(ID) instanceof String id && PROVIDER_ID.matcher(id).matches()
+		return provider.get(ID) instanceof String id && isProviderId(id)
 				&& provider.get(ISSUER_URL) instanceof String issuerUrl && isHttpsUrlWithHost(issuerUrl);
+	}
+
+	/** @return {@code true} when the text has the form of a provider ID */
+	static boolean isProviderId(String text) {
+		return PROVIDER_ID.matcher(text).matches();
 	}
 
 	private static boolean isHttpsUrlWithHost(String text) {
