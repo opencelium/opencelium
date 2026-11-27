@@ -88,12 +88,12 @@ class AuthConfig {
 	}
 
 	/**
-	 * The main chain matches each request that no other chain matches, so it comes last. The login and the login
-	 * options are open, and they ignore a bearer token, so that an old session JWT in the header of the HTTP client
-	 * does not stop a new login or the login page. Each other request needs a valid session JWT as the bearer token;
-	 * without one it gets the answer of {@link #refuse}. The chain is stateless: no server session and no cookie, so it
-	 * needs no CSRF token. Spring Security exists only in a web application, so a start without a web server has no
-	 * chain.
+	 * The main chain matches each request that no other chain matches, so it comes last. The login, the login options
+	 * and the start of an OIDC login are open, and they ignore a bearer token, so that an old session JWT in the header
+	 * of the HTTP client does not stop a new login or the login page. Each other request needs a valid session JWT as
+	 * the bearer token; without one it gets the answer of {@link #refuse}. The chain is stateless: no server session
+	 * and no cookie, so it needs no CSRF token. Spring Security exists only in a web application, so a start without a
+	 * web server has no chain.
 	 * <p>
 	 * A request that a permission rule of the access control refuses gets the answer of {@link #denial}: the rules run
 	 * before the code of an endpoint, so the chain writes that response for each endpoint.
@@ -109,7 +109,9 @@ class AuthConfig {
 		RequestMatcher login = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, LoginController.PATH);
 		RequestMatcher loginOptions = PathPatternRequestMatcher.withDefaults()
 			.matcher(HttpMethod.GET, LoginOptionsController.PATH);
-		RequestMatcher open = RequestMatchers.anyOf(login, loginOptions);
+		RequestMatcher oidcLogin = PathPatternRequestMatcher.withDefaults()
+			.matcher(HttpMethod.GET, OidcLoginController.PATH);
+		RequestMatcher open = RequestMatchers.anyOf(login, loginOptions, oidcLogin);
 		var sessionJwts = new JwtAuthenticationProvider(
 				signature.decoder(SessionTokens.SESSION_JWT_TYPE, SessionTokens.ISSUER));
 		sessionJwts.setJwtAuthenticationConverter(SessionTokens::authenticationOf);

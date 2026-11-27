@@ -24,14 +24,7 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Criteria:** AO-01, AO-02, AO-09. **Status:** done
 
 ## Task 4: feat(core): redirect the browser to the IdP of an OIDC provider
-- **Criteria:** AO-03 (the redirect; the late answer in task 5), AO-09 (the refused start)
-- **Read:** plan: decisions 2, 4, 6, Interfaces and contracts, Risks; architecture: 6.3, 6.7, decisions 15, 16, 29
-- **Function:** A browser that opens the login of an OIDC provider goes to the login page of its IdP. MongoDB shows a login record for each started login.
-- **Tests:** `OidcLoginStartTest` (full application), `LoginRedirectTest` (slice), `OidcCloudTest` (full application, more cases)
-- **Hand test:** 1. Save the OIDC provider `kc`, and make a random login verifier and its SHA-256 hash. 2. In a browser, open `/api/auth/oidc/kc/login` with the hash: the login page of Keycloak opens. 3. In `mongosh`, `oidc_logins` has 1 login record of `kc` without a code of the IdP. 4. Open `/api/auth/oidc/unknown/login` with the hash: the browser goes to `/login/oidc#error=unknown-provider`.
-- **Size:** approximately 280 lines
-- **Depends on:** task 3
-- **Status:** open
+- **Criteria:** AO-03, AO-09. **Status:** done
 
 ## Task 5: feat(core): start a session after an OIDC login at the IdP
 - **Criteria:** AO-03 (the late answer), AO-04, AO-06, AO-07 (rules 1 and 3; rule 2 and the email of rule 3 in task 7)

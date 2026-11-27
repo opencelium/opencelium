@@ -1,5 +1,6 @@
 package io.opencelium.core.auth;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 
@@ -9,14 +10,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 
 import io.opencelium.core.auth.oidc.OidcDiscovery;
+import io.opencelium.core.auth.oidc.OidcDiscoveryCache;
 import io.opencelium.core.auth.oidc.OidcRequestFactory;
 import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.settings.SettingDefinition;
 import io.opencelium.core.settings.SettingType;
 
 /**
- * The OIDC login strategy: the installation setting of the OIDC providers, and the HTTP client of the calls of core
- * to an IdP. The setting has no OIDC provider by default, and its number of OIDC providers has no fixed limit.
+ * The OIDC login strategy: the installation setting of the OIDC providers, the HTTP client of the calls of core to an
+ * IdP, and the cache of the discovery documents of the start of a login. The setting has no OIDC provider by default,
+ * and its number of OIDC providers has no fixed limit.
  */
 @Configuration(proxyBeanMethods = false)
 class OidcConfig {
@@ -41,6 +44,12 @@ class OidcConfig {
 	@Bean
 	OidcDiscovery oidcDiscovery(@Qualifier(REQUEST_FACTORY) ClientHttpRequestFactory requestFactory) {
 		return new OidcDiscovery(requestFactory);
+	}
+
+	/** The start of a login reads a discovery document through the cache. The check of a setting change does not. */
+	@Bean
+	OidcDiscoveryCache oidcDiscoveryCache(OidcDiscovery discovery, Clock clock) {
+		return new OidcDiscoveryCache(discovery, clock);
 	}
 
 	@Bean

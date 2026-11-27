@@ -10,6 +10,7 @@ spring:
 
 server:
   port: 9090
+#  forward-headers-strategy: native   # behind a proxy: the OIDC redirect URI gets its address; the proxy replaces X-Forwarded-*
 
 #opencelium:
 #  deployment-mode: self-host        # self-host | cloud
