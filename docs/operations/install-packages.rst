@@ -30,7 +30,7 @@ Update your system, download and install required packages.
 
 	apt update
 	apt dist-upgrade
-	apt install unzip mariadb-server mariadb-client openjdk-17-jdk nginx
+	apt install unzip mariadb-server mariadb-client openjdk-17-jre-headless nginx
 
 **2. Install MongoDB:**
 
@@ -196,7 +196,7 @@ Update your system, download and install required packages.
 .. code-block:: sh
 	:linenos:
 
-	zypper install unzip insserv mariadb mariadb-client java-17-openjdk nginx
+	zypper install unzip insserv mariadb mariadb-client java-17-openjdk-headless nginx
 
 **2. Install MongoDB:**
 
@@ -375,7 +375,7 @@ Update your system, download and install required packages.
 	:linenos:
 
 	yum update
-	yum install unzip mariadb-server java-17-openjdk nginx
+	yum install unzip mariadb-server java-17-openjdk-headless nginx
 
 **2. Install MongoDB:**
 
