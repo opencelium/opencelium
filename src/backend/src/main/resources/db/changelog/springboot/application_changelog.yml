@@ -328,10 +328,6 @@ versions:
         operation: add
         value: TRANSACTION_READ_COMMITTED
         path: spring.datasource.hikari.transaction-isolation
-      - changeset: 3
-        operation: add
-        value: 65536
-        path: opencelium.global-variable.max-value-bytes
   - version: 5.3
     changes:
       - changeset: 1
@@ -374,3 +370,7 @@ versions:
         operation: modify
         value: 480000
         path: opencelium.forgot-psw.lockout-time
+      - changeset: 11
+        operation: add
+        value: 65536
+        path: opencelium.global-variable.max-value-bytes
