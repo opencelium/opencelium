@@ -136,6 +136,18 @@ final class SessionTokens {
 				List.of());
 	}
 
+	/**
+	 * The login of an exchange with a valid login code: its principal is the {@link UserPrincipal} of the login code,
+	 * without roles, and its credentials are the login code itself, whose code ID and hash of the login verifier the
+	 * session service reads.
+	 *
+	 * @throws InvalidBearerTokenException when the login code lacks a claim of a login code, so the request gets the
+	 *                                     status code 401
+	 */
+	static UsernamePasswordAuthenticationToken authenticationOfLoginCode(Jwt loginCode) {
+		throw new UnsupportedOperationException();
+	}
+
 	private static UserPrincipal principalOf(Jwt token, Set<String> roles) {
 		String userId = token.getSubject();
 		String tenantId = token.getClaimAsString(TENANT_ID_CLAIM);

@@ -85,6 +85,20 @@ final class SessionService {
 	}
 
 	/**
+	 * Gives the 2 tokens of the session of a valid login code, once. The login verifier must be the one whose hash the
+	 * login code holds; an exchange with a wrong one uses nothing and ends nothing.
+	 *
+	 * @param loginCode     a login code that the decoder of its type accepted
+	 * @param loginVerifier the login verifier that the HTTP client gives with the login code
+	 * @throws InvalidLoginVerifierException when the hash of the login verifier is not the hash of the login code
+	 * @throws SessionEndedException         when the login code was used already, or when the OpenCelium user is
+	 *                                       locked or deleted
+	 */
+	IssuedTokens exchange(Jwt loginCode, String loginVerifier) {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
 	 * Gives 2 new tokens for the session of a valid refresh token, and the old refresh token stops.
 	 *
 	 * @param refreshToken a refresh token that the decoder of its type accepted

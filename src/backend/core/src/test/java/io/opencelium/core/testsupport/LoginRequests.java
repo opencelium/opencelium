@@ -14,9 +14,9 @@ import io.opencelium.core.setup.SetupContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The requests of a login, of the current OpenCelium user, of a refresh and of a logout, for a full-application test
- * with MockMvc. The default admin of the setup exists in each self-host test database: core makes it at the start of
- * an empty database.
+ * The requests of a login, of the current OpenCelium user, of a refresh, of a logout and of the exchange of a login
+ * code, for a full-application test with MockMvc. The default admin of the setup exists in each self-host test
+ * database: core makes it at the start of an empty database.
  */
 public final class LoginRequests {
 
@@ -27,6 +27,9 @@ public final class LoginRequests {
 	public static final String REFRESH_PATH = "/api/auth/refresh";
 
 	public static final String LOGOUT_PATH = "/api/auth/logout";
+
+	/** The exchange of the login code of a redirect login for the 2 tokens of its session. */
+	public static final String LOGIN_CODE_PATH = "/api/auth/login-code";
 
 	private LoginRequests() {
 	}
@@ -94,6 +97,25 @@ public final class LoginRequests {
 	/** A logout, with the token as the bearer token. */
 	public static MvcTestResult logOut(MockMvcTester mvc, String token) {
 		return mvc.post().uri(LOGOUT_PATH).header(HttpHeaders.AUTHORIZATION, "Bearer " + token).exchange();
+	}
+
+	/**
+	 * The exchange of a login code, as the HTTP client sends it after a redirect login: the token as the bearer token,
+	 * and the login verifier in the JSON body.
+	 */
+	public static MvcTestResult exchange(MockMvcTester mvc, String token, String loginVerifier) {
+		return exchangeWithBody(mvc, token, exchangeBody(loginVerifier));
+	}
+
+	/** An exchange with the token as the bearer token and the text as the JSON body, also a text that is not JSON. */
+	public static MvcTestResult exchangeWithBody(MockMvcTester mvc, String token, String body) {
+		return mvc.post().uri(LOGIN_CODE_PATH).header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON).content(body).exchange();
+	}
+
+	/** The JSON body of an exchange; the login verifier must need no JSON escape. */
+	public static String exchangeBody(String loginVerifier) {
+		return "{\"loginVerifier\": \"" + loginVerifier + "\"}";
 	}
 
 }

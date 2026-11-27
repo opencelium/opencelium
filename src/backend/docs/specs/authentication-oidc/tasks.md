@@ -37,7 +37,7 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Hand test:** 1. Log in as `alice` through `kc` with a login verifier, and copy the login code from the address bar. 2. Send `POST /api/auth/login-code` with the login code and a wrong login verifier: 401 with `invalid-login-verifier`. 3. Send it again with the correct login verifier: the response has a session JWT and a refresh token. 4. Send `GET /api/auth/me` with the session JWT: the response shows the OpenCelium user of `alice`. 5. Send step 3 again: 401 with `session-ended`, and a refresh with the refresh token of step 3 fails.
 - **Size:** approximately 230 lines
 - **Depends on:** task 5
-- **Status:** open
+- **Status:** in work
 
 ## Task 7: feat(core): link an OIDC login by email, refuse a locked OpenCelium user
 - **Criteria:** AO-07 (rule 2 and the email of rule 3), AO-08 (the answer of the IdP)
