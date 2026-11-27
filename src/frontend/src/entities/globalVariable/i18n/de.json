@@ -377,5 +377,11 @@
     },
     "done": "Der aktuelle Wert wurde zurückgesetzt",
     "failed": "Der aktuelle Wert konnte nicht zurückgesetzt werden."
+  },
+  "docs": {
+    "busyPolicy": "So funktioniert die Belegt-Regel",
+    "script": "So funktionieren Skriptvariablen",
+    "constant": "So werden Werte typisiert",
+    "mutable": "So funktionieren veränderliche Variablen"
   }
 }

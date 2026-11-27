@@ -45,6 +45,7 @@ const ProfileButton = () => {
                     type="text"
                     onClick={openProfile}
                     testId="topbar-profile"
+                    ariaLabel={tCommon('topbar.profile')}
                     style={{padding: 2, height: 'auto'}}
                 >
                     <EntityAvatar path={profilePicture} fallbackIcon="profile" size={26} fit="cover"/>
@@ -56,6 +57,7 @@ const ProfileButton = () => {
                     iconProps={{name: 'profile', color: 'primary'}}
                     onClick={openProfile}
                     testId="topbar-profile"
+                    ariaLabel={tCommon('topbar.profile')}
                 />
             )}
         </Tooltip>

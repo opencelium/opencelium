@@ -6,7 +6,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { XmlFieldEditor } from '../XmlFieldEditor/XmlFieldEditor';
 import { XmlNodeDialogs } from '../XmlNodeDialogs/XmlNodeDialogs';
-import type { XmlTreeNode } from '../xmlTree';
+import { hasMixedText, type XmlTreeNode } from '../xmlTree';
 import { XmlNodeAttributes } from './XmlNodeAttributes';
 import type { XmlNodeCardProps } from './XmlNodeCard.types';
 import '../xmlNode.css';
@@ -41,12 +41,14 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
 			</Space>}
 		</div>
 		<div className='xmlNodeBody'>
-			<XmlFieldEditor variant='text' label={<span className='xmlSectionBadge xmlSectionBadgeText'>
+			{/* An element holds text or child elements; text left next to children is shown to be cleared. */}
+			{(node.children.length === 0 || hasMixedText(node)) && <XmlFieldEditor variant='text' label={<span className='xmlSectionBadge xmlSectionBadgeText'>
 				{t('xmlNode.text')}</span>} value={node.text} placeholder={t('xmlNode.textPlaceholder')}
 				selection={{ nodeId: node.id, kind: 'text' }} selected={selectedText} readOnly={readOnly}
 				onSelect={onSelect} onChange={(text) => onChangeNode(node.id, { text })}
 				onReferenceClick={onReferenceClick} onInsertReference={onInsertReference}
-				onEdit={() => { onSelect({ nodeId: node.id, kind: 'text' }); setIsTextDialogOpen(true); }} />
+				onEdit={() => { onSelect({ nodeId: node.id, kind: 'text' }); setIsTextDialogOpen(true); }} />}
+			{hasMixedText(node) && <div className='xmlNodeMixedText' data-testid='xml-node-mixed-text'>{t('xmlNode.mixedText')}</div>}
 			<XmlNodeAttributes node={node} readOnly={readOnly} selected={selected}
 				onChangeNode={onChangeNode} onSelect={onSelect} onReferenceClick={onReferenceClick}
 				onInsertReference={onInsertReference} onEdit={setEditingAttribute} />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { js2xml, xml2js } from 'xml-js';
+import { parseXmlBody, serializeXmlBody } from '../../../../utils/xmlBody';
 import { useMethodContext } from '../../../../providers/MethodContext';
 import type { RootState } from '../../../../store';
 import { updateConnection, updatePayload } from '../../../../store/connection/connectionSlice';
@@ -15,14 +15,10 @@ import {
 } from './xmlTree';
 import { useXmlEnhancementActions } from './useXmlEnhancementActions';
 import { useXmlSelectionState } from './useXmlSelectionState';
-
-const XML_JS_OPTIONS = {
-  compact: true,
-  attributesKey: '__oc__attributes',
-  textKey: '__oc__value',
-} as const;
+import { useXmlBodyErrorMessage } from './useXmlBodyErrorMessage';
 
 export function useXmlBodyEditor() {
+  const describeError = useXmlBodyErrorMessage();
   const dispatch = useDispatch();
   const { method } = useMethodContext();
   const connection = useSelector((state: RootState) => state.connection.connection);
@@ -38,7 +34,7 @@ export function useXmlBodyEditor() {
 
   useEffect(() => {
     try {
-      setRawXml(js2xml(serializeCompactXml(tree), { ...XML_JS_OPTIONS, spaces: 2 }));
+      setRawXml(serializeXmlBody(serializeCompactXml(tree)));
       setRawError(null);
     } catch {
       setRawXml('');
@@ -84,15 +80,15 @@ export function useXmlBodyEditor() {
     tree,
     applyRawXml: (readOnly?: boolean) => {
       if (readOnly) return;
-      try {
-        const parsed = xml2js(rawXml || '<root />', XML_JS_OPTIONS);
-        const nextTree = createTreeFromCompactXml(parsed);
-        setTree(nextTree);
-        setRawError(null);
-        syncBody(nextTree);
-      } catch (value) {
-        setRawError(value instanceof Error ? value.message : 'Invalid XML');
+      const parsed = parseXmlBody(rawXml);
+      if (!parsed.ok) {
+        setRawError(describeError(parsed.error));
+        return;
       }
+      const nextTree = createTreeFromCompactXml(parsed.fields);
+      setTree(nextTree);
+      setRawError(null);
+      syncBody(nextTree);
     },
     insertReference: (reference: string) => {
       if (!selection) return;

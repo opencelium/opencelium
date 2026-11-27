@@ -17,6 +17,7 @@ export const AntButton: ButtonComponent = ({
     color,
     style,
     testId,
+    ariaLabel,
    ...rest
 }) => {
     // `minWidth: 51px` is a default floor for text-only buttons, not a mandate —
@@ -33,6 +34,7 @@ export const AntButton: ButtonComponent = ({
         <AntButtonBase
             {...rest}
             data-testid={testId}
+            aria-label={ariaLabel}
             style={style}
             loading={false}
             color={color}

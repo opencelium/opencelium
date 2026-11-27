@@ -1,11 +1,11 @@
 import type { ComponentProps } from 'react';
-import type { TransformTarget } from '../../model/notificationTransformTargets';
+import type { AnyTransformTarget } from '../../model/notificationTransformTargets';
 import { ReferenceTextField } from '../references/ReferenceTextField';
 import { useNotificationTransformations } from './notificationTransformationContextValue';
 import { TransformationButton } from './TransformationButton';
 import { TransformationField } from './TransformationField';
 
-type Props = Omit<ComponentProps<typeof ReferenceTextField>, 'actions'> & { target: TransformTarget };
+type Props = Omit<ComponentProps<typeof ReferenceTextField>, 'actions'> & { target: AnyTransformTarget };
 
 /** A message value: references inline in text, or — once turned into one — a transformation. */
 export function NotificationValueField({ target, ...field }: Props) {

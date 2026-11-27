@@ -17,5 +17,9 @@
     "features_other": "{{count}} Funktionen",
     "fixes_one": "{{count}} Fehlerbehebung",
     "fixes_other": "{{count}} Fehlerbehebungen"
+  },
+  "docs": {
+    "whatsNew": "Neu in {{version}}",
+    "upgrade": "Vor dem Update prüfen"
   }
 }

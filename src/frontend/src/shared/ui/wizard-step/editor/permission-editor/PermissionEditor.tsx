@@ -3,6 +3,7 @@ import {useFormContext} from "react-hook-form";
 import {Table} from "antd";
 import {EntityText} from "@shared/ui/primitives/Text";
 import {Checkbox} from "@shared/ui/primitives/Checkbox";
+import {DocsLink} from "@shared/ui/actions/DocsLink";
 import type {Permission} from "@entities/role/model/types.ts";
 import {useGetComponentsQuery} from "@entities/role/api/componentApi.ts";
 import type {Mode} from "@/engine/entity/EntityDefinition.ts";
@@ -104,6 +105,7 @@ export const PermissionEditor: React.FC<PermissionEditorProps> = ({ name, label,
                         <EntityText typoProps={{isBold: true}} i18nKey={label}/>
                     </span>
                     <span className="form-control__required">*</span>
+                    <DocsLink page="reference/permissions" anchor="components" testId="role-permissions-docs"/>
                 </label>
             )}
             <Table

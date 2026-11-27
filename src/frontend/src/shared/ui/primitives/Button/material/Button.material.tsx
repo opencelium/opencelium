@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button as MuiButton} from '@mui/material';
-import type { ButtonComponent } from './Button.types';
+import type { ButtonComponent } from '../Button.types';
 import {Icon} from "@shared/ui/primitives/Icon";
 import './button.material.css';
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
@@ -19,6 +19,7 @@ export const MaterialButton: ButtonComponent = ({
     iconLeft,
     iconRight,
     testId,
+    ariaLabel,
     ...rest
 }) => {
     return (
@@ -26,6 +27,7 @@ export const MaterialButton: ButtonComponent = ({
             variant={variantMap[variant]}
             {...rest}
             data-testid={testId}
+            aria-label={ariaLabel}
             disabled={disabled || loading}
             sx={{
                 position: 'relative',

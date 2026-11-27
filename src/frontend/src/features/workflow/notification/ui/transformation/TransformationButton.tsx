@@ -2,15 +2,15 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { getTransformationAvailability } from '../../model/notificationTransformation';
-import { locateTransformTarget, type TransformTarget } from '../../model/notificationTransformTargets';
+import type { AnyTransformTarget } from '../../model/notificationTransformTargets';
 import { useNotificationTransformations } from './notificationTransformationContextValue';
 
-type Props = { target: TransformTarget; value: string; testId: string; disabled?: boolean; onChange: (value: string) => void };
+type Props = { target: AnyTransformTarget; value: string; testId: string; disabled?: boolean; onChange: (value: string) => void };
 
-const useDisabledReason = (target: TransformTarget, value: string): string | null => {
-	const { toolId, message } = useNotificationTransformations();
-	if (!toolId) return 'unused';
-	const location = locateTransformTarget(toolId, message, target);
+const useDisabledReason = (target: AnyTransformTarget, value: string): string | null => {
+	const { locate } = useNotificationTransformations();
+	const location = locate(target);
+	if (!location) return 'unused';
 	if (location.kind !== 'whole') return location.kind;
 	const availability = getTransformationAvailability(value);
 	return availability === 'ok' ? null : availability;

@@ -37,8 +37,11 @@ const MENU_ITEM_COMPONENT: Partial<Record<string, PermissionComponent>> = {
 // in a new tab on ctrl/cmd/middle-click. Color is inherited so it matches the
 // menu text in both light and dark themes. Normal-click navigation is still
 // handled by the Menu's onClick (see NavigationMenu).
-const link = (to: string, label: ReactNode): ReactNode => (
-    <a href={to} style={{color: 'inherit', textDecoration: 'none'}}>
+// `isFlex` is for a label wrapped in NewFeature: its Tooltip wrapper is a block-level
+// flex box, which inside an inline anchor breaks onto a second line and is clipped out of
+// the row in the collapsed sidebar's popup submenu.
+const link = (to: string, label: ReactNode, isFlex = false): ReactNode => (
+    <a href={to} style={{color: 'inherit', textDecoration: 'none', ...(isFlex && {display: 'inline-flex'})}}>
         {label}
     </a>
 );
@@ -100,7 +103,7 @@ export const useAdminMenu = (): any[] => {
                 leaf('/data-aggregator', <GrAggregate/>, t('menu.dataAggregator')),
                 {
                     ...leaf('/global-variable', <GlobalVariableGlyph/>, t('menu.globalVariables')),
-                    label: link('/global-variable', <NewFeature id='global-variables' variant='pill' placement='right'>{t('menu.globalVariables')}</NewFeature>),
+                    label: link('/global-variable', <NewFeature id='global-variables' variant='pill' placement='right'>{t('menu.globalVariables')}</NewFeature>, true),
                 },
                 leaf('/notification-template', <MdNotificationAdd/>, t('menu.notificationTemplates')),
                 leaf('/category', <BiCategory/>, t('menu.categories')),

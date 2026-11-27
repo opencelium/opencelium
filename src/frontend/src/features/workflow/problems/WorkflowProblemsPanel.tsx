@@ -3,6 +3,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { DocsLink } from '@shared/ui/actions/DocsLink';
 import type { WorkflowIssue, WorkflowProblemSeverity } from './workflowProblems';
 import type { WorkflowIssueGroups } from './useWorkflowIssues';
 import { useWorkflowProblemText } from './useWorkflowProblemText';
@@ -69,7 +70,10 @@ export function WorkflowProblemsPanel({ open, issues, onClose, onSelectNode }: P
 			<aside data-testid="workflow-problems-panel"
 				className={`rightDrawer workflowProblemsDrawer ${open ? 'rightDrawerOpen' : ''}`}>
 				<div className="drawerHeader">
-					<div className="drawerTitle">{t('problems.title')}</div>
+					<div className="drawerTitle">
+						{t('problems.title')}
+						<DocsLink page="guides/check-a-workflow" anchor="what-is-checked" testId="workflow-problems-docs" />
+					</div>
 					<Tooltip content={t('problems.close')}>
 						<IconButton type="text" iconProps={{ name: 'close' }} onClick={onClose}
 							testId="workflow-problems-close" />

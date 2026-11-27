@@ -198,5 +198,9 @@
       "baseUrlMissing": "The server returned an unusable link because its set-password address is not configured. Ask an administrator to set opencelium.forgot-psw.base-url to this app's /set-password page, then create the link again.",
       "failed": "Could not create the password reset link. Please try again."
     }
+  },
+  "docs": {
+    "signIn": "Email, username or both: how signing in works",
+    "resetLink": "About password reset links"
   }
 }

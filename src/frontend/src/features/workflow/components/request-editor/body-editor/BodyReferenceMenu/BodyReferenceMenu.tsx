@@ -6,6 +6,7 @@ import { useTestRun } from '../../../../test-run/useTestRun';
 import type { Connection, MethodWithId } from '../../../../types/connection';
 import { BodyPointerEditorPopup } from '../BodyPointer/BodyPointerEditorPopup';
 import '../BodyPointer/BodyPointer.css';
+import { isInEditorPopupLayer } from '../../editorPopupLayers';
 
 type Props = {
   /** The reference as written in the field — what the editor opens on. */
@@ -37,7 +38,7 @@ export function BodyReferenceMenu({ value, children, title, onEdit, onRemove, co
     if (!editorPos) return;
     const onMouseDown = (event: globalThis.MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target?.closest('.bodyPointerEditorPopup, .ant-select-dropdown, .bodyLegacyWebhookModalRoot')) return;
+      if (target?.closest('.bodyPointerEditorPopup') || isInEditorPopupLayer(target)) return;
       setEditorPos(null);
     };
     document.addEventListener('mousedown', onMouseDown, true);

@@ -75,7 +75,7 @@ describe('notification transformation bindings', () => {
 		const { bindings, transformations } = transformedBody(configFor('slack', { text: 'Hi', body: STATE }));
 		const moved = configFor('slack', { text: 'Hi', header: 'New', body: `${STATE} ${ID}` });
 		const next = reconcileTransformationBindings({ config: moved, color: COLOR, bindings, transformations });
-		expect(resultVarOf(next)).toBe(`${COLOR}.(request).body.$.blocks.[1].text.text`);
+		expect(resultVarOf(next)).toBe(`${COLOR}.(request).body.$.blocks[1].text.text`);
 		expect(next[0].enhancement.args).toMatchObject({ VAR_0: `${COLOR}.(response).body.$.state`, VAR_1: `${COLOR}.(response).body.$.id` });
 		expect(next[0].enhancement.script).toBe('RESULT_VAR = VAR_0.toUpperCase()');
 		expect(next[1]).toBe(other);
@@ -105,7 +105,7 @@ describe('notification transformation bindings', () => {
 	it('is saved as a backend field binding on the body field', () => {
 		const { bindings } = transformedBody(configFor('slack', {}));
 		const [saved] = serializeWorkflowFieldBindings(bindings);
-		expect(saved.to).toEqual([{ color: COLOR, type: 'request', field: 'body.$.blocks.[0].text.text' }]);
+		expect(saved.to).toEqual([{ color: COLOR, type: 'request', field: 'body.$.blocks[0].text.text' }]);
 		expect(saved.from).toEqual([{ color: COLOR, type: 'response', field: 'body.$.state' }]);
 		expect(saved.enhancement.expertCode).toBe('RESULT_VAR = VAR_0.toUpperCase();');
 	});

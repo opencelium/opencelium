@@ -2,6 +2,10 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {FormProvider, useForm} from 'react-hook-form';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {CronEditor} from './CronEditor';
+// Provider-free stand-in; the real link renders primitives that need SystemProvider.
+vi.mock('@shared/ui/actions/DocsLink', () => ({
+	DocsLink: ({ children }: { children?: import('react').ReactNode }) => <span>{children}</span>,
+}));
 vi.mock("@shared/i18n/hooks/useI18n", () => ({useI18n: () => ({t: (key: string) => key, lang: "en"})}));
 vi.mock('@shared/ui/form/FormInput', () => ({
     FormInput: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,

@@ -15,6 +15,7 @@ export const MenuSwitcher = () => {
                 iconProps={{ name: 'settings', color: menuType === 'admin' ? 'inherit' : 'primary' }}
                 onClick={toggleMenu}
                 testId="topbar-menu-switch"
+                ariaLabel={tCommon(labelKey)}
             />
         </Tooltip>
     );

@@ -9,6 +9,7 @@ import {buildTestId} from "@shared/testing/testId.ts";
 export const FormControl: React.FC<FormControlProps> = ({
     label,
     labelKey,
+    labelExtra,
     hint,
     error,
     children,
@@ -31,6 +32,7 @@ export const FormControl: React.FC<FormControlProps> = ({
                     {required && (
                         <span className="form-control__required">*</span>
                     )}
+                    {labelExtra}
                 </label>
             )}
 

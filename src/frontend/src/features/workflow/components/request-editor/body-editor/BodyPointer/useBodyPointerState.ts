@@ -3,6 +3,7 @@ import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
 import type { BodyPointerProps } from './BodyPointer.types';
+import { isInEditorPopupLayer } from '../../editorPopupLayers';
 
 export function useBodyPointerState(props: BodyPointerProps) {
   const { pointer, pointers, onEdit, onRemove, connection, currentMethod } = props;
@@ -18,7 +19,7 @@ export function useBodyPointerState(props: BodyPointerProps) {
     if (!editorPos) return;
     const onMouseDown = (event: globalThis.MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target?.closest('.bodyPointerEditorPopup') || target?.closest('.ant-select-dropdown')) return;
+      if (target?.closest('.bodyPointerEditorPopup') || isInEditorPopupLayer(target)) return;
       setEditorPos(null);
     };
     document.addEventListener('mousedown', onMouseDown, true);
