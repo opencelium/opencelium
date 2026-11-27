@@ -19,11 +19,8 @@ export type DocsPage =
     | 'reference/configuration'
     | 'reference/permissions'
 
-/**
- * The `docs` build is the one that has the 5.3 pages; `prod` only gets them once the docs
- * branch is merged. Switch the version here, never at a link.
- */
-export const DOCS_BASE_URL = 'https://docs.opencelium.io/en/docs/'
+/** The published docs version every link points at. Switch it here, never at a link. */
+export const DOCS_BASE_URL = 'https://docs.opencelium.io/en/prod/'
 
 export const docsUrl = (page: DocsPage, anchor?: string): string =>
     `${DOCS_BASE_URL}${page ? `${page}.html` : ''}${anchor ? `#${anchor}` : ''}`
