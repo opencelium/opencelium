@@ -18,9 +18,12 @@ import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockFilterChain;
@@ -33,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -59,8 +63,12 @@ class AuthorizationFilterTest {
     @Mock
     SessionServiceImpl sessionService;
 
-    @InjectMocks
     AuthorizationFilter filter;
+
+    @BeforeEach
+    void createFilter() {
+        filter = new AuthorizationFilter(jwtTokenUtil, userService, sessionService, "/ws");
+    }
 
     @AfterEach
     void clearSecurityContext() {
@@ -174,22 +182,64 @@ class AuthorizationFilterTest {
         verifyNoInteractions(sessionService);
     }
 
-    @Test
-    void doFilterReadsTokenFromQueryParameterWhenHeaderIsAbsent() throws Exception {
-        JWTClaimsSet claims = claimsFor(SESSION_ID);
-        User user = aUser(5);
-        when(jwtTokenUtil.verify(TOKEN)).thenReturn(Optional.of(claims));
-        when(jwtTokenUtil.userIdOf(claims)).thenReturn(Optional.of(5));
-        when(userService.findByIdNoLock(5)).thenReturn(Optional.of(user));
-        when(jwtTokenUtil.belongsToActiveSession(claims, user)).thenReturn(true);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setParameter("token", "Bearer " + TOKEN);
+    // ── token in the URL: the WebSocket endpoint only ─────────────────────────
 
-        filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+    @ParameterizedTest
+    @DisplayName("doFilter — a browser cannot set headers on a WebSocket, so the SockJS paths take ?token=")
+    @ValueSource(strings = {"/ws", "/ws/info", "/ws/123/abcdef/websocket", "/ws/123/abcdef/xhr_send"})
+    void doFilterReadsTokenFromQueryParameterWhenRequestGoesToWebSocketEndpoint(String path) throws Exception {
+        User user = givenValidTokenOf(aUser(5));
+
+        filter.doFilter(tokenInUrlRequest(path), new MockHttpServletResponse(), new MockFilterChain());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assertThat(authentication).isNotNull();
         assertThat(((UserPrincipals) authentication.getPrincipal()).getUser()).isSameAs(user);
+    }
+
+    @ParameterizedTest
+    @DisplayName("doFilter — any other path ignores ?token=, even one that only starts like the endpoint")
+    @ValueSource(strings = {"/connection/all", "/user/5", "/wsx", "/ws-admin/info", "/api/ws", ""})
+    void doFilterIgnoresTokenQueryParameterWhenRequestGoesElsewhere(String path) throws Exception {
+        MockFilterChain chain = new MockFilterChain();
+
+        filter.doFilter(tokenInUrlRequest(path), new MockHttpServletResponse(), chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        assertThat(chain.getRequest()).isNotNull();
+        verifyNoInteractions(jwtTokenUtil, userService, sessionService);
+    }
+
+    @Test
+    void doFilterReadsTokenFromQueryParameterWhenPathInfoHoldsRestOfWebSocketPath() throws Exception {
+        givenValidTokenOf(aUser(5));
+        MockHttpServletRequest request = tokenInUrlRequest("/ws");
+        request.setPathInfo("/info");
+
+        filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+    }
+
+    @ParameterizedTest
+    @DisplayName("constructor — '/ws', 'ws' and '/ws/' all name the endpoint /ws")
+    @ValueSource(strings = {"/ws", "ws", "/ws/", " /ws "})
+    void constructorAcceptsEndpointWhenSlashesDiffer(String endpoint) throws Exception {
+        givenValidTokenOf(aUser(5));
+        AuthorizationFilter configured = new AuthorizationFilter(jwtTokenUtil, userService, sessionService, endpoint);
+
+        configured.doFilter(tokenInUrlRequest("/ws/info"), new MockHttpServletResponse(), new MockFilterChain());
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+    }
+
+    @ParameterizedTest
+    @DisplayName("constructor — the root path would let ?token= authenticate every request, so it is refused")
+    @ValueSource(strings = {"/", "", "//"})
+    void constructorThrowsWhenEndpointIsRootPath(String endpoint) {
+        assertThatThrownBy(() -> new AuthorizationFilter(jwtTokenUtil, userService, sessionService, endpoint))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("websocket.endpoint");
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
@@ -198,6 +248,24 @@ class AuthorizationFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer " + TOKEN);
         return request;
+    }
+
+    /** A request to {@code servletPath} without an Authorization header, carrying ?token=Bearer …. */
+    private static MockHttpServletRequest tokenInUrlRequest(String servletPath) {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", servletPath);
+        request.setServletPath(servletPath);
+        request.setParameter("token", "Bearer " + TOKEN);
+        return request;
+    }
+
+    /** Makes {@link #TOKEN} a valid token of {@code user}'s active session. */
+    private User givenValidTokenOf(User user) {
+        JWTClaimsSet claims = claimsFor(SESSION_ID);
+        when(jwtTokenUtil.verify(TOKEN)).thenReturn(Optional.of(claims));
+        when(jwtTokenUtil.userIdOf(claims)).thenReturn(Optional.of(user.getId()));
+        when(userService.findByIdNoLock(user.getId())).thenReturn(Optional.of(user));
+        when(jwtTokenUtil.belongsToActiveSession(claims, user)).thenReturn(true);
+        return user;
     }
 
     private static JWTClaimsSet claimsFor(String sessionId) {
