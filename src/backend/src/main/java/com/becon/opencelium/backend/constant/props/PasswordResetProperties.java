@@ -5,9 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "opencelium.forgot-psw")
 public class PasswordResetProperties {
     private String baseUrl;
-    private long tokenActivityTime = 60_000; // 1 minute
-    private int maxEmailValidationAttempts = 2;
-    private long lockoutTime = 180_000; // 3 minutes
+    private long tokenActivityTime = 240_000; // 4 minutes
+    private int maxEmailValidationAttempts = 3;
+    private long lockoutTime = 480_000; // 8 minutes
     private long adminLinkActivityTime = 86_400_000; // 24 hours: lifetime of a link an admin issues
 
     public String getBaseUrl() {
