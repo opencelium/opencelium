@@ -519,9 +519,9 @@ public class InvokerServiceImp implements InvokerService {
         // The name is validated and normalized before the file is written, so that a rejected
         // invoker never leaves a file behind.
         String name = applyNamePolicy(document);
-        assertNotStoredInAnotherFile(name, fileName);
+        String targetFileName = targetFileName(name, fileName);
 
-        write(document, fileName);
+        write(document, targetFileName);
         return name;
     }
 
@@ -540,7 +540,9 @@ public class InvokerServiceImp implements InvokerService {
             throw new GeneralServiceException(HttpStatus.BAD_REQUEST, "INVALID_FILE_NAME",
                     "Invoker file '" + fileName + "' must have the '.xml' extension.");
         }
-        return baseName;
+        // the invoker folder is read for '.xml' files only, so 'Jira.XML' is stored as 'Jira.xml':
+        // under its own spelling it would be gone from the container after the next restart
+        return FileNameUtils.removeExtension(baseName) + ".xml";
     }
 
     @Override
@@ -582,12 +584,18 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     /**
-     * Two files declaring the same invoker name would shadow each other in the invoker
-     * container, so a file may only be overwritten by the invoker it already carries.
+     * Returns the name of the file an uploaded invoker is written to. Two files declaring the
+     * same invoker name would shadow each other in the invoker container, so a file may only be
+     * overwritten by the invoker it already carries. That file keeps its own name when the upload
+     * spells it in another case: on a case-sensitive file system, writing under the uploaded
+     * spelling would leave a second file declaring the same invoker next to it.
+     *
+     * @return the file that already carries the invoker, or {@code fileName} for a new invoker
+     * @throws GeneralServiceException if the invoker is already stored in a differently named file
      */
-    private void assertNotStoredInAnotherFile(String name, String fileName) {
+    private String targetFileName(String name, String fileName) {
         if (!existsByName(name)) {
-            return;
+            return fileName;
         }
 
         String existingFileName;
@@ -596,7 +604,7 @@ public class InvokerServiceImp implements InvokerService {
         } catch (RuntimeException e) {
             // the container knows the invoker but no file declares it any more - nothing to shadow
             log.warn("No file found for invoker '{}' while storing '{}'", name, fileName, e);
-            return;
+            return fileName;
         }
 
         if (!existingFileName.equalsIgnoreCase(fileName)) {
@@ -604,6 +612,7 @@ public class InvokerServiceImp implements InvokerService {
                     "Invoker '" + name + "' is already stored in '" + existingFileName
                             + "'. Invoker names are compared without regard to case.");
         }
+        return existingFileName;
     }
 
     private Document parse(InputStream inputStream, String fileName) {

@@ -173,6 +173,31 @@ class InvokerServiceImpTest {
         assertThat(invokerFolder.toFile().list()).containsExactly("dellwarranty.xml");
     }
 
+    // Like the test above, this only catches a regression on a case-sensitive file system (Linux):
+    // APFS and NTFS resolve the uploaded spelling to the stored file anyway.
+    @Test
+    void storeInvokerFileWritesUploadIntoStoredFileWhenNameDiffersOnlyInCase() throws IOException {
+        writeInvokerFile("dellwarranty.xml", DELL_WARRANTY);
+        invokerService.refresh();
+        InputStream upload = new ByteArrayInputStream(("<invoker type=\"xml\"><name>" + DELL_WARRANTY
+                + "</name></invoker>").getBytes(StandardCharsets.UTF_8));
+
+        invokerService.storeInvokerFile(upload, "DellWarranty.xml");
+
+        assertThat(Files.readString(invokerFolder.resolve("dellwarranty.xml"))).contains("type=\"xml\"");
+    }
+
+    @Test
+    void storeInvokerFileKeepsInvokerAfterRefreshWhenUploadHasUppercaseExtension() {
+        // stored the way the upload endpoints store it; refresh() reloads the folder as a restart does
+        invokerService.storeInvokerFile(anInvokerFileStreamDeclaring("Jira"), invokerService.toStoredFileName("Jira.XML"));
+
+        invokerService.refresh();
+
+        assertThat(invokerService.existsByName("Jira")).isTrue();
+        assertThat(invokerFolder.toFile().list()).containsExactly("Jira.xml");
+    }
+
     @Test
     void storeInvokerFileRefusesASecondFileDeclaringTheSameInvoker() throws IOException {
         writeInvokerFile("dellwarranty.xml", DELL_WARRANTY);
@@ -221,7 +246,9 @@ class InvokerServiceImpTest {
             "../../etc/jira.xml|jira.xml",
             "invokers\\jira.xml|jira.xml",
             "  jira.xml  |jira.xml",
-            "JIRA.XML|JIRA.XML"
+            "JIRA.XML|JIRA.xml",
+            "Jira.Xml|Jira.xml",
+            "api.v2.XML|api.v2.xml"
     })
     void toStoredFileNameKeepsOnlyThePlainFileName(String given, String expected) {
         assertThat(invokerService.toStoredFileName(given)).isEqualTo(expected);
