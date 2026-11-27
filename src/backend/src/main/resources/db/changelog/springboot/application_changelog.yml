@@ -362,3 +362,15 @@ versions:
         operation: add
         value: 86400000
         path: opencelium.forgot-psw.admin-link-activity-time
+      - changeset: 8
+        operation: modify
+        value: 240000
+        path: opencelium.forgot-psw.token-activity-time
+      - changeset: 9
+        operation: modify
+        value: 3
+        path: opencelium.forgot-psw.max-email-validation-attempts
+      - changeset: 10
+        operation: modify
+        value: 480000
+        path: opencelium.forgot-psw.lockout-time
