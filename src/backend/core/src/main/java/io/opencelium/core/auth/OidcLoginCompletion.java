@@ -21,7 +21,9 @@ import io.opencelium.core.auth.oidc.OidcTokenRequest;
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.settings.SettingReader;
+import io.opencelium.core.user.EmailTakenException;
 import io.opencelium.core.user.UserDocument;
+import io.opencelium.core.user.UserLockedException;
 import io.opencelium.core.user.UserService;
 
 /**
@@ -41,6 +43,10 @@ import io.opencelium.core.user.UserService;
  * <li>The answer must have no error and must have a code: else {@code idp-error}. A discovery document, a token request
  * and a request of the public keys that fail also give {@code idp-error}.</li>
  * <li>The ID token must pass its checks: else {@code invalid-id-token}.</li>
+ * <li>The OpenCelium user of the ID token must not be locked: else {@code user-locked}. The user comes from the OIDC
+ * link, or from the verified email when the OIDC provider has the email-link option.</li>
+ * <li>A new OpenCelium user with the verified email of the ID token must not take the email of another OpenCelium user:
+ * else {@code email-taken}.</li>
  * </ol>
  * Each refusal writes 1 line to the log with the code and a fixed reason. The line names the provider ID only after the
  * check of its form, and it never has the state, the code, a token, the nonce, the PKCE verifier, the client secret or a
@@ -154,7 +160,20 @@ class OidcLoginCompletion {
 		finally {
 			Arrays.fill(clientSecret, (byte) 0);
 		}
-		UserDocument user = users.findOrCreateByOidcLink(providerId, identity);
+		UserDocument user;
+		try {
+			user = provider.emailLink() ? users.findOrCreateByOidcLinkOrEmail(providerId, identity)
+					: users.findOrCreateByOidcLink(providerId, identity);
+		}
+		catch (UserLockedException ex) {
+			return refuse(OidcLoginError.USER_LOCKED,
+					"the OpenCelium user of the login of the OIDC provider " + providerId + " is locked.");
+		}
+		catch (EmailTakenException ex) {
+			return refuse(OidcLoginError.EMAIL_TAKEN,
+					"another OpenCelium user has the verified email of the login of the OIDC provider " + providerId
+							+ ".");
+		}
 		return new OidcLoginOutcome.LoginCode(sessions.startForLoginCode(user, login.get().loginVerifierHash()));
 	}
 

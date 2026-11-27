@@ -58,6 +58,21 @@ class UserRepository {
 					.elemMatch(where(UserDocument.OIDC_ISSUER).is(issuer).and(UserDocument.OIDC_SUBJECT).is(subject))));
 	}
 
+	/**
+	 * Adds the OIDC link to a user that is still not locked and still has the email, in 1 conditional update: a user
+	 * locked since the read, or with another email since the read, does not get the link. A link that the user holds
+	 * already stays once in the list.
+	 *
+	 * @param email the email of the user in the form of {@link UserDocument#lowerCaseEmail}
+	 * @return 1 if the user exists, is not locked and has the email
+	 * @throws org.springframework.dao.DuplicateKeyException when another user of the tenant has the link
+	 */
+	long addOidcLinkIfUnlocked(String id, String email, UserDocument.OidcLink link) {
+		return documents.update(UserDocument.class,
+				where(UserDocument.ID).is(id).and(UserDocument.LOCKED).is(false).and(UserDocument.EMAIL).is(email),
+				new Update().addToSet(UserDocument.OIDC_LINKS, link));
+	}
+
 	Optional<UserDocument> findById(String id) {
 		return documents.findOne(UserDocument.class, where(UserDocument.ID).is(id));
 	}

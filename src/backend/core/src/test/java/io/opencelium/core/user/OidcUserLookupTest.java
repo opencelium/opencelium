@@ -27,11 +27,13 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.convention.TestBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.tenant.TenantDocuments;
 import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
+import io.opencelium.core.testsupport.TenantTasks;
 import io.opencelium.core.testsupport.fake.FakeIdp;
 import io.opencelium.core.testsupport.fixture.UserFixture;
 
@@ -60,6 +62,10 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * </ol>
  * A unique index refuses a second OpenCelium user with the OIDC link of another one, and it does not refuse OpenCelium
  * users without an OIDC link.
+ * <p>
+ * The email link adds the OIDC link in 1 conditional update: a user that is locked, or that has another email, after
+ * the read by email does not get the link, and a link that the user has already stays once in the list. A login cannot
+ * put a change between the read and the update, so these cases call the update of the repository itself.
  * <p>
  * Each login goes through the endpoints of core and the fake IdP: the session of a login names its OpenCelium user.
  * The tests find an OIDC link by its values, not by the names of its fields: an embedded document, alone or in a list,
@@ -112,6 +118,9 @@ class OidcUserLookupTest {
 
 	@Autowired
 	TenantDocuments documents;
+
+	@Autowired
+	UserRepository users;
 
 	private final String clientSecret = UUID.randomUUID().toString();
 
@@ -385,6 +394,54 @@ class OidcUserLookupTest {
 				arguments("no email_verified, the email-link option on", Set.of("kc"), Map.of("email", BOB_EMAIL)),
 				arguments("email_verified false, the email-link option off", Set.of(),
 						Map.of("email", BOB_EMAIL, "email_verified", false)));
+	}
+
+	@Test
+	void addOidcLinkIfUnlockedChangesNoUserWhenTheUserIsLocked() {
+		String bob = UserFixture.aUser("bob", UUID.randomUUID().toString())
+			.withEmail(BOB_EMAIL)
+			.locked()
+			.storeIn(tenantRunner, documents)
+			.id();
+		Document bobBefore = userNamed("bob");
+
+		long changed = addOidcLink(bob, BOB_EMAIL, newSubject());
+
+		assertThat(changed).as("the changed users").isZero();
+		assertThat(userNamed("bob")).as("the locked user").isEqualTo(bobBefore);
+	}
+
+	@Test
+	void addOidcLinkIfUnlockedChangesNoUserWhenTheUserHasAnotherEmail() {
+		String bob = storeUserWithBobsEmail();
+		Document bobBefore = userNamed("bob");
+
+		long changed = addOidcLink(bob, "other@example.com", newSubject());
+
+		assertThat(changed).as("the changed users").isZero();
+		assertThat(userNamed("bob")).as("the user with another email").isEqualTo(bobBefore);
+	}
+
+	@Test
+	void addOidcLinkIfUnlockedKeepsTheOidcLinkOnceWhenTheSameLinkIsAddedTwice() {
+		String bob = storeUserWithBobsEmail();
+		String subject = newSubject();
+
+		long first = addOidcLink(bob, BOB_EMAIL, subject);
+		long second = addOidcLink(bob, BOB_EMAIL, subject);
+
+		assertThat(first).as("the changed users of the first update").isEqualTo(1);
+		assertThat(second).as("the users of the second update").isEqualTo(1);
+		List<?> links = userNamed("bob").getList("oidcLinks", Object.class, List.of());
+		assertThat(links).as("the OIDC links of the user").hasSize(1);
+		assertThat(hasOidcLink(userNamed("bob"), ISSUER_URL, subject)).as("the OIDC link of the user").isTrue();
+	}
+
+	/** The conditional update of the email link, in the self-host tenant, with an OIDC link of {@code kc}. */
+	private long addOidcLink(String userId, String email, String subject) {
+		var link = new UserDocument.OidcLink(ISSUER_URL, subject);
+		return TenantTasks.call(tenantRunner, TenantId.SELF_HOST,
+				() -> users.addOidcLinkIfUnlocked(userId, email, link));
 	}
 
 	/** A complete OIDC login of the person with the subject, without an email in the ID token. */
