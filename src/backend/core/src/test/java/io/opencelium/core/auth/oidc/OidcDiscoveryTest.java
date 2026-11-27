@@ -95,6 +95,16 @@ class OidcDiscoveryTest {
 			.isThrownBy(() -> discovery.discover(PROVIDER_ID, ISSUER_URL));
 	}
 
+	@ParameterizedTest(name = "{0}")
+	@ValueSource(strings = { "authorization_endpoint", "token_endpoint", "jwks_uri" })
+	void discoverThrowsNoDiscoveryDocumentWhenThePortOfAnEndpointOfTheDocumentIsOutOfRange(String endpoint) {
+		idp.serveDiscoveryDocument(ISSUER_URL,
+				FakeIdp.documentOf(ISSUER_URL, Map.of(endpoint, "https://idp.example.com:99999/realms/oc/endpoint")));
+
+		assertThatExceptionOfType(NoDiscoveryDocumentException.class)
+			.isThrownBy(() -> discovery.discover(PROVIDER_ID, ISSUER_URL));
+	}
+
 	@Test
 	void discoverThrowsNoDiscoveryDocumentWhenTheAnswerIsJsonWithoutAnIssuer() {
 		idp.serveDiscoveryDocument(ISSUER_URL, "{\"status\": \"up\"}");
@@ -123,6 +133,16 @@ class OidcDiscoveryTest {
 	@Test
 	void discoverThrowsNoDiscoveryDocumentWithoutARequestWhenTheIssuerUrlHasNoHttps() {
 		String issuerUrl = "http://idp.example.com/realms/oc";
+		idp.serveDiscoveryDocument(issuerUrl);
+
+		assertThatExceptionOfType(NoDiscoveryDocumentException.class)
+			.isThrownBy(() -> discovery.discover(PROVIDER_ID, issuerUrl));
+		assertThat(idp.requests()).isEmpty();
+	}
+
+	@Test
+	void discoverThrowsNoDiscoveryDocumentWithoutARequestWhenThePortOfTheIssuerUrlIsOutOfRange() {
+		String issuerUrl = "https://idp.example.com:99999/realms/oc";
 		idp.serveDiscoveryDocument(issuerUrl);
 
 		assertThatExceptionOfType(NoDiscoveryDocumentException.class)

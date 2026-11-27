@@ -34,8 +34,8 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 ### The OIDC providers
 
 - **AO-01** Given the self-host mode, when an installation admin saves an OIDC provider, then core must keep it. These rules apply:
-  1. Core refuses an issuer URL without HTTPS or without an OIDC discovery document.
-  2. Each response masks the client secret.
+  1. An issuer URL needs HTTPS. A new or changed one needs a discovery document.
+  2. Responses mask the client secret.
   3. The email-link option is off by default.
 - **AO-02** Given 2 OIDC providers, when the HTTP client asks for the login options, then core must list their display names. The list has the provider ID of each, and the request needs no session JWT.
 

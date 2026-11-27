@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -28,11 +29,17 @@ import io.opencelium.core.settings.SettingList.ItemField;
  * A secret setting keeps a secret reference in the database, and the secret provider keeps the ciphertext. A read
  * shows {@value #MASK} for it, and no method of this class gives the plaintext. A list setting keeps a secret
  * reference in the secret field of each item, and a read shows {@value #MASK} there.
+ * <p>
+ * A feature outside the package reads a list setting through {@link SettingReader}, which this class implements and
+ * which has no method that changes a setting.
  */
-final class SettingsService {
+final class SettingsService implements SettingReader {
 
 	/** The value that a read and a change show for a secret setting with a secret. */
 	static final String MASK = "****";
+
+	/** The form of a problem code of a rule: lower-case letters a to z, in parts that hyphens separate. */
+	private static final Pattern PROBLEM_CODE = Pattern.compile("[a-z]+(-[a-z]+)*");
 
 	private static final Log log = LogFactory.getLog(SettingsService.class);
 
@@ -61,12 +68,33 @@ final class SettingsService {
 	}
 
 	/**
+	 * The items of a list setting for a feature: each stored item with the secret reference in its secret field, in
+	 * the order of the database; the default items when the database has no value.
+	 */
+	@Override
+	public List<Map<String, Object>> items(String key) {
+		SettingDefinition definition = registry.definition(key)
+			.filter(declared -> declared.type() == SettingType.LIST)
+			.orElseThrow(() -> new IllegalArgumentException("The setting key " + key + " is not a list setting."));
+		Object stored = storedValue(definition);
+		if (stored == null) {
+			return definition.defaultValue() instanceof List<?> defaults ? itemsOf(defaults) : List.of();
+		}
+		return definition.list().withReferences(documentsIn(stored));
+	}
+
+	/**
 	 * Changes the settings of the map in 1 update: a valid new value replaces the database value, and the value
 	 * {@code null} or the default removes it. A map with 1 unknown setting key or 1 value that is not valid changes
 	 * nothing.
 	 * <p>
-	 * A value is valid when it has the form of the type of the setting, then passes the rule of the feature, and, for a
-	 * list, when each item without a secret keeps the secret of the stored item with the same ID and the same address.
+	 * A value is valid when it has the form of the type of the setting, then, for a list, each item without a secret
+	 * keeps the secret of the stored item with the same ID and the same address, and then it passes the rule of the
+	 * feature. The change examines each setting key on its own and in this order, so that the error names each
+	 * incorrect setting key. The rule of a feature can call another system, so it runs for a setting key only when the
+	 * earlier checks of that key refused nothing. The rule gets the database value of the setting before the change,
+	 * so that it can examine only what the change makes new. The error names the problem of the rule when that is a
+	 * problem code, and {@code invalid-value} else.
 	 * <p>
 	 * A secret, and the secret of a list item, changes in 3 steps: the secret provider keeps the new secret, the update
 	 * sets its reference and gives the replaced reference, and the secret provider deletes the replaced secret. When
@@ -77,6 +105,7 @@ final class SettingsService {
 	 * @param changes the setting keys and their new values; a value can be {@code null}
 	 * @return each declared setting with its value after the change
 	 * @throws InvalidSettingsException when a setting key is unknown or a value is not valid; it names each such key
+	 *                                  in the order of the setting keys
 	 */
 	List<SettingValue> change(Map<String, Object> changes) {
 		Map<String, Object> sorted = new TreeMap<>(changes);
@@ -86,6 +115,7 @@ final class SettingsService {
 		Map<String, ListChange> listChanges = new LinkedHashMap<>();
 		List<String> resets = new ArrayList<>();
 		sorted.forEach((key, value) -> {
+			int errorsBefore = errors.size();
 			Optional<SettingDefinition> definition = registry.definition(key);
 			if (definition.isEmpty()) {
 				errors.add(new SettingError(key, Problem.UNKNOWN_KEY));
@@ -93,7 +123,7 @@ final class SettingsService {
 			else if (value == null) {
 				resets.add(key);
 			}
-			else if (!accepts(definition.get(), value)) {
+			else if (!hasForm(definition.get(), value)) {
 				errors.add(new SettingError(key, Problem.INVALID_VALUE));
 			}
 			else if (definition.get().type() == SettingType.SECRET) {
@@ -111,6 +141,12 @@ final class SettingsService {
 			else {
 				values.put(key, databaseValue(definition.get().type(), value));
 			}
+			// The rule is the last check of a key, and it can call another system: it does not run for a key that an
+			// earlier check refused, and a reset has no value to examine.
+			if (value != null && errors.size() == errorsBefore) {
+				ruleProblemOf(definition.orElseThrow(), value)
+					.ifPresent(code -> errors.add(new SettingError(key, code)));
+			}
 		});
 		if (!errors.isEmpty()) {
 			throw new InvalidSettingsException(errors);
@@ -120,14 +156,24 @@ final class SettingsService {
 		return read();
 	}
 
-	/**
-	 * The type of the setting, then, for a list, the form of its items, then the rule of the feature. A rule runs only
-	 * for a value that has the form of the type, so it needs no check of the form itself.
-	 */
-	private static boolean accepts(SettingDefinition definition, Object value) {
+	/** The form of the value: the type of the setting, then, for a list, the form of its items. */
+	private static boolean hasForm(SettingDefinition definition, Object value) {
 		return definition.type().validate(value, definition.min(), definition.max())
-				&& (definition.type() != SettingType.LIST || definition.list().validate(value))
-				&& (definition.rule() == null || definition.rule().validate(value));
+				&& (definition.type() != SettingType.LIST || definition.list().validate(value));
+	}
+
+	/**
+	 * The problem that the rule of the feature gives for a value that has its form, or empty when the setting has no
+	 * rule or the rule accepts the value. The problem is the code of the rule when it has the form of a problem code,
+	 * and {@code invalid-value} else, so that no text of a rule reaches the response.
+	 */
+	private Optional<String> ruleProblemOf(SettingDefinition definition, Object value) {
+		if (definition.rule() == null) {
+			return Optional.empty();
+		}
+		return definition.rule()
+			.problemOf(value, storedValue(definition))
+			.map(code -> PROBLEM_CODE.matcher(code).matches() ? code : Problem.INVALID_VALUE.code());
 	}
 
 	/**
@@ -290,8 +336,13 @@ final class SettingsService {
 
 	/** The items of the list of the setting in the database; empty when it has none. */
 	private List<Map<String, ?>> storedItems(SettingDefinition definition) {
+		return documentsIn(storedValue(definition));
+	}
+
+	/** The value of the setting in the database as the database keeps it, or {@code null} when it has none. */
+	private Object storedValue(SettingDefinition definition) {
 		Document values = repository.installationValues().orElseGet(Document::new);
-		return documentsIn(values.getEmbedded(path(definition.key()), Object.class));
+		return values.getEmbedded(path(definition.key()), Object.class);
 	}
 
 	/** The subdocuments of a stored list; {@code null}, for a reset, gives an empty list. */

@@ -214,6 +214,20 @@ class OidcProvidersEndpointTest {
 	}
 
 	@Test
+	void patchMakesNoRequestToTheIdpWhenTheIssuerUrlChangesWithoutAClientSecret() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(save(admin, provider("kc", ISSUER_URL, clientSecret))).as("the save of the OIDC provider")
+			.hasStatusOk();
+		IDP.reset();
+		IDP.serveDiscoveryDocument(OTHER_ISSUER_URL);
+
+		MvcTestResult change = save(admin, provider("kc", OTHER_ISSUER_URL, null));
+
+		assertInvalidValue(change);
+		assertThat(IDP.requests()).as("the requests to the IdP of a change that is refused anyway").isEmpty();
+	}
+
+	@Test
 	void patchGivesInvalidSettingsWhenANewProviderHasNoClientSecret() {
 		MvcTestResult change = save(LoginRequests.sessionJwtOfTheDefaultAdmin(mvc), provider("kc", ISSUER_URL, null));
 

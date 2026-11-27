@@ -45,10 +45,15 @@ final class InvalidSettingsException extends RuntimeException {
 	}
 
 	/**
-	 * @param key     the setting key of the change
-	 * @param problem the problem of the setting key
+	 * @param key  the setting key of the change
+	 * @param code the problem of the setting key in the error response: the code of a {@link Problem}, or the problem
+	 *             code that the rule of a feature gave
 	 */
-	record SettingError(String key, Problem problem) {
+	record SettingError(String key, String code) {
+
+		SettingError(String key, Problem problem) {
+			this(key, problem.code());
+		}
 
 	}
 
