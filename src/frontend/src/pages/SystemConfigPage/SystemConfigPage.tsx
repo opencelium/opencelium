@@ -2,6 +2,7 @@ import React, {useCallback, useDeferredValue, useEffect, useLayoutEffect, useMem
 import {message} from 'antd'
 import PageWrapper from '@pages/PageWrapper/PageWrapper'
 import {Typography} from '@shared/ui/primitives/Typography'
+import {DocsLink} from '@shared/ui/actions/DocsLink'
 import {Button} from '@shared/ui/primitives/Button'
 import {Input} from '@shared/ui/primitives/Input'
 import {Alert} from '@shared/ui/primitives/Alert'
@@ -232,10 +233,11 @@ export function SystemConfigPage() {
         <PageWrapper>
             <div style={{padding: 16}}>
                 <header style={{marginBottom: 20}}>
-                    <h1 style={{marginBottom: 8}}>
+                    <h1 style={{marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6}}>
                         <Typography variant="headline" as="span">
                             {t('system-config.page.title')}
                         </Typography>
+                        <DocsLink page="guides/configure-the-system" anchor="which-file-the-page-edits" testId="system-config-docs" />
                     </h1>
                     <div style={{color: 'var(--color-text-secondary)'}}>
                         <Typography variant="body">

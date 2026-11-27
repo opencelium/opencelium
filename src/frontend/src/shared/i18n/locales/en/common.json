@@ -178,6 +178,9 @@
     "edit": "Edit",
     "delete": "Delete"
   },
+  "docs": {
+    "tooltip": "Open documentation"
+  },
   "copy": {
     "tooltip": "Copy to clipboard",
     "empty": "Nothing to copy",

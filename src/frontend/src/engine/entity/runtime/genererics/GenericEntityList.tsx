@@ -2,6 +2,7 @@ import { useListUrlState } from './useListUrlState';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { message } from 'antd';
+import { DocsLink } from '@shared/ui/actions/DocsLink';
 import {
     useReactTable,
     getCoreRowModel,
@@ -361,8 +362,12 @@ export const GenericEntityList: React.FC<Props> = ({ entityName, syncUrl = false
         <div data-testid={buildTestId(entity.name, 'list')} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <header style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                    <h1 style={{ margin: 0 }}>
+                    <h1 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <Typography variant="headline" as="span">{titleText}</Typography>
+                        {entity.list?.docs && (
+                            <DocsLink page={entity.list.docs.page} anchor={entity.list.docs.anchor}
+                                testId={buildTestId(entity.name, 'docs') ?? 'list-docs'} />
+                        )}
                     </h1>
                     {/* Wraps under the title (and onto more lines itself) instead of running off a narrow page. */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8, alignSelf: 'flex-start', marginLeft: 'auto' }}>

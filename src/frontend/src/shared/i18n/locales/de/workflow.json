@@ -8,7 +8,8 @@
     "pasteRest": "Übrige Schritte einfügen",
     "confirm": "Einfügen",
     "copyFailed": "Die kopierten Schritte konnten nicht in diesem Browser gespeichert werden.",
-    "nothingToPaste": "Keiner der kopierten Schritte kann in diesen Workflow eingefügt werden."
+    "nothingToPaste": "Keiner der kopierten Schritte kann in diesen Workflow eingefügt werden.",
+    "docs": "So funktioniert Kopieren zwischen Workflows"
   },
   "loadError": {
     "title": "Workflow konnte nicht geladen werden",
@@ -588,7 +589,8 @@
   "saveProblems": {
     "confirmTitle": "Mit Warnungen speichern?",
     "confirmMessage": "Diese Schritte werden möglicherweise nicht wie erwartet ausgeführt:",
-    "saveAnyway": "Trotzdem speichern"
+    "saveAnyway": "Trotzdem speichern",
+    "saveDocs": "Was Speichern mit Warnungen bedeutet"
   },
   "problems": {
     "title": "Probleme",
@@ -943,7 +945,8 @@
     "chipSource": {
       "webhook": "Webhook",
       "global": "Global"
-    }
+    },
+    "validationDocs": "So werden Referenzen geprüft"
   },
   "refGenerator": {
     "connector": "Konnektor",

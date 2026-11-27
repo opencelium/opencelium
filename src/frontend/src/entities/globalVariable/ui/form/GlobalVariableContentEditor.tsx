@@ -1,6 +1,8 @@
 import { useWatch } from 'react-hook-form'
 import type { FieldOverrideProps } from '@/engine/entity/overrides/types'
 import { FormSwitch } from '@shared/ui/form/FormSwitch'
+import { DocsLink } from '@shared/ui/actions/DocsLink'
+import { EntityText } from '@shared/ui/primitives/Text'
 import { GlobalVariableValueEditor } from './GlobalVariableValueEditor'
 import { ScriptVariableEditor } from '../script/ScriptVariableEditor'
 import { MutableSettingsEditor } from './MutableSettingsEditor'
@@ -22,6 +24,9 @@ export function GlobalVariableContentEditor(props: FieldOverrideProps) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
             <FormSwitch name="secret" labelKey="global-variable.fields.secret.label"
                 readOnly={props.mode === 'view'} testId="global-variable-field-secret" />
+            <DocsLink page="guides/global-variables" anchor="secrets-and-the-secret-key" testId="global-variable-secret-docs">
+                <EntityText i18nKey="global-variable.docs.secret" />
+            </DocsLink>
             <GlobalVariableValueEditor {...props} />
         </div>
     )

@@ -8,7 +8,8 @@
     "pasteRest": "Paste the rest",
     "confirm": "Paste",
     "copyFailed": "Could not store the copied steps in this browser.",
-    "nothingToPaste": "None of the copied steps can be pasted into this workflow."
+    "nothingToPaste": "None of the copied steps can be pasted into this workflow.",
+    "docs": "How copying between workflows works"
   },
   "loadError": {
     "title": "Could not load the workflow",
@@ -588,7 +589,8 @@
   "saveProblems": {
     "confirmTitle": "Save with warnings?",
     "confirmMessage": "These steps may not run as expected:",
-    "saveAnyway": "Save anyway"
+    "saveAnyway": "Save anyway",
+    "saveDocs": "What saving with warnings means"
   },
   "problems": {
     "title": "Problems",
@@ -943,7 +945,8 @@
     "chipSource": {
       "webhook": "Webhook",
       "global": "Global"
-    }
+    },
+    "validationDocs": "How references are checked"
   },
   "refGenerator": {
     "connector": "Connector",

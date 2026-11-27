@@ -9,9 +9,9 @@ import { useAuth } from '@features/auth/useAuth';
 import { useGetAppVersionQuery } from '@entities/updateAssistant/api/updateAssistantApi';
 import { useBreakpoints } from '@app/hooks/useBreakpoints.tsx';
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
+import { docsUrl } from '@shared/docs/docsUrl';
 
 const OPENCELIUM_URL = 'https://www.opencelium.io/';
-const DOCS_URL = 'https://docs.opencelium.io/en/prod/';
 const GIT_URL = 'https://github.com/opencelium';
 const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login';
 // Stands in only where the running version can't be asked for: the login page,
@@ -38,7 +38,7 @@ export const AppFooter = ({ hasBorder = true, leadingSlot }: AppFooterProps) => 
     const version = appVersion?.version?.trim() || FALLBACK_APP_VERSION;
 
     const links: { icon: IconName; url: string; label: string; testId: string }[] = [
-        { icon: 'docs', url: DOCS_URL, label: t('footer.docsLink'), testId: 'footer-docs-link' },
+        { icon: 'docs', url: docsUrl(''), label: t('footer.docsLink'), testId: 'footer-docs-link' },
         { icon: 'git', url: GIT_URL, label: t('footer.gitLink'), testId: 'footer-git-link' },
         { icon: 'globe', url: OPENCELIUM_URL, label: t('footer.landingPageLink'), testId: 'footer-landing-page-link' },
         { icon: 'portal', url: SERVICE_PORTAL_URL, label: t('footer.servicePortalLink'), testId: 'footer-service-portal-link' },

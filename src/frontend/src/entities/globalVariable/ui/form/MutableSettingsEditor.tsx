@@ -8,6 +8,7 @@ import { Radio } from '@shared/ui/primitives/Radio'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { Hint } from '@shared/ui/primitives/Hint'
 import { EntityText } from '@shared/ui/primitives/Text'
+import { DocsLink } from '@shared/ui/actions/DocsLink'
 import { useFetchEntitiesQuery } from '@shared/api/genericApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { ConnectionMeta } from '@entities/connection/command/connectionCache'
@@ -78,7 +79,10 @@ const QUEUE_LIMITS_COMPONENTS = { code: <code />, page: <SystemConfigLink /> }
 function BusyPolicyScopeHint() {
     return (
         <div className="form-control__hint" data-testid="global-variable-busy-policy-scope-hint">
-            <EntityText i18nKey="global-variable.mutable.busyPolicy.scope" />
+            <EntityText i18nKey="global-variable.mutable.busyPolicy.scope" />{' '}
+            <DocsLink page="guides/global-variables" anchor="the-busy-policy-one-run-at-a-time" testId="global-variable-busy-policy-docs">
+                <EntityText i18nKey="global-variable.docs.busyPolicy" />
+            </DocsLink>
         </div>
     )
 }

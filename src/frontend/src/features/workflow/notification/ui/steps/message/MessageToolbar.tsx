@@ -1,6 +1,7 @@
 import { Segmented } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { DocsLink } from '@shared/ui/actions/DocsLink';
 import { countReferences, parseBody } from '../../../model/notificationBody';
 import type { NotificationEditMode } from '../../../model/notification.types';
 import type { NotificationTool } from '../../../tools/notificationTool.types';
@@ -33,6 +34,7 @@ export function MessageToolbar({ mode, tool, bodyText, onModeChange }: Props) {
 			<span className='notificationMuted'>
 				{mode === 'editor' ? t('notification.message.editorHint', { tool: toolName(tool) }) : t('notification.message.jsonHint')}
 			</span>
+			<DocsLink page='guides/send-notifications' anchor='message' testId='notification-message-docs' />
 			<span className='notificationSpacer' />
 			{parsed.ok && brokenCount > 0 && (
 				<StatusPill tone='warning' testId='notification-json-status-broken-references'>

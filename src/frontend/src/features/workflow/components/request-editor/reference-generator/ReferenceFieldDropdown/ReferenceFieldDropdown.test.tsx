@@ -3,6 +3,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import type { ReferencePathOption } from '../../body-editor/requestReferenceOptions';
 import { ReferenceFieldDropdown } from './ReferenceFieldDropdown';
+// Provider-free stand-in; the real link renders primitives that need SystemProvider.
+vi.mock('@shared/ui/actions/DocsLink', () => ({
+	DocsLink: ({ children }: { children?: import('react').ReactNode }) => <span>{children}</span>,
+}));
 
 vi.mock('@shared/i18n/hooks/useI18n', () => ({
 	useI18n: () => ({ t: (key: string) => key, lang: 'en' }),
