@@ -3,7 +3,7 @@ import {
 	DownOutlined,
 } from '@ant-design/icons';
 import { Button, Input, Modal, Select } from 'antd';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FocusEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Connection, MethodWithId } from '../../types/connection';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyResponseFieldSelect/LegacyResponseFieldSelect';
@@ -69,8 +69,6 @@ import { LiveInspectHint } from '../request-editor/utils/LiveInspectHint';
 import { useTestRun } from '../../test-run/useTestRun';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { isHttpRequestNodeType, isMethodNodeType } from '../../utils/methodNodeTypes';
-import { ConditionReferenceChip } from './ConditionValueInput/ConditionReferenceChip';
-import { useSettleOnOutsideClick } from '../reference-chip/useSettleOnOutsideClick';
 import '../request-editor/body-editor/bodyLegacy.css';
 import '../dialogHeader.css';
 import { useMaximizableModal } from '../dialog-maximize/useMaximizableModal';
@@ -355,11 +353,6 @@ function ConditionValueInput({
 	const [draftSource, setDraftSource] = useState<ConditionValueSource>(() => getSourceFromField(fieldValue));
 	const [draftMethodId, setDraftMethodId] = useState<string | undefined>(() => parsedMethod?.id);
 	const [draftResponseType, setDraftResponseType] = useState<ResponseType>(() => parsedResponseType || 'body');
-	// A chosen reference shows as a chip; the selects come back while it is edited or still empty.
-	const [isEditing, setIsEditing] = useState(() => !fieldValue);
-	const editorRef = useRef<HTMLDivElement>(null);
-	const settle = useCallback(() => setIsEditing(false), []);
-	useSettleOnOutsideClick(editorRef, isEditing && !!fieldValue, settle);
 	const source = normalizeSource(fieldValue ? getSourceFromField(fieldValue) : draftSource);
 	const methodId = fieldValue ? parsedMethod?.id : draftMethodId;
 	const responseType = normalizeResponseType(draftResponseType);
@@ -393,27 +386,11 @@ function ConditionValueInput({
 
 	const setSource = (nextSource: ConditionValueSource) => {
 		setDraftSource(nextSource);
-		setIsEditing(true);
 		if (nextSource === 'direct') {
 			setDraftResponseType(responseType || 'body');
 		}
 		onChange({ [fieldKey]: undefined });
 	};
-
-	// Leaving the whole input — not moving between its selects — settles a complete reference into a chip.
-	const finishEditing = (event: FocusEvent<HTMLDivElement>) => {
-		if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsEditing(false);
-	};
-
-	if (fieldValue && !isEditing && source !== 'constant') {
-		return <ConditionReferenceChip side={side} kind={source === 'direct' ? 'step' : source}
-			fieldValue={fieldValue} method={selectedMethod} onHoverChange={setIsFieldHovered}
-			tooltip={selectedMethod && testRun?.isPaused ? <LiveReferenceValuePreview label={fieldLabel}
-				isLoading={isLiveValueLoading} hasValue={hasLiveValue} rawValue={liveValue}
-				formattedValue={hasLiveValue ? formatLiveReferenceValue(liveValue) : null} /> : undefined}
-			onEdit={() => setIsEditing(true)}
-			onRemove={() => { setIsEditing(true); onChange({ [fieldKey]: undefined }); }} />;
-	}
 
 	if (source === 'constant') {
 		return (
@@ -431,7 +408,7 @@ function ConditionValueInput({
 
 	if (source === 'global') {
 		return (
-			<div ref={editorRef} className="conditionValueInput conditionValueInputWebhook" onBlur={finishEditing}>
+			<div className="conditionValueInput conditionValueInputWebhook">
 				<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 				<GlobalVariableSelect
 					value={parseGlobalReference(fieldValue)?.name}
@@ -445,7 +422,7 @@ function ConditionValueInput({
 
 	if (source === 'webhook') {
 		return (
-			<div ref={editorRef} className="conditionValueInput conditionValueInputWebhook" onBlur={finishEditing}>
+			<div className="conditionValueInput conditionValueInputWebhook">
 				<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 				<LegacyWebhookReferenceSelect
 					value={extractWebhookValue(fieldValue) || undefined}
@@ -457,7 +434,7 @@ function ConditionValueInput({
 	}
 
 	return (
-		<div ref={editorRef} className="conditionValueInput" onBlur={finishEditing}>
+		<div className="conditionValueInput">
 			<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 			<MethodSelect
 				methods={methods}
