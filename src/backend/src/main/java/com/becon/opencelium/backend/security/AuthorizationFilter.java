@@ -26,32 +26,48 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.hc.core5.http.HttpHeaders;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class AuthorizationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    /** The query parameter a WebSocket client sends its bearer token in. */
+    private static final String TOKEN_PARAMETER = "token";
 
-    @Autowired
-    private UserService userService;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final UserService userService;
+    private final SessionServiceImpl sessionService;
+    // the WebSocket endpoint as a path: a leading slash, no trailing one
+    private final String websocketPath;
 
-    @Autowired
-    private SessionServiceImpl sessionService;
+    /**
+     * @param websocketEndpoint the path of the WebSocket endpoint, the only one that takes a token
+     *                          in the URL
+     * @throws IllegalStateException if the endpoint is the root path, which would let a token in
+     *                               the URL authenticate every request
+     */
+    public AuthorizationFilter(JwtTokenUtil jwtTokenUtil, UserService userService,
+            SessionServiceImpl sessionService, @Value("${websocket.endpoint}") String websocketEndpoint) {
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.userService = userService;
+        this.sessionService = sessionService;
+        this.websocketPath = toPath(websocketEndpoint);
+    }
 
     @Override
     protected void doFilterInternal( HttpServletRequest request,
                                      HttpServletResponse response,
                                      FilterChain chain ) throws IOException, ServletException {
 
-        String token = extractTokenFromRequest(request);
+        String token = extractToken(request).orElse(null);
         if (token == null || !token.startsWith(SecurityConstant.BEARER)){
             chain.doFilter(request, response);
             return;
@@ -73,12 +89,41 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         response.setHeader("Content-Type", "application/json");
     }
 
-    private static String extractTokenFromRequest(HttpServletRequest request) {
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (token == null) {
-            return request.getParameter("token");
+    /**
+     * Returns the token of the request: its {@code Authorization} header or, on the WebSocket
+     * endpoint only, its {@code token} query parameter. A browser cannot set headers on a
+     * WebSocket or on the SockJS fallbacks, so the frontend sends its token in the URL there.
+     * Anywhere else a token in the URL is ignored: URLs end up in access logs, browser history
+     * and pasted links, where a header never goes.
+     */
+    private Optional<String> extractToken(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header != null) {
+            return Optional.of(header);
         }
-        return token;
+        return isWebSocketRequest(request)
+                ? Optional.ofNullable(request.getParameter(TOKEN_PARAMETER))
+                : Optional.empty();
+    }
+
+    /**
+     * Tells whether the request goes to the WebSocket endpoint or below it, like SockJS's
+     * {@code /ws/info}. The servlet path is the one the container decoded, normalised and serves,
+     * so {@code /ws/../connection/all} counts as the {@code /connection/all} it is served as.
+     */
+    private boolean isWebSocketRequest(HttpServletRequest request) {
+        String path = request.getServletPath() + Objects.toString(request.getPathInfo(), "");
+        return path.equals(websocketPath) || path.startsWith(websocketPath + "/");
+    }
+
+    // "/ws", "ws" and "/ws/" all name the path /ws
+    private static String toPath(String endpoint) {
+        String path = "/" + endpoint.strip().replaceAll("^/+|/+$", "");
+        if (path.equals("/")) {
+            throw new IllegalStateException(
+                    "websocket.endpoint must name a path below '/', not '" + endpoint + "'");
+        }
+        return path;
     }
 
     /**
