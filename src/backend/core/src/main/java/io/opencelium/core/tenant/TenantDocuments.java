@@ -121,7 +121,8 @@ public final class TenantDocuments {
 	 * @return the deleted document, or nothing when no document of the current tenant matches the condition
 	 */
 	public <T extends TenantDocument> Optional<T> findAndDelete(Class<T> type, Criteria condition) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		Scope scope = scope(condition);
+		return Optional.ofNullable(scope.template().findAndRemove(scope.query(), type));
 	}
 
 	/**

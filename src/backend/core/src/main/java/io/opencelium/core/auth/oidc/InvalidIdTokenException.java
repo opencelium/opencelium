@@ -11,7 +11,7 @@ public final class InvalidIdTokenException extends RuntimeException {
 	 * @param reason     a fixed text that says why core refuses the ID token; it holds no part of the ID token
 	 */
 	InvalidIdTokenException(String providerId, String reason) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		super("The ID token for the OIDC provider " + providerId + " is not valid: " + reason + ".");
 	}
 
 }

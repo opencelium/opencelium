@@ -15,4 +15,11 @@ package io.opencelium.core.auth.oidc;
 public record OidcTokenRequest(String providerId, OidcDiscoveryDocument document, String clientId,
 		String redirectUri, String codeVerifier, String nonce) {
 
+	/** Without the PKCE verifier and the nonce: no log line and no error message shows them. */
+	@Override
+	public String toString() {
+		return "OidcTokenRequest[providerId=" + providerId + ", clientId=" + clientId + ", redirectUri=" + redirectUri
+				+ ", codeVerifier=****, nonce=****]";
+	}
+
 }

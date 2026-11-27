@@ -1,6 +1,7 @@
 package io.opencelium.core.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +28,9 @@ class OidcCallbackController {
 			@RequestParam(name = "state", required = false) String state,
 			@RequestParam(name = "code", required = false) String code,
 			@RequestParam(name = "error", required = false) String error, HttpServletRequest request) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		OidcLoginOutcome outcome = completion.complete(providerId, state, code, error,
+				OidcLoginController.redirectUri(request, providerId));
+		return ResponseEntity.status(HttpStatus.FOUND).location(outcome.target()).build();
 	}
 
 }

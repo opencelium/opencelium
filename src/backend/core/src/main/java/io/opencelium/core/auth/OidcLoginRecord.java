@@ -30,6 +30,10 @@ record OidcLoginRecord(@Id String id, String tenantId, String providerId, String
 
 	static final String COLLECTION = "oidc_logins";
 
+	static final String STATE = "state";
+
+	static final String PROVIDER_ID = "providerId";
+
 	static final String EXPIRES_AT = "expiresAt";
 
 	/** The time from the start of a login to its end; a fixed value of the code. */

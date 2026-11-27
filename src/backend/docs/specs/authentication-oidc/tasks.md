@@ -27,14 +27,7 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Criteria:** AO-03, AO-09. **Status:** done
 
 ## Task 5: feat(core): start a session after an OIDC login at the IdP
-- **Criteria:** AO-03 (the late answer), AO-04, AO-06, AO-07 (rules 1 and 3; rule 2 and the email of rule 3 in task 7)
-- **Read:** plan: decisions 1, 2, 4, 5, Interfaces and contracts, Test strategy; architecture: 6.7, 6.9, decisions 17, 18, 21, 28, 29
-- **Function:** After a login at the IdP, the browser returns to the frontend with a login code, and MongoDB shows the new OpenCelium user. A wrong answer of the IdP gives an error code.
-- **Tests:** `OidcIdTokenCheckTest` (unit), `OidcUsernameTest` (unit), `LoginRedirectTest` (slice, more cases), `OidcCallbackTest` (full application), `OidcUserLookupTest` (full application)
-- **Hand test:** 1. Save the OIDC provider `kc`, and make a login verifier and its SHA-256 hash. 2. In a browser, open the login of `kc` with the hash, and log in at Keycloak as `alice`. 3. The address bar shows `/login/oidc#code=` with a login code, and `users` has 1 OpenCelium user with an OIDC link. 4. Log in as `alice` again: `users` still has 1 OpenCelium user with the OIDC link of `alice`. 5. Open the callback URL of step 2 again from the history: the browser goes to `/login/oidc#error=login-expired`.
-- **Size:** approximately 400 lines
-- **Depends on:** task 4
-- **Status:** in work
+- **Criteria:** AO-03, AO-04, AO-06, AO-07. **Status:** done
 
 ## Task 6: feat(core): exchange a login code for the tokens of a session
 - **Criteria:** AO-05, AO-08 (a locked or deleted OpenCelium user at the exchange; the answer of the IdP in task 7)

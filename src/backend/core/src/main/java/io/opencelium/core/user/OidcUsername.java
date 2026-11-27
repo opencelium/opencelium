@@ -9,6 +9,8 @@ import java.util.function.Predicate;
  */
 final class OidcUsername {
 
+	private static final String SEPARATOR = "-";
+
 	private OidcUsername() {
 	}
 
@@ -22,7 +24,12 @@ final class OidcUsername {
 	 */
 	static String of(String providerId, String subject, String email, boolean emailVerified,
 			Predicate<String> taken) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		String base = emailVerified && email != null && !email.isBlank() ? email : providerId + SEPARATOR + subject;
+		String username = base;
+		for (int number = 1; taken.test(username); number++) {
+			username = base + SEPARATOR + number;
+		}
+		return username;
 	}
 
 }

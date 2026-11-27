@@ -12,7 +12,7 @@ public final class IdpErrorException extends RuntimeException {
 	 * @param reason     a fixed text that says why the call failed; it holds no part of the answer
 	 */
 	IdpErrorException(String providerId, String reason) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		super("The IdP of the OIDC provider " + providerId + " gave no usable answer: " + reason + ".");
 	}
 
 }
