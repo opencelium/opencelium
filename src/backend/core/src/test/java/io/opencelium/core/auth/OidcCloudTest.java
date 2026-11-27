@@ -25,6 +25,7 @@ import io.opencelium.core.settings.SettingDefinition;
 import io.opencelium.core.settings.SettingRule;
 import io.opencelium.core.testsupport.CloudStart;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
+import io.opencelium.core.testsupport.OidcLoginRequests;
 import io.opencelium.core.testsupport.fake.FakeIdp;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +39,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>
  * The endpoint of the login options is open in the cloud mode too, and its list holds no OIDC provider, also when
  * the settings document holds one.
+ * <p>
+ * The start of an OIDC login is open in the cloud mode too, and it knows no OIDC provider, also when the settings
+ * document holds one: it redirects the browser to the login page of the frontend with the error code
+ * {@code unknown-provider}, without a request to the IdP.
  */
 @MongoIntegrationTest
 @AutoConfigureMockMvc
@@ -105,7 +110,29 @@ class OidcCloudTest {
 
 	@Test
 	void providersGivesAnEmptyListWhenTheSettingsDocumentHoldsAProviderAndTheModeIsCloud() {
-		// The cloud mode refuses each change of the OIDC providers, so the provider goes into the database directly.
+		storeTheProviderInTheSettingsDocument();
+
+		MvcTestResult options = mvc.get().uri(LOGIN_OPTIONS_PATH).exchange();
+
+		assertThat(options).hasStatusOk();
+		assertThat(options).bodyJson().isStrictlyEqualTo("[]");
+	}
+
+	@Test
+	void loginRedirectsToTheErrorTargetOfUnknownProviderWithoutARequestToTheIdpWhenTheModeIsCloud() {
+		storeTheProviderInTheSettingsDocument();
+
+		MvcTestResult start = OidcLoginRequests.start(mvc, "kc", OidcLoginRequests.newLoginVerifierHash());
+
+		OidcLoginRequests.assertErrorRedirect(start, "unknown-provider");
+		assertThat(IDP.requests()).as("the requests to an IdP").isEmpty();
+	}
+
+	/**
+	 * Stores the OIDC provider {@code kc} in the settings document. The cloud mode refuses each change of the OIDC
+	 * providers, so the provider goes into the database directly.
+	 */
+	private void storeTheProviderInTheSettingsDocument() {
 		Document provider = new Document("id", "kc").append("display-name", "Keycloak")
 			.append("issuer-url", ISSUER_URL)
 			.append("client-id", "core")
@@ -114,11 +141,6 @@ class OidcCloudTest {
 		mongo.getCollection("settings")
 			.insertOne(new Document("_id", "installation").append("oidc",
 					new Document("providers", List.of(provider))));
-
-		MvcTestResult options = mvc.get().uri(LOGIN_OPTIONS_PATH).exchange();
-
-		assertThat(options).hasStatusOk();
-		assertThat(options).bodyJson().isStrictlyEqualTo("[]");
 	}
 
 	private SettingDefinition theOidcProviders() {

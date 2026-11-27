@@ -31,7 +31,7 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Hand test:** 1. Save the OIDC provider `kc`, and make a random login verifier and its SHA-256 hash. 2. In a browser, open `/api/auth/oidc/kc/login` with the hash: the login page of Keycloak opens. 3. In `mongosh`, `oidc_logins` has 1 login record of `kc` without a code of the IdP. 4. Open `/api/auth/oidc/unknown/login` with the hash: the browser goes to `/login/oidc#error=unknown-provider`.
 - **Size:** approximately 280 lines
 - **Depends on:** task 3
-- **Status:** open
+- **Status:** in work
 
 ## Task 5: feat(core): start a session after an OIDC login at the IdP
 - **Criteria:** AO-03 (the late answer), AO-04, AO-06, AO-07 (rules 1 and 3; rule 2 and the email of rule 3 in task 7)
