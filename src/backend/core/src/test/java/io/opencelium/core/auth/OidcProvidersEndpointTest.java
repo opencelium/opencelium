@@ -1,5 +1,6 @@
 package io.opencelium.core.auth;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
@@ -16,9 +17,13 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.convention.TestBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
@@ -27,6 +32,7 @@ import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.LoginRequests;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 import io.opencelium.core.testsupport.SettingsRequests;
+import io.opencelium.core.testsupport.fake.FakeIdp;
 
 import static io.opencelium.core.testsupport.SettingsRequests.field;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +44,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * keeps its stored client secret only with the same provider ID and the same issuer URL. The secrets collection
  * keeps only the client secrets of the saved OIDC providers, and the plaintext of a client secret is in no other
  * place.
+ * <p>
+ * At a change core examines the discovery document of each new issuer URL, and refuses an issuer URL without one.
+ * An issuer URL is new for an OIDC provider whose provider ID is not stored, or whose stored item has another issuer
+ * URL; a kept OIDC provider with the stored issuer URL causes no request to its IdP. The fake IdP serves the discovery
+ * document of each issuer URL of a case, unless the case removes it.
  */
 @MongoIntegrationTest
 @AutoConfigureMockMvc
@@ -48,6 +59,15 @@ class OidcProvidersEndpointTest {
 
 	private static final String ISSUER_URL = "https://idp.example.com/realms/oc";
 
+	private static final String SECOND_ISSUER_URL = "https://login.example.org/tenant-2/v2.0";
+
+	private static final String OTHER_ISSUER_URL = "https://other-idp.example.com/realms/oc";
+
+	/** An issuer URL whose discovery document the fake IdP never serves. */
+	private static final String ISSUER_URL_WITHOUT_DOCUMENT = "https://no-idp.example.com/realms/oc";
+
+	private static final FakeIdp IDP = new FakeIdp();
+
 	@TempDir
 	static Path dataDir;
 
@@ -55,6 +75,9 @@ class OidcProvidersEndpointTest {
 	static void properties(DynamicPropertyRegistry registry) {
 		LocalMongo.register(registry, OidcProvidersEndpointTest.class, () -> dataDir);
 	}
+
+	@TestBean(name = FakeIdp.BEAN_NAME, methodName = "fakeIdp")
+	ClientHttpRequestFactory oidcRequestFactory;
 
 	@Autowired
 	MockMvcTester mvc;
@@ -64,10 +87,22 @@ class OidcProvidersEndpointTest {
 
 	private final String clientSecret = newClientSecret();
 
+	static ClientHttpRequestFactory fakeIdp() {
+		return IDP;
+	}
+
 	@BeforeEach
 	void removeTheSettingsOfAnotherTest() {
 		mongo.getCollection("settings").deleteMany(new Document());
 		mongo.getCollection("secrets").deleteMany(new Document());
+	}
+
+	@BeforeEach
+	void serveTheDiscoveryDocumentOfEachIssuerUrl() {
+		IDP.reset();
+		IDP.serveDiscoveryDocument(ISSUER_URL);
+		IDP.serveDiscoveryDocument(SECOND_ISSUER_URL);
+		IDP.serveDiscoveryDocument(OTHER_ISSUER_URL);
 	}
 
 	@Test
@@ -170,12 +205,26 @@ class OidcProvidersEndpointTest {
 			.hasStatusOk();
 		String secretId = theOnlySecretId();
 
-		MvcTestResult change = save(admin, provider("kc", "https://other-idp.example.com/realms/oc", null));
+		MvcTestResult change = save(admin, provider("kc", OTHER_ISSUER_URL, null));
 
 		assertInvalidValue(change);
 		assertThat(SettingsRequests.read(mvc, admin)).bodyJson().extractingPath(item(0, "issuer-url"))
 			.isEqualTo(ISSUER_URL);
 		assertThat(theOnlySecretId()).as("the kept client secret").isEqualTo(secretId);
+	}
+
+	@Test
+	void patchMakesNoRequestToTheIdpWhenTheIssuerUrlChangesWithoutAClientSecret() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(save(admin, provider("kc", ISSUER_URL, clientSecret))).as("the save of the OIDC provider")
+			.hasStatusOk();
+		IDP.reset();
+		IDP.serveDiscoveryDocument(OTHER_ISSUER_URL);
+
+		MvcTestResult change = save(admin, provider("kc", OTHER_ISSUER_URL, null));
+
+		assertInvalidValue(change);
+		assertThat(IDP.requests()).as("the requests to the IdP of a change that is refused anyway").isEmpty();
 	}
 
 	@Test
@@ -205,7 +254,7 @@ class OidcProvidersEndpointTest {
 	void patchDeletesTheClientSecretOfAProviderWhenTheChangeRemovesIt() {
 		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
 		assertThat(save(admin, provider("kc", ISSUER_URL, clientSecret),
-				provider("kc2", "https://login.example.org/tenant-2/v2.0", newClientSecret())))
+				provider("kc2", SECOND_ISSUER_URL, newClientSecret())))
 			.as("the save of 2 OIDC providers")
 			.hasStatusOk();
 		String keptId = storedSecretIdOf("kc");
@@ -222,7 +271,7 @@ class OidcProvidersEndpointTest {
 	void patchDeletesEachClientSecretWhenTheSettingIsReset() {
 		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
 		assertThat(save(admin, provider("kc", ISSUER_URL, clientSecret),
-				provider("kc2", "https://login.example.org/tenant-2/v2.0", newClientSecret())))
+				provider("kc2", SECOND_ISSUER_URL, newClientSecret())))
 			.as("the save of 2 OIDC providers")
 			.hasStatusOk();
 
@@ -238,7 +287,7 @@ class OidcProvidersEndpointTest {
 	void patchDeletesEachClientSecretWhenTheChangeHasNoProvider() {
 		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
 		assertThat(save(admin, provider("kc", ISSUER_URL, clientSecret),
-				provider("kc2", "https://login.example.org/tenant-2/v2.0", newClientSecret())))
+				provider("kc2", SECOND_ISSUER_URL, newClientSecret())))
 			.as("the save of 2 OIDC providers")
 			.hasStatusOk();
 
@@ -266,6 +315,93 @@ class OidcProvidersEndpointTest {
 			}
 		}
 		assertThat(output.getAll()).doesNotContain(clientSecret);
+	}
+
+	@Test
+	void patchGivesNoDiscoveryDocumentWhenTheIdpHasNoDiscoveryDocumentForTheIssuerUrl() {
+		MvcTestResult change = save(LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				provider("kc", ISSUER_URL_WITHOUT_DOCUMENT, clientSecret));
+
+		assertNoDiscoveryDocument(change);
+		assertThat(change).bodyText().doesNotContain(clientSecret);
+		assertThat(mongo.getCollection("settings").countDocuments()).isZero();
+		assertThat(mongo.getCollection("secrets").countDocuments()).isZero();
+	}
+
+	@Test
+	void patchGivesNoDiscoveryDocumentWhenTheIssuerOfTheDocumentIsAnotherUrl() {
+		String issuerUrl = "https://idp.example.com/realms/staff";
+		IDP.serveDiscoveryDocument(issuerUrl, FakeIdp.documentOf(ISSUER_URL));
+
+		MvcTestResult change = save(LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				provider("kc", issuerUrl, clientSecret));
+
+		assertNoDiscoveryDocument(change);
+		assertThat(mongo.getCollection("settings").countDocuments()).isZero();
+		assertThat(mongo.getCollection("secrets").countDocuments()).isZero();
+	}
+
+	@Test
+	void patchGivesNoDiscoveryDocumentWhenOneOfTwoIssuerUrlsHasNoDiscoveryDocument() {
+		MvcTestResult change = save(LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				provider("kc", ISSUER_URL, clientSecret),
+				provider("kc2", ISSUER_URL_WITHOUT_DOCUMENT, newClientSecret()));
+
+		assertNoDiscoveryDocument(change);
+		assertThat(mongo.getCollection("settings").countDocuments()).isZero();
+		assertThat(mongo.getCollection("secrets").countDocuments()).isZero();
+	}
+
+	@Test
+	void patchKeepsAProviderWithoutARequestToTheIdpWhenItsIssuerUrlIsTheStoredOne() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(save(admin, provider("kc", ISSUER_URL, clientSecret))).as("the save of the OIDC provider")
+			.hasStatusOk();
+		// A new OIDC provider causes a request; else the empty list at the end would also hold for a fake without use.
+		assertThat(IDP.requests()).as("the requests of the save of a new OIDC provider")
+			.contains(URI.create(FakeIdp.discoveryUrlOf(ISSUER_URL)));
+		String secretId = theOnlySecretId();
+		IDP.reset();
+
+		MvcTestResult change = save(admin, provider("kc", "Keycloak of the staff", ISSUER_URL, null));
+
+		assertThat(change).hasStatusOk();
+		assertThat(change).bodyJson().extractingPath(item(0, "display-name")).isEqualTo("Keycloak of the staff");
+		assertThat(theOnlySecretId()).as("the kept client secret").isEqualTo(secretId);
+		assertThat(storedSecretIdOf("kc")).isEqualTo(secretId);
+		assertThat(IDP.requests()).isEmpty();
+	}
+
+	@Test
+	void patchGivesNoDiscoveryDocumentWhenTheIssuerUrlOfAStoredProviderChangesToAUrlWithoutADocument() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(save(admin, provider("kc", ISSUER_URL, clientSecret))).as("the save of the OIDC provider")
+			.hasStatusOk();
+		String secretId = theOnlySecretId();
+
+		MvcTestResult change = save(admin, provider("kc", ISSUER_URL_WITHOUT_DOCUMENT, newClientSecret()));
+
+		assertNoDiscoveryDocument(change);
+		assertThat(SettingsRequests.read(mvc, admin)).bodyJson().extractingPath(item(0, "issuer-url"))
+			.isEqualTo(ISSUER_URL);
+		assertThat(theOnlySecretId()).as("the kept client secret").isEqualTo(secretId);
+	}
+
+	@Test
+	void patchShowsTheBodyOfTheIdpAnswerNeitherInTheResponseNorInTheLogWhenItRefusesTheIssuerUrl(
+			CapturedOutput output) {
+		String marker = "marker" + UUID.randomUUID().toString().replace("-", "");
+		HttpHeaders html = new HttpHeaders();
+		html.setContentType(MediaType.TEXT_HTML);
+		IDP.answer(FakeIdp.discoveryUrlOf(ISSUER_URL_WITHOUT_DOCUMENT), HttpStatus.INTERNAL_SERVER_ERROR, html,
+				"<html>Internal error " + marker + "</html>");
+
+		MvcTestResult change = save(LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				provider("kc", ISSUER_URL_WITHOUT_DOCUMENT, clientSecret));
+
+		assertNoDiscoveryDocument(change);
+		assertThat(change).bodyText().doesNotContain(marker).doesNotContain(clientSecret);
+		assertThat(output.getAll()).doesNotContain(marker).doesNotContain(clientSecret);
 	}
 
 	/** A change of the OIDC providers with the JSON objects of the providers, as the HTTP client sends it. */
@@ -302,6 +438,14 @@ class OidcProvidersEndpointTest {
 		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "invalid-settings");
 		assertThat(change).bodyJson().extractingPath("$.errors[0].key").isEqualTo(KEY);
 		assertThat(change).bodyJson().extractingPath("$.errors[0].problem").isEqualTo("invalid-value");
+	}
+
+	/** The error {@code invalid-settings} with 1 incorrect setting key, the OIDC providers without a document. */
+	private static void assertNoDiscoveryDocument(MvcTestResult change) {
+		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "invalid-settings");
+		assertThat(change).bodyJson().extractingPath("$.errors").asArray().hasSize(1);
+		assertThat(change).bodyJson().extractingPath("$.errors[0].key").isEqualTo(KEY);
+		assertThat(change).bodyJson().extractingPath("$.errors[0].problem").isEqualTo("no-discovery-document");
 	}
 
 	/** The ID of the 1 secret of the secrets collection; the assertion fails when the collection has another number. */

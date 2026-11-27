@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import io.opencelium.common.secret.SecretReference;
 
@@ -89,6 +90,26 @@ public record SettingList(List<ItemField> fields, String idField, String secretF
 	 * @return the items as the settings API shows them, in the order of {@code stored}
 	 */
 	List<Map<String, Object>> masked(List<? extends Map<String, ?>> stored) {
+		return shown(stored, secret -> Optional.of(SettingsService.MASK));
+	}
+
+	/**
+	 * The value of a read for a feature: as {@link #masked}, but with the secret reference in place of the mask. It
+	 * never gives the plaintext of a secret, which only the secret provider has.
+	 *
+	 * @param stored the items as the database keeps them
+	 * @return the items with the secret reference in the secret field, in the order of {@code stored}; an item whose
+	 *         secret field holds no valid secret reference has no secret field
+	 */
+	List<Map<String, Object>> withReferences(List<? extends Map<String, ?>> stored) {
+		return shown(stored, SettingsService::referenceOf);
+	}
+
+	/**
+	 * @param secretShown gives what an item shows for its stored secret field, or empty when it shows no secret field
+	 */
+	private List<Map<String, Object>> shown(List<? extends Map<String, ?>> stored,
+			Function<Object, Optional<?>> secretShown) {
 		List<Map<String, Object>> shown = new ArrayList<>();
 		for (Map<String, ?> item : stored) {
 			Map<String, Object> shownItem = new LinkedHashMap<>();
@@ -96,7 +117,7 @@ public record SettingList(List<ItemField> fields, String idField, String secretF
 				Object value = item.get(field.name());
 				if (field.name().equals(secretField)) {
 					if (value != null) {
-						shownItem.put(field.name(), SettingsService.MASK);
+						secretShown.apply(value).ifPresent(secret -> shownItem.put(field.name(), secret));
 					}
 				}
 				else if (value != null || field.defaultValue() != null) {

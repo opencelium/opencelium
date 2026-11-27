@@ -21,14 +21,7 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Criteria:** AO-01, AO-09. **Status:** done
 
 ## Task 3: feat(core): list the OIDC providers as login options
-- **Criteria:** AO-01 (the discovery document of rule 1), AO-02, AO-09 (the login options)
-- **Read:** plan: decision 4, Interfaces and contracts (Endpoints, Error codes, The calls to an IdP), Test strategy; architecture: 6.7, decisions 10, 19, 23
-- **Function:** The login page can get the OIDC providers as login options. At each change, core examines the discovery document of each issuer URL.
-- **Tests:** `OidcDiscoveryTest` (unit), `LoginOptionsEndpointTest` (full application), `OidcProvidersEndpointTest` and `OidcCloudTest` (full application, more cases)
-- **Hand test:** 1. As the default admin, save the OIDC providers `kc` and `kc2`, both on the realm `oc`. 2. Save an OIDC provider with the issuer URL `https://example.com`: core answers 400 with `no-discovery-document`. 3. Without a session JWT, send `GET /api/auth/oidc/providers`: the response lists `kc` and `kc2` with their display names.
-- **Size:** approximately 250 lines
-- **Depends on:** task 2
-- **Status:** open
+- **Criteria:** AO-01, AO-02, AO-09. **Status:** done
 
 ## Task 4: feat(core): redirect the browser to the IdP of an OIDC provider
 - **Criteria:** AO-03 (the redirect; the late answer in task 5), AO-09 (the refused start)

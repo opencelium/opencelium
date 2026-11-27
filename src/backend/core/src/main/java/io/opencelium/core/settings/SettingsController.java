@@ -81,7 +81,7 @@ class SettingsController {
 	ResponseEntity<ProblemDetail> invalidSettings(InvalidSettingsException refused) {
 		ProblemDetail problem = SettingsError.INVALID_SETTINGS.problem();
 		problem.setProperty(SettingsError.ERRORS_FIELD, refused.errors().stream()
-				.map(error -> new ErrorField(error.key(), error.problem().code())).toList());
+				.map(error -> new ErrorField(error.key(), error.code())).toList());
 		return ResponseEntity.badRequest().body(problem);
 	}
 
@@ -146,7 +146,7 @@ class SettingsController {
 
 	/**
 	 * @param key     an incorrect setting key of the change
-	 * @param problem {@code unknown-key} or {@code invalid-value}
+	 * @param problem {@code unknown-key}, {@code invalid-value}, or the problem code that the rule of a feature gave
 	 */
 	record ErrorField(String key, String problem) {
 
