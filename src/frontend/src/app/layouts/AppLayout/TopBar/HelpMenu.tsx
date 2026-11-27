@@ -42,6 +42,7 @@ export function HelpMenu({ tours = 'app', newFeatureId }: { tours?: HelpTours; n
             type="text"
             iconProps={{ name: 'help', color: 'primary' }}
             testId="topbar-help"
+            ariaLabel={tCommon('topbar.help')}
         />
     )
 

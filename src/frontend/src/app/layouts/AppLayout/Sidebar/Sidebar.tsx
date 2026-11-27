@@ -52,7 +52,7 @@ export const Sidebar = () => {
                     content={tCommon(collapsed ? 'sidebar.expand' : 'sidebar.collapse')}
                     placement="right"
                 >
-                    <Button type="text" onClick={toggleCollapsed}>
+                    <Button type="text" onClick={toggleCollapsed} ariaLabel={tCommon(collapsed ? 'sidebar.expand' : 'sidebar.collapse')}>
                         {collapsed
                             ? <MenuUnfoldOutlined style={{ color: theme.color.sidebar.fg }} />
                             : <MenuFoldOutlined style={{ color: theme.color.sidebar.fg }} />
@@ -93,6 +93,7 @@ export const Sidebar = () => {
                     <Button
                         type="text"
                         onClick={() => { void handleLogout(); }}
+                        ariaLabel={collapsed ? logoutLabel : undefined}
                         style={{
                             display: 'flex',
                             alignItems: 'center',

@@ -1039,13 +1039,13 @@
   },
   "requestData": "Request data",
   "graphqlBody": {
-    "masterPasswordTitle": "Enter the master password to access this connector's GraphQL API",
     "editorHint": "Ctrl + Space for autocomplete. Only the active tab's query runs when this method executes — tabs are named after the query's operation name (e.g. \"query MyQuery {...}\"), so anonymous queries stay \"<untitled>\".",
-    "connectorFailed": "Could not load the connector. Check the backend connection and try again.",
-    "loginFailed": "Could not authenticate with this connector's GraphQL API. Check its credentials and try again.",
-    "masterPasswordNotConfigured": "No master password is configured",
-    "masterPasswordNotConfiguredDescription": "Ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend to enable browsing this connector's GraphQL API.",
-    "retry": "Try again"
+    "confirmMutation": {
+      "title": "Run this mutation?",
+      "message": "A mutation changes data in the connected system. It is sent to the real API with the connector's credentials."
+    },
+    "mutationCancelled": "Mutation not sent.",
+    "requestFailed": "The request could not be sent."
   },
   "minimap": {
     "title": "Minimap",
@@ -1462,8 +1462,18 @@
       "editorHint": "Fields for {{tool}}. The JSON is generated automatically.",
       "jsonHint": "This exact body is sent. References are allowed in every string.",
       "jsonReferenceHint": "Insert a reference at the cursor.",
+      "jsonTransformHint": "Insert a reference at the cursor. Lines marked </> hold a step reference: click the mark to compute the value with a script.",
       "validJson_one": "Valid JSON · {{count}} reference",
       "validJson_other": "Valid JSON · {{count}} references",
+      "brokenReferences_one": "Valid JSON · {{count}} broken reference",
+      "brokenReferences_other": "Valid JSON · {{count}} broken references",
+      "brokenReference": {
+        "malformed": "Not a valid step reference. Expected {%#color.(response).body.$.path%}.",
+        "direction": "After the step colour write (request) or (response), not ({{direction}}).",
+        "unknownStep": "No step in this workflow has the colour {{color}}.",
+        "pathSyntax": "The JSON path of this reference has a syntax error.",
+        "pathSyntaxAt": "The JSON path of this reference has a syntax error at \"{{character}}\"."
+      },
       "invalidJson": "Invalid JSON: {{error}}",
       "invalidJsonOnApply": "The message body is not valid JSON. Fix it before applying.",
       "lockedBanner": "The JSON was edited by hand and takes precedence. The editor is locked.",
@@ -1644,6 +1654,9 @@
         "webhookParameter": "Webhook parameters can't be passed to a script. Remove them to use a transformation.",
         "combined": "This field is combined with other text in the message, so a script can't fill it.",
         "unused": "This field isn't part of the message yet."
+      },
+      "json": {
+        "edit": "Transformation: edit the script or remove it"
       }
     }
   },

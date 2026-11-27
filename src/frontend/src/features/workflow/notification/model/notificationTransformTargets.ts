@@ -14,10 +14,23 @@ export type TargetLocation =
 	| { kind: 'combined' }
 	| { kind: 'unused' };
 
+/** A text value of hand-edited JSON, by its path in the body. */
+export type JsonTransformTarget = { kind: 'json'; path: string[] };
+
+export type AnyTransformTarget = TransformTarget | JsonTransformTarget;
+
 /** Keyed by tool too: Slack and Teams both have a `text` field, and each tool keeps its own draft. */
-export const transformTargetId = (toolId: NotificationToolId, target: TransformTarget) => target.kind === 'field'
-	? `${toolId}:field:${target.key}`
-	: `${toolId}:fact:${target.key}:${target.factId}`;
+export const transformTargetId = (toolId: NotificationToolId, target: AnyTransformTarget) => {
+	switch (target.kind) {
+		case 'field': return `${toolId}:field:${target.key}`;
+		case 'fact': return `${toolId}:fact:${target.key}:${target.factId}`;
+		case 'json': return `${toolId}:json:${JSON.stringify(target.path)}`;
+		default: {
+			const _exhaustive: never = target;
+			return _exhaustive;
+		}
+	}
+};
 
 const flattenFields = (layout: NotificationFieldLayout[]) =>
 	layout.flatMap((item) => item.kind === 'row' ? item.fields : [item]);
