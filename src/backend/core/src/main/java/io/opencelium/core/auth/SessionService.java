@@ -1,9 +1,13 @@
 package io.opencelium.core.auth;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.UUID;
 
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -21,7 +25,9 @@ import io.opencelium.core.user.UserService;
  * session, also for a user with a session already.</li>
  * <li>A redirect login starts its session before the browser returns to the frontend, and gives the login code of the
  * session. The session record holds the code ID of the login code until the HTTP client exchanges the login code for
- * the 2 tokens.</li>
+ * the 2 tokens. The exchange needs the login verifier whose hash the login code holds, and it uses the login code
+ * once: a second use ends the session, also when 2 exchanges come at the same time. An exchange for a locked or
+ * deleted user ends the session too.</li>
  * <li>A refresh gives 2 new tokens, and the old refresh token stops. The new session JWT carries the roles that the
  * user has now. The refresh ends the session instead when the refresh token is an old one, or when the user is locked
  * or deleted: a second use of a refresh token can mean that another person has a copy of it. A refresh never moves
@@ -85,6 +91,42 @@ final class SessionService {
 	}
 
 	/**
+	 * Gives the 2 tokens of the session of a valid login code, once. The login verifier must be the one whose hash the
+	 * login code holds; an exchange with a wrong one uses nothing and ends nothing. The refresh token has the token ID
+	 * that the session record held already, and that no token held before. The session JWT has the roles that the
+	 * OpenCelium user has now.
+	 *
+	 * @param loginCode     a login code that the decoder of its type accepted
+	 * @param loginVerifier the login verifier that the HTTP client gives with the login code
+	 * @throws InvalidLoginVerifierException when the hash of the login verifier is not the hash of the login code
+	 * @throws SessionEndedException         when the session does not exist or reached its end, when the login code
+	 *                                       was used already, or when the OpenCelium user is locked or deleted
+	 */
+	IssuedTokens exchange(Jwt loginCode, String loginVerifier) {
+		String codeId = loginCode.getId();
+		String sessionId = loginCode.getClaimAsString(SessionTokens.SESSION_ID_CLAIM);
+		if (!hashMatches(loginVerifier, loginCode.getClaimAsString(LoginCodes.LOGIN_VERIFIER_HASH_CLAIM))) {
+			throw new InvalidLoginVerifierException();
+		}
+		SessionRecord session = sessions.findById(sessionId)
+				.orElseThrow(() -> new SessionEndedException("the session does not exist"));
+		// MongoDB removes a record after its end only approximately each 60 seconds.
+		if (!clock.instant().isBefore(session.endsAt())) {
+			throw new SessionEndedException("the session reached its end");
+		}
+		if (!codeId.equals(session.codeId())) {
+			throw endSession(session, "a login code came a second time");
+		}
+		UserDocument user = users.findById(session.userId()).filter(found -> !found.locked())
+				.orElseThrow(() -> endSession(session, "the OpenCelium user is locked or deleted"));
+		if (!sessions.useLoginCode(sessionId, codeId)) {
+			throw endSession(session, "another exchange used the login code first");
+		}
+		var principal = new UserPrincipal(session.userId(), TenantId.of(session.tenantId()), sessionId, user.roles());
+		return tokens.issue(principal, session.tokenId(), session.endsAt());
+	}
+
+	/**
 	 * Gives 2 new tokens for the session of a valid refresh token, and the old refresh token stops.
 	 *
 	 * @param refreshToken a refresh token that the decoder of its type accepted
@@ -135,6 +177,24 @@ final class SessionService {
 
 	private static String newTokenId() {
 		return UUID.randomUUID().toString();
+	}
+
+	/**
+	 * Whether the SHA-256 hash of the ASCII bytes of the login verifier, in the base64url form without padding, is the
+	 * hash that the login code holds. The comparison does not stop at the first byte that differs. A login verifier is a
+	 * random value and no key material, and its hash uses no key. The controller accepts only ASCII login verifiers, so
+	 * the encoding loses no character.
+	 */
+	private static boolean hashMatches(String loginVerifier, String expectedHash) {
+		try {
+			byte[] hash = MessageDigest.getInstance("SHA-256").digest(loginVerifier.getBytes(StandardCharsets.US_ASCII));
+			String hashText = Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+			return MessageDigest.isEqual(hashText.getBytes(StandardCharsets.US_ASCII),
+					expectedHash.getBytes(StandardCharsets.US_ASCII));
+		}
+		catch (NoSuchAlgorithmException ex) {
+			throw new IllegalStateException("Each JVM has SHA-256.", ex);
+		}
 	}
 
 }

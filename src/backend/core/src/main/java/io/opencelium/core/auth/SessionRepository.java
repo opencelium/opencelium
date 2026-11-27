@@ -11,8 +11,9 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 /**
  * The sessions collection, limited to the sessions of the current tenant: each operation goes through the
- * tenant-document access. The change of the current refresh token is 1 conditional update, so that of 2 refreshes
- * with 1 refresh token at the same time only 1 changes it.
+ * tenant-document access. The change of the current refresh token and the use of a login code are each 1 conditional
+ * update, so that of 2 refreshes with 1 refresh token, or of 2 exchanges of 1 login code, at the same time only 1
+ * succeeds.
  */
 @Repository
 class SessionRepository {
@@ -44,6 +45,18 @@ class SessionRepository {
 		return documents.update(SessionRecord.class,
 				where(SessionRecord.ID).is(sessionId).and(SessionRecord.TOKEN_ID).is(currentTokenId),
 				new Update().set(SessionRecord.TOKEN_ID, newTokenId)) == 1;
+	}
+
+	/**
+	 * Uses the login code of the session: clears its code ID, if it is still {@code codeId}.
+	 *
+	 * @return {@code true} when this call used the login code; {@code false} when the session does not exist or has
+	 *         another code ID, which means that another exchange used the login code first
+	 */
+	boolean useLoginCode(String sessionId, String codeId) {
+		return documents.update(SessionRecord.class,
+				where(SessionRecord.ID).is(sessionId).and(SessionRecord.CODE_ID).is(codeId),
+				new Update().unset(SessionRecord.CODE_ID)) == 1;
 	}
 
 	/** Deletes the session; a session that does not exist is no error. */

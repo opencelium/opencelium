@@ -25,15 +25,31 @@ enum AuthError {
 
 	/**
 	 * A refresh of a session that does not exist any more: it reached its end, the user logged out, an old refresh
-	 * token came again, or the user is locked or deleted. Also a request for the current user whose user is deleted.
-	 * The HTTP client logs in again.
+	 * token came again, or the user is locked or deleted. Also an exchange of a login code that was used already, or
+	 * for a user that is locked or deleted, and a request for the current user whose user is deleted. The HTTP client
+	 * logs in again.
 	 */
 	SESSION_ENDED("session-ended", HttpStatus.UNAUTHORIZED, "The session ended. Log in again."),
 
 	/** A login body that is not JSON, that lacks a field, or that has a field that is too long. */
 	BAD_REQUEST("bad-request", HttpStatus.BAD_REQUEST,
 			"The body must be JSON with a username and a password of at most " + LoginController.MAX_LENGTH
-					+ " characters each.");
+					+ " characters each."),
+
+	/**
+	 * An exchange of a login code with a login verifier whose hash is not the hash that the login code holds. The
+	 * login code stays valid.
+	 */
+	INVALID_LOGIN_VERIFIER("invalid-login-verifier", HttpStatus.UNAUTHORIZED,
+			"The login verifier is not the one of the login that started the login code."),
+
+	/**
+	 * An exchange body that is not JSON, that lacks the login verifier, or whose login verifier has another form than
+	 * 43 to 128 characters of letters, digits, {@code -}, {@code .}, {@code _} and {@code ~}.
+	 */
+	BAD_EXCHANGE("bad-request", HttpStatus.BAD_REQUEST,
+			"The body must be JSON with a login verifier of 43 to 128 characters: letters, digits, '-', '.', '_' and"
+					+ " '~'.");
 
 	static final String CODE_FIELD = "code";
 

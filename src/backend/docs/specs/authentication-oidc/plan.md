@@ -69,7 +69,7 @@ All code is in `core`, with the login strategies, the users and the settings API
 | `idp-error` | Redirect | An error from the IdP, also for the token request |
 | `invalid-id-token` | Redirect | AO-06, rule 2 |
 | `user-locked`, `email-taken` | Redirect | AO-08 |
-| `bad-request` | Redirect or 400 | No hash at the start, or no login verifier at the exchange |
+| `bad-request` | Redirect or 400 | No hash at the start, or no valid login verifier at the exchange |
 | `invalid-login-verifier` | 401 | A wrong login verifier; the login code stays valid |
 | `session-ended` | 401 | A second use of the login code (AO-05), or a locked or deleted OpenCelium user at the exchange (AO-08) |
 | `invalid-settings` | 400 | AO-01; the field `errors` (decision 23) has `invalid-value`, or `no-discovery-document` for rule 1 |

@@ -39,10 +39,11 @@ import io.opencelium.core.secrets.keys.TokenSignature;
 import io.opencelium.core.user.UserService;
 
 /**
- * The authentication of core: the login strategies of the deployment mode, the 2 tokens of a session, and 2 security
- * filter chains. The refresh chain accepts a request to the refresh and logout endpoints only with a valid refresh
- * token; the main chain accepts each other request only with a valid session JWT. The decoder of each chain refuses
- * a token of the other type.
+ * The authentication of core: the login strategies of the deployment mode, the 2 tokens of a session, and 3 security
+ * filter chains. The login-code chain accepts a request to the exchange endpoint only with a valid login code; the
+ * refresh chain accepts a request to the refresh and logout endpoints only with a valid refresh token; the main chain
+ * accepts each other request only with a valid session JWT. The decoder of each chain refuses a token of the other
+ * types.
  */
 @Configuration(proxyBeanMethods = false)
 class AuthConfig {
@@ -65,6 +66,32 @@ class AuthConfig {
 	LoginStrategies loginStrategies(OpenCeliumProperties properties, UserService users,
 			PasswordEncoder passwordEncoder) {
 		return new LoginStrategies(properties.deploymentMode(), new LoginLookup(users), passwordEncoder);
+	}
+
+	/**
+	 * The login-code chain matches the exchange endpoint, with each method, and comes before the refresh chain and the
+	 * main chain. Each request needs a valid login code as the bearer token, and no session JWT; without one it gets the
+	 * answer of {@link #refuse}. The login of the request keeps the login code as its credentials, because the session
+	 * service reads its code ID and the hash of its login verifier. The principal of the login code gives the tenant of
+	 * the exchange, also in the cloud mode. The chain is stateless, as the other chains.
+	 */
+	@Bean
+	@Order(Ordered.LOWEST_PRECEDENCE - 2)
+	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+	SecurityFilterChain loginCodeSecurityFilterChain(HttpSecurity http, TokenSignature signature) throws Exception {
+		var loginCodes = new JwtAuthenticationProvider(
+				signature.decoder(LoginCodes.LOGIN_CODE_TYPE, SessionTokens.ISSUER));
+		loginCodes.setJwtAuthenticationConverter(SessionTokens::authenticationOfLoginCode);
+		var authentication = new ProviderManager(loginCodes);
+		authentication.setEraseCredentialsAfterAuthentication(false);
+		var bearerTokenFilter = new BearerTokenAuthenticationFilter(authentication);
+		bearerTokenFilter.setAuthenticationEntryPoint(AuthConfig::refuse);
+		return http.securityMatcher(LoginCodeController.PATH)
+				.authorizeHttpRequests(requests -> requests.anyRequest().authenticated())
+				.addFilter(bearerTokenFilter)
+				.exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(AuthConfig::refuse))
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.csrf(AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable).build();
 	}
 
 	/**
