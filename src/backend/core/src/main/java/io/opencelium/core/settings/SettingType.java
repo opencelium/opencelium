@@ -1,6 +1,7 @@
 package io.opencelium.core.settings;
 
 import java.net.InetAddress;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import io.opencelium.core.config.TerminalText;
@@ -39,7 +40,16 @@ public enum SettingType {
 	 * A JSON string with the rule of {@link #TEXT}, but not the mask {@value SettingsService#MASK}: a read shows the
 	 * mask, so a client that sends a read back must not replace the secret with it. The secret storage keeps the value.
 	 */
-	SECRET;
+	SECRET,
+
+	/** A JSON boolean, {@code true} or {@code false}. */
+	BOOLEAN,
+
+	/**
+	 * A JSON array with a number of items inside the bounds. The type examines only the array and its size; the list of
+	 * the setting definition examines the items ({@link SettingList}).
+	 */
+	LIST;
 
 	private static final Pattern HOST_NAME_LABEL = Pattern.compile("[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?");
 
@@ -60,6 +70,8 @@ public enum SettingType {
 			case INTEGER -> isWholeNumber(value) && inside(((Number) value).longValue(), min, max);
 			case HOST -> value instanceof String host && inside(host.length(), min, max)
 					&& (isHostName(host) || isIpv6Address(host));
+			case BOOLEAN -> value instanceof Boolean;
+			case LIST -> value instanceof List<?> items && inside(items.size(), min, max);
 		};
 	}
 
