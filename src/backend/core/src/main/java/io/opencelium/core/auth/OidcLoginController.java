@@ -1,7 +1,6 @@
 package io.opencelium.core.auth;
 
 import java.time.Clock;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -97,7 +96,7 @@ final class OidcLoginController {
 			return refuse(OidcLoginError.BAD_REQUEST,
 					"the hash of the login verifier is missing or not valid for the OIDC provider " + providerId + ".");
 		}
-		Optional<Provider> provider = find(providerId);
+		Optional<OidcProvider> provider = OidcProvider.find(settings.items(OidcProviders.KEY), providerId);
 		if (provider.isEmpty()) {
 			return refuse(OidcLoginError.UNKNOWN_PROVIDER,
 					"no OIDC provider has the provider ID " + providerId + ".");
@@ -117,19 +116,11 @@ final class OidcLoginController {
 		return ResponseEntity.status(HttpStatus.FOUND).location(authorization.uri()).build();
 	}
 
-	/** The OIDC provider of the setting with the provider ID; an item without text for the 2 values has no use. */
-	private Optional<Provider> find(String providerId) {
-		for (Map<String, Object> item : settings.items(OidcProviders.KEY)) {
-			if (providerId.equals(item.get(OidcProviders.ID)) && item.get(OidcProviders.ISSUER_URL) instanceof String
-					issuerUrl && item.get(OidcProviders.CLIENT_ID) instanceof String clientId) {
-				return Optional.of(new Provider(issuerUrl, clientId));
-			}
-		}
-		return Optional.empty();
-	}
-
-	/** The scheme, the host and the port of the request, without the default port, then the callback path. */
-	private static String redirectUri(HttpServletRequest request, String providerId) {
+	/**
+	 * The scheme, the host and the port of the request, without the default port, then the callback path. The answer of
+	 * the IdP uses the same method, so the token request has the redirect URI of the authorization request.
+	 */
+	static String redirectUri(HttpServletRequest request, String providerId) {
 		return ServletUriComponentsBuilder.fromContextPath(request)
 			.path(CALLBACK_PATH)
 			.buildAndExpand(providerId)
@@ -144,11 +135,6 @@ final class OidcLoginController {
 	private static ResponseEntity<Void> refuse(OidcLoginError error, String reason) {
 		log.info("The start of an OIDC login is refused with the code " + error.code() + ": " + reason);
 		return ResponseEntity.status(HttpStatus.FOUND).location(error.target()).build();
-	}
-
-	/** The values of an OIDC provider that the start uses; the start needs no client secret. */
-	private record Provider(String issuerUrl, String clientId) {
-
 	}
 
 }

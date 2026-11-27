@@ -25,6 +25,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-restclient'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.security:spring-security-ldap'
+	// Core uses only ClientRegistration and OidcIdTokenValidator of this library, which do not need the OIDC SDK.
+	implementation('org.springframework.security:spring-security-oauth2-client') {
+		exclude group: 'com.nimbusds', module: 'oauth2-oidc-sdk'
+	}
 
 	// Merges META-INF/additional-spring-configuration-metadata.json into the IDE metadata.
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'

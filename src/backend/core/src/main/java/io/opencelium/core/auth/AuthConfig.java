@@ -57,6 +57,11 @@ class AuthConfig {
 	}
 
 	@Bean
+	LoginCodes loginCodes(TokenSignature signature, Clock clock) {
+		return new LoginCodes(signature.encoder(LoginCodes.LOGIN_CODE_TYPE), clock);
+	}
+
+	@Bean
 	LoginStrategies loginStrategies(OpenCeliumProperties properties, UserService users,
 			PasswordEncoder passwordEncoder) {
 		return new LoginStrategies(properties.deploymentMode(), new LoginLookup(users), passwordEncoder);
@@ -88,9 +93,10 @@ class AuthConfig {
 	}
 
 	/**
-	 * The main chain matches each request that no other chain matches, so it comes last. The login, the login options
-	 * and the start of an OIDC login are open, and they ignore a bearer token, so that an old session JWT in the header
-	 * of the HTTP client does not stop a new login or the login page. Each other request needs a valid session JWT as
+	 * The main chain matches each request that no other chain matches, so it comes last. The login, the login options,
+	 * the start of an OIDC login and the answer of the IdP to it are open, and they ignore a bearer token, so that an
+	 * old session JWT in the header of the HTTP client does not stop a new login or the login page, and the browser
+	 * that the IdP sends back needs none. Each other request needs a valid session JWT as
 	 * the bearer token; without one it gets the answer of {@link #refuse}. The chain is stateless: no server session
 	 * and no cookie, so it needs no CSRF token. Spring Security exists only in a web application, so a start without a
 	 * web server has no chain.
@@ -111,7 +117,9 @@ class AuthConfig {
 			.matcher(HttpMethod.GET, LoginOptionsController.PATH);
 		RequestMatcher oidcLogin = PathPatternRequestMatcher.withDefaults()
 			.matcher(HttpMethod.GET, OidcLoginController.PATH);
-		RequestMatcher open = RequestMatchers.anyOf(login, loginOptions, oidcLogin);
+		RequestMatcher oidcCallback = PathPatternRequestMatcher.withDefaults()
+			.matcher(HttpMethod.GET, OidcLoginController.CALLBACK_PATH);
+		RequestMatcher open = RequestMatchers.anyOf(login, loginOptions, oidcLogin, oidcCallback);
 		var sessionJwts = new JwtAuthenticationProvider(
 				signature.decoder(SessionTokens.SESSION_JWT_TYPE, SessionTokens.ISSUER));
 		sessionJwts.setJwtAuthenticationConverter(SessionTokens::authenticationOf);

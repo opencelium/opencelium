@@ -36,7 +36,8 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 /**
  * The tenant-document access limits each operation to the current tenant. In the self-host mode the 1 database holds
  * the documents of 2 tenant IDs: the test writes them with the plain template, then reads, changes and deletes them
- * through the access for the self-host tenant. A document of the other tenant stays as it is.
+ * through the access for the self-host tenant, also with the read and delete in 1 operation. A document of the other
+ * tenant stays as it is.
  */
 @MongoIntegrationTest
 class TenantDocumentsTest {
@@ -125,6 +126,42 @@ class TenantDocumentsTest {
 	}
 
 	@Test
+	void findAndDeleteGivesAndDeletesTheDocumentOfTheCurrentTenantWhenTheConditionMatchesIt() {
+		store(OWN, "x");
+		store(OTHER, "x");
+
+		Optional<TestDocument> taken = asSelfHost(() -> documents.findAndDelete(TestDocument.class, named("x")));
+
+		assertThat(taken).hasValueSatisfying(document -> {
+			assertThat(document.tenantId()).isEqualTo(OWN);
+			assertThat(document.name()).isEqualTo("x");
+		});
+		assertThat(storedOf(OWN)).isEmpty();
+		assertThat(storedOf(OTHER)).hasSize(1);
+	}
+
+	@Test
+	void findAndDeleteGivesAndDeletesNoDocumentOfAnotherTenantWhenTheConditionMatchesIt() {
+		store(OTHER, "x");
+
+		Optional<TestDocument> taken = asSelfHost(() -> documents.findAndDelete(TestDocument.class, named("x")));
+
+		assertThat(taken).isEmpty();
+		assertThat(storedOf(OTHER)).hasSize(1);
+	}
+
+	@Test
+	void findAndDeleteGivesNoDocumentWhenItIsTheSecondCallForTheDocument() {
+		store(OWN, "x");
+		Optional<TestDocument> first = asSelfHost(() -> documents.findAndDelete(TestDocument.class, named("x")));
+
+		Optional<TestDocument> second = asSelfHost(() -> documents.findAndDelete(TestDocument.class, named("x")));
+
+		assertThat(first).as("the document of the first call").isPresent();
+		assertThat(second).as("the document of the second call").isEmpty();
+	}
+
+	@Test
 	void insertStoresTheDocumentWhenItHoldsTheCurrentTenant() {
 		TestDocument inserted = asSelfHost(() -> documents.insert(TestDocument.of(OWN, "new")));
 
@@ -205,6 +242,17 @@ class TenantDocumentsTest {
 
 		assertThatExceptionOfType(NoCurrentTenantException.class)
 				.isThrownBy(() -> documents.find(TestDocument.class, refusedByTheServer));
+	}
+
+	@Test
+	void findAndDeleteStopsBeforeAQueryWhenNoTenantIsBound() {
+		// MongoDB refuses this condition, so an operation that sends the query ends with the error of the server.
+		Criteria refusedByTheServer = where(TestDocument.NAME).is(new Document("$noSuchOperator", 1));
+		assertThatExceptionOfType(DataAccessException.class)
+				.isThrownBy(() -> mongo.findAndRemove(new Query(refusedByTheServer), TestDocument.class));
+
+		assertThatExceptionOfType(NoCurrentTenantException.class)
+				.isThrownBy(() -> documents.findAndDelete(TestDocument.class, refusedByTheServer));
 	}
 
 	private <T> T asSelfHost(Supplier<T> step) {

@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.PkceParameterNames;
@@ -30,6 +31,11 @@ import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames
 public record OidcAuthorizationRequest(URI uri, String state, String nonce, String codeVerifier) {
 
 	private static final int RANDOM_BYTES = 32;
+
+	/** The characters of {@code RANDOM_BYTES} bytes in the base64url form without padding: 6 bits for each character. */
+	private static final int RANDOM_VALUE_LENGTH = (RANDOM_BYTES * 8 + 5) / 6;
+
+	private static final Pattern RANDOM_VALUE_FORM = Pattern.compile("[A-Za-z0-9_-]{" + RANDOM_VALUE_LENGTH + "}");
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -58,6 +64,15 @@ public record OidcAuthorizationRequest(URI uri, String state, String nonce, Stri
 			.build();
 		return new OidcAuthorizationRequest(URI.create(request.getAuthorizationRequestUri()), state, nonce,
 				codeVerifier);
+	}
+
+	/**
+	 * @param state a value that came in an answer of an IdP
+	 * @return {@code true} when the value has the form of a state that this class makes; any other value names no
+	 *         login, so the caller needs no read of the database to refuse it
+	 */
+	public static boolean hasStateForm(String state) {
+		return state != null && RANDOM_VALUE_FORM.matcher(state).matches();
 	}
 
 	private static String randomValue() {

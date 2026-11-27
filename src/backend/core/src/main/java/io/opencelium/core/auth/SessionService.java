@@ -19,6 +19,9 @@ import io.opencelium.core.user.UserService;
  * <ul>
  * <li>A login starts a new session with a new random ID. It ends 24 hours after its start. Each login starts a new
  * session, also for a user with a session already.</li>
+ * <li>A redirect login starts its session before the browser returns to the frontend, and gives the login code of the
+ * session. The session record holds the code ID of the login code until the HTTP client exchanges the login code for
+ * the 2 tokens.</li>
  * <li>A refresh gives 2 new tokens, and the old refresh token stops. The new session JWT carries the roles that the
  * user has now. The refresh ends the session instead when the refresh token is an old one, or when the user is locked
  * or deleted: a second use of a refresh token can mean that another person has a copy of it. A refresh never moves
@@ -36,14 +39,18 @@ final class SessionService {
 
 	private final SessionTokens tokens;
 
+	private final LoginCodes loginCodes;
+
 	private final SessionRepository sessions;
 
 	private final UserService users;
 
 	private final Clock clock;
 
-	SessionService(SessionTokens tokens, SessionRepository sessions, UserService users, Clock clock) {
+	SessionService(SessionTokens tokens, LoginCodes loginCodes, SessionRepository sessions, UserService users,
+			Clock clock) {
 		this.tokens = tokens;
+		this.loginCodes = loginCodes;
 		this.sessions = sessions;
 		this.users = users;
 		this.clock = clock;
@@ -55,8 +62,26 @@ final class SessionService {
 		Instant end = now.plus(SESSION_LIFETIME);
 		String sessionId = UUID.randomUUID().toString();
 		String tokenId = newTokenId();
-		sessions.insert(new SessionRecord(sessionId, user.tenantId().value(), user.userId(), tokenId, now, end));
+		sessions.insert(new SessionRecord(sessionId, user.tenantId().value(), user.userId(), tokenId, null, now, end));
 		return tokens.issue(new UserPrincipal(user.userId(), user.tenantId(), sessionId, user.roles()), tokenId, end);
+	}
+
+	/**
+	 * Starts the session of a redirect login for the OpenCelium user and issues its login code. The session has no
+	 * token yet: the exchange of the login code gives them. Until then no refresh token has the token ID of the record.
+	 *
+	 * @param user              the OpenCelium user of the login, of the current tenant
+	 * @param loginVerifierHash the hash of the login verifier of the HTTP client that started the login
+	 * @return the login code
+	 */
+	String startForLoginCode(UserDocument user, String loginVerifierHash) {
+		Instant now = clock.instant().truncatedTo(ChronoUnit.SECONDS);
+		String sessionId = UUID.randomUUID().toString();
+		String codeId = UUID.randomUUID().toString();
+		sessions.insert(new SessionRecord(sessionId, user.tenantId(), user.id(), newTokenId(), codeId, now,
+				now.plus(SESSION_LIFETIME)));
+		return loginCodes.issue(user.id(), TenantId.of(user.tenantId()), sessionId, codeId, loginVerifierHash)
+			.getTokenValue();
 	}
 
 	/**

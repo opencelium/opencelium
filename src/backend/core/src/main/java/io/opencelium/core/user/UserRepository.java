@@ -45,6 +45,19 @@ class UserRepository {
 		return documents.findOne(UserDocument.class, where(UserDocument.EMAIL).is(email));
 	}
 
+	/**
+	 * The user with the OIDC link of this issuer and this subject. The condition on the 2 fields of the links gives
+	 * MongoDB the index of the OIDC links ({@link UserIndexes}); the condition on 1 link makes sure that both values are
+	 * in the same link, not 1 in a link and 1 in another link of the user.
+	 */
+	Optional<UserDocument> findByOidcLink(String issuer, String subject) {
+		String issuerField = UserDocument.OIDC_LINKS + "." + UserDocument.OIDC_ISSUER;
+		String subjectField = UserDocument.OIDC_LINKS + "." + UserDocument.OIDC_SUBJECT;
+		return documents.findOne(UserDocument.class, new Criteria().andOperator(where(issuerField).is(issuer),
+				where(subjectField).is(subject), where(UserDocument.OIDC_LINKS)
+					.elemMatch(where(UserDocument.OIDC_ISSUER).is(issuer).and(UserDocument.OIDC_SUBJECT).is(subject))));
+	}
+
 	Optional<UserDocument> findById(String id) {
 		return documents.findOne(UserDocument.class, where(UserDocument.ID).is(id));
 	}

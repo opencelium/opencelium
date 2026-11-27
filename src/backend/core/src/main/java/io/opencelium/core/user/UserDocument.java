@@ -1,6 +1,7 @@
 package io.opencelium.core.user;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -22,11 +23,14 @@ import io.opencelium.core.tenant.TenantDocument;
  * @param temporary          an account that the caller marks as temporary; the application stores the flag
  *                           and does not act on it
  * @param locked             login refused, for example because a generated password expired
+ * @param oidcLinks          the accounts at an IdP that log in as this user; none for a user that logs in with a
+ *                           password only. A pair of issuer and subject is the link of 1 user of the tenant
+ *                           ({@link UserIndexes}).
  */
 @Document(UserDocument.COLLECTION)
 public record UserDocument(@Id String id, String tenantId, String username, String email, String passwordHash,
 		Set<String> roles, boolean mustChangePassword, Instant passwordIssuedAt, boolean temporary, boolean locked,
-		Instant createdAt) implements TenantDocument {
+		Instant createdAt, List<OidcLink> oidcLinks) implements TenantDocument {
 
 	/** The collection; {@link AdminLookup} reads it with the plain driver, and {@link UserRepository} queries it. */
 	static final String COLLECTION = "users";
@@ -47,9 +51,36 @@ public record UserDocument(@Id String id, String tenantId, String username, Stri
 
 	static final String LOCKED = "locked";
 
+	static final String OIDC_LINKS = "oidcLinks";
+
+	/** The field of the issuer in an OIDC link, below {@link #OIDC_LINKS}. */
+	static final String OIDC_ISSUER = "issuer";
+
+	/** The field of the subject in an OIDC link, below {@link #OIDC_LINKS}. */
+	static final String OIDC_SUBJECT = "subject";
+
 	public UserDocument {
 		email = lowerCaseEmail(email);
 		roles = roles == null ? Set.of() : Set.copyOf(roles);
+		oidcLinks = oidcLinks == null ? List.of() : List.copyOf(oidcLinks);
+	}
+
+	/** A user without an OIDC link. */
+	public UserDocument(String id, String tenantId, String username, String email, String passwordHash,
+			Set<String> roles, boolean mustChangePassword, Instant passwordIssuedAt, boolean temporary, boolean locked,
+			Instant createdAt) {
+		this(id, tenantId, username, email, passwordHash, roles, mustChangePassword, passwordIssuedAt, temporary,
+				locked, createdAt, List.of());
+	}
+
+	/**
+	 * The account of a person at an IdP: the claims {@code iss} and {@code sub} of its ID tokens.
+	 *
+	 * @param issuer  the issuer URL of the IdP
+	 * @param subject the account of the person at the IdP
+	 */
+	public record OidcLink(String issuer, String subject) {
+
 	}
 
 	/**

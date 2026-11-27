@@ -1,5 +1,6 @@
 package io.opencelium.core.testsupport;
 
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -8,12 +9,15 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import io.opencelium.core.testsupport.fake.FakeIdp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,16 +29,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>
  * An error of the start is a redirect of the browser to the login page of the frontend: the fixed path
  * {@value #FRONTEND_TARGET} without a host, with the error code after the {@code #}, and without a body.
+ * <p>
+ * The IdP answers at the redirect URI of the OIDC provider. Core then redirects the browser to the same login page of
+ * the frontend, with the login code of the new session or with an error code after the {@code #}.
  */
 public final class OidcLoginRequests {
 
 	public static final String LOGIN_PATH = "/api/auth/oidc/{providerId}/login";
+
+	/** The redirect URI of an OIDC provider, at which the IdP answers. */
+	public static final String CALLBACK_PATH = "/api/auth/oidc/{providerId}/callback";
 
 	/** The query parameter of the start with the hash of the login verifier. */
 	public static final String LOGIN_VERIFIER_HASH = "login-verifier-hash";
 
 	/** The login page of the frontend for an OIDC login: a path of the origin of core, without a host. */
 	public static final String FRONTEND_TARGET = "/login/oidc";
+
+	/** A signed token in the compact form: 3 parts in the base64url form without padding. */
+	private static final String SIGNED_TOKEN = "[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+";
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -78,6 +91,57 @@ public final class OidcLoginRequests {
 		String location = response.getResponse().getHeader(HttpHeaders.LOCATION);
 		assertThat(location).as("the target of the redirect").isNotNull();
 		return location;
+	}
+
+	/**
+	 * The login of a person at the IdP, from the start of the login at core to the redirect of the browser back to
+	 * core: core redirects the browser to the login page of the IdP, and the person logs in there.
+	 *
+	 * @param claims the claims that the ID token gets in addition to its default claims, or in place of them
+	 * @return the address of the redirect of the browser to the redirect URI, with the code and the state
+	 */
+	public static String logInAtTheIdp(MockMvcTester mvc, FakeIdp idp, String providerId, String loginVerifierHash,
+			String subject, Map<String, ?> claims) {
+		return idp.login(locationOf(start(mvc, providerId, loginVerifierHash)), subject, claims);
+	}
+
+	/** The request of the browser to the redirect URI with the answer of the IdP, as the IdP redirected it. */
+	public static MvcTestResult callback(MockMvcTester mvc, String redirect) {
+		return mvc.get().uri(URI.create(redirect)).exchange();
+	}
+
+	/**
+	 * The response is a redirect to the login page of the frontend with a login code, exactly: no host, no other text,
+	 * and no body. A login code is a signed token in the compact form, so it has 3 parts in the base64url form.
+	 *
+	 * @return the login code
+	 */
+	public static String loginCodeOf(MvcTestResult response) {
+		String location = locationOf(response);
+		String prefix = FRONTEND_TARGET + "#code=";
+		assertThat(location).as("the target with the login code").startsWith(prefix);
+		String loginCode = location.substring(prefix.length());
+		assertThat(loginCode).as("the login code").matches(SIGNED_TOKEN);
+		assertThat(response.getResponse().getContentAsByteArray()).as("the body of the redirect").isEmpty();
+		return loginCode;
+	}
+
+	/**
+	 * Saves the OIDC providers through the settings API as the default admin, each with the client ID and the client
+	 * secret; they replace each other OIDC provider.
+	 *
+	 * @param issuerUrls the issuer URL of each provider ID
+	 */
+	public static void saveProviders(MockMvcTester mvc, String clientId, String clientSecret,
+			Map<String, String> issuerUrls) {
+		String providers = issuerUrls.entrySet().stream()
+			.map(provider -> "{\"id\": \"" + provider.getKey() + "\", \"display-name\": \"Keycloak\","
+					+ " \"issuer-url\": \"" + provider.getValue() + "\", \"client-id\": \"" + clientId
+					+ "\", \"client-secret\": \"" + clientSecret + "\"}")
+			.collect(Collectors.joining(", "));
+		MvcTestResult change = SettingsRequests.change(mvc, LoginRequests.sessionJwtOfTheDefaultAdmin(mvc),
+				"{\"oidc.providers\": [" + providers + "]}");
+		assertThat(change).as("the save of the OIDC providers").hasStatusOk();
 	}
 
 	/** The decoded query parameters of the URL; each parameter must occur once. */
