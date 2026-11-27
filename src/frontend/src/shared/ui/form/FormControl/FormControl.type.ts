@@ -4,6 +4,8 @@ import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
 export interface FormControlProps {
     label?: string;
     labelKey?: string;
+    /** Shown right after the label text, e.g. a docs link icon. */
+    labelExtra?: ReactNode;
     hint?: string;
     error?: ReactNode;
     info?: PartialStepProps,

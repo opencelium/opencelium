@@ -5,13 +5,13 @@ import { FormControl } from '@shared/ui/form/FormControl'
 import { Select } from '@shared/ui/primitives/Select'
 import { Tabs } from '@shared/ui/primitives/Tabs'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { DocsLink } from '@shared/ui/actions/DocsLink'
 import { DEFAULT_CODE, detectImpureCalls, emptyScript, SCRIPT_LANGUAGES, type ScriptFormValues } from '../../model/script'
 import type { ScriptLanguage } from '../../model/types'
 import { ScriptCodeEditor } from './ScriptCodeEditor'
 import { ScriptParametersEditor } from './ScriptParametersEditor'
 import { ScriptTestRun } from './ScriptTestRun'
 import { useScriptTestRun } from './useScriptTestRun'
+import { GlobalVariableKindDocsLink } from '../form/GlobalVariableKindDocsLink'
 
 export function ScriptVariableEditor({ mode }: { mode: Mode }) {
     const { t } = useI18n('entities')
@@ -54,11 +54,7 @@ export function ScriptVariableEditor({ mode }: { mode: Mode }) {
 
     return (
         <div style={{ width: '100%' }} data-testid="global-variable-script-editor">
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <DocsLink page="guides/global-variables" anchor="script-variables" testId="global-variable-script-docs">
-                    {t('global-variable.docs.script')}
-                </DocsLink>
-            </div>
+            <GlobalVariableKindDocsLink kind="SCRIPT" />
             {isReadOnly ? definition : (
                 <Tabs
                     value={tab}

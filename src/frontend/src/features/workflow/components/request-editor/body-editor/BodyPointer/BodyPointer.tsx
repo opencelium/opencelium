@@ -19,6 +19,7 @@ import {
     LIVE_INSPECTABLE_CLASS,
     useLiveReferenceValue
 } from "@features/workflow/components/request-editor/utils/useLiveReferenceValue.ts";
+import { isInEditorPopupLayer } from '../../editorPopupLayers';
 
 export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, connection, currentMethod,
   isSelected = false, isWarning = false }: BodyPointerProps) {
@@ -73,7 +74,7 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
     const onMouseDown = (event: globalThis.MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
-      if (target.closest('.bodyPointerEditorPopup') || target.closest('.ant-select-dropdown')) return;
+      if (target.closest('.bodyPointerEditorPopup') || isInEditorPopupLayer(target)) return;
       setEditorPos(null);
     };
     document.addEventListener('mousedown', onMouseDown, true);
