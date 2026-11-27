@@ -779,7 +779,21 @@
     "tree": "Baum",
     "rawData": "Rohdaten",
     "rawXml": "Rohes XML",
-    "xmlBody": "XML-Body"
+    "xmlBody": "XML-Body",
+    "errors": {
+      "empty": "Das XML muss ein Wurzelelement enthalten.",
+      "invalid": "Das XML ist ungültig.",
+      "multipleRoots": "Das XML muss genau ein Wurzelelement enthalten.",
+      "mixedContent": "Text neben Kindelementen (gemischter Inhalt) wird nicht unterstützt.",
+      "interleaved": "Elemente mit gleichem Namen müssen aufeinander folgen; dazwischen stehende andere Elemente werden nicht unterstützt.",
+      "reservedName": "„{{name}}“ ist reserviert und kann nicht als Elementname verwendet werden.",
+      "tooDeep": "Das XML ist mehr als {{max}} Ebenen tief verschachtelt."
+    },
+    "limits": {
+      "title": "Teile dieses XML werden nicht wie angezeigt gesendet",
+      "attributes": "Attribute werden nur als eine einzelne xmlns:Präfix-Deklaration pro Element gesendet; andere gehen verloren oder ändern den Elementnamen: {{elements}}",
+      "prefixes": "Diese Elemente verlieren oder ändern ihr Namespace-Präfix, weil sie es nicht selbst deklarieren: {{elements}}"
+    }
   },
   "xmlDialog": {
     "editTag": "Tag bearbeiten",
@@ -788,7 +802,9 @@
     "textValue": "Textwert",
     "editAttribute": "Attribut bearbeiten",
     "attributeName": "Attributname",
-    "attributeValue": "Attributwert"
+    "attributeValue": "Attributwert",
+    "tagInvalid": "Dies ist kein gültiger XML-Elementname.",
+    "tagReserved": "„{{name}}“ ist reserviert und kann nicht als Elementname verwendet werden."
   },
   "xmlNode": {
     "level": "Ebene {{depth}}",
@@ -797,7 +813,8 @@
     "textPlaceholder": "Kein Textinhalt",
     "addChild": "Unterelement",
     "attributePlaceholder": "Attribut {{name}}",
-    "empty": "Leer"
+    "empty": "Leer",
+    "mixedText": "Text neben Kindelementen kann nicht gesendet werden. Leeren Sie den Text oder entfernen Sie die Kindelemente."
   },
   "enhancement": {
     "title": "Transformation",
@@ -1247,7 +1264,8 @@
         "json": "JSON",
         "xml": "XML",
         "urlencoded": "x-www-form-urlencoded"
-      }
+      },
+      "lastValidSent": "Der letzte gültige Body wird gesendet."
     },
     "response": {
       "title": "Antwort",

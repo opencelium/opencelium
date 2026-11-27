@@ -15,8 +15,10 @@ import {
 } from './xmlTree';
 import { useXmlEnhancementActions } from './useXmlEnhancementActions';
 import { useXmlSelectionState } from './useXmlSelectionState';
+import { useXmlBodyErrorMessage } from './useXmlBodyErrorMessage';
 
 export function useXmlBodyEditor() {
+  const describeError = useXmlBodyErrorMessage();
   const dispatch = useDispatch();
   const { method } = useMethodContext();
   const connection = useSelector((state: RootState) => state.connection.connection);
@@ -78,15 +80,15 @@ export function useXmlBodyEditor() {
     tree,
     applyRawXml: (readOnly?: boolean) => {
       if (readOnly) return;
-      try {
-        const parsed = parseXmlBody(rawXml);
-        const nextTree = createTreeFromCompactXml(parsed);
-        setTree(nextTree);
-        setRawError(null);
-        syncBody(nextTree);
-      } catch (value) {
-        setRawError(value instanceof Error ? value.message : 'Invalid XML');
+      const parsed = parseXmlBody(rawXml);
+      if (!parsed.ok) {
+        setRawError(describeError(parsed.error));
+        return;
       }
+      const nextTree = createTreeFromCompactXml(parsed.fields);
+      setTree(nextTree);
+      setRawError(null);
+      syncBody(nextTree);
     },
     insertReference: (reference: string) => {
       if (!selection) return;

@@ -140,3 +140,10 @@
 .xmlAddAttribute {
   justify-self: start;
 }
+
+.xmlNodeMixedText,
+.xmlTagError {
+  margin-top: 4px;
+  color: var(--color-status-error-fg);
+  font-size: 12px;
+}

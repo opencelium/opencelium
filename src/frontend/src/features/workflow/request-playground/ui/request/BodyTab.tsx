@@ -12,6 +12,7 @@ import { buildXmlBodyPreview } from '../../model/xmlBodyPreview';
 import { readBodyFields } from '../../model/collectPlaygroundInputs';
 import { buildChipInputs } from '../../model/previewRequest';
 import { BodyRawEditor } from './BodyRawEditor';
+import { XmlBackendLimitsWarning } from '../../../components/request-editor/body-editor/xml/XmlBackendLimitsWarning/XmlBackendLimitsWarning';
 import { BodyCodeView } from './BodyCodeView';
 
 type BodyMode = 'pretty' | 'raw';
@@ -57,6 +58,7 @@ export function BodyTab({ session, values, missingKeys, onSelectInput }: Props) 
 					</span>
 				)}
 			</div>
+			{config.bodyFormat === 'xml' && <XmlBackendLimitsWarning body={fields} />}
 			{mode === 'raw'
 				? <BodyRawEditor key={config.bodyFormat} body={config.body} format={config.bodyFormat}
 					onChange={(body) => setEdits((current) => ({ ...current, body }))} />

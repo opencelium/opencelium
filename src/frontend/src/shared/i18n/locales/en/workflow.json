@@ -779,7 +779,21 @@
     "tree": "Tree",
     "rawData": "Raw data",
     "rawXml": "Raw XML",
-    "xmlBody": "XML body"
+    "xmlBody": "XML body",
+    "errors": {
+      "empty": "The XML must contain a root element.",
+      "invalid": "The XML is not valid.",
+      "multipleRoots": "The XML must contain exactly one root element.",
+      "mixedContent": "Text next to child elements (mixed content) is not supported.",
+      "interleaved": "Elements with the same name must follow each other; mixing them with other elements is not supported.",
+      "reservedName": "“{{name}}” is reserved and cannot be used as an element name.",
+      "tooDeep": "The XML is nested more than {{max}} levels deep."
+    },
+    "limits": {
+      "title": "Parts of this XML are not sent as shown",
+      "attributes": "Attributes are only sent as a single xmlns:prefix declaration per element; others are lost or change the element name: {{elements}}",
+      "prefixes": "These elements lose or change their namespace prefix, because they do not declare it themselves: {{elements}}"
+    }
   },
   "xmlDialog": {
     "editTag": "Edit tag",
@@ -788,7 +802,9 @@
     "textValue": "Text value",
     "editAttribute": "Edit attribute",
     "attributeName": "Attribute name",
-    "attributeValue": "Attribute value"
+    "attributeValue": "Attribute value",
+    "tagInvalid": "This is not a valid XML element name.",
+    "tagReserved": "“{{name}}” is reserved and cannot be used as an element name."
   },
   "xmlNode": {
     "level": "level {{depth}}",
@@ -797,7 +813,8 @@
     "textPlaceholder": "No text content",
     "addChild": "Child",
     "attributePlaceholder": "Attribute {{name}}",
-    "empty": "Empty"
+    "empty": "Empty",
+    "mixedText": "Text next to child elements cannot be sent. Clear the text or remove the child elements."
   },
   "enhancement": {
     "title": "Transformation",
@@ -1247,7 +1264,8 @@
         "json": "JSON",
         "xml": "XML",
         "urlencoded": "x-www-form-urlencoded"
-      }
+      },
+      "lastValidSent": "The last valid body is sent."
     },
     "response": {
       "title": "Response",
