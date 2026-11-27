@@ -14,10 +14,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +61,21 @@ public final class OperationFixture {
         operation.setLoopDepth(0);
 
         operation.getResponses().put("#", response);
+
+        return operation;
+    }
+
+    /** An operation whose request sent {@code xml} as an {@code application/xml} body. */
+    public static Operation anOperationWithXmlRequest(String xml) {
+        RequestEntity<String> request = RequestEntity.post(URI.create("https://api.example.test/soap"))
+                .contentType(MediaType.APPLICATION_XML)
+                .body(xml);
+
+        Operation operation = new Operation();
+        operation.setColor("#ababab");
+        operation.setLoopDepth(0);
+
+        operation.addRequest("#", request);
 
         return operation;
     }

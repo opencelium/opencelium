@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -28,7 +29,10 @@ import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.num
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.object;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.primitive;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.string;
+import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.withXmlAttributes;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.entry;
 
 @DisplayName("SchemaDTOUtil — unit")
 class SchemaDTOUtilTest {
@@ -535,6 +539,30 @@ class SchemaDTOUtilTest {
         assertThat(copy.getProperties().get("query").isLiteral()).isTrue();
     }
 
+    @Test
+    @DisplayName("copy — properties keep their order, which XML elements are read in")
+    void copyKeepsPropertyOrderWhenSchemaHasManyProperties() {
+        SchemaDTO schema = object(
+                "first", string("1"),
+                "second", string("2"),
+                "third", string("3"),
+                "fourth", string("4"),
+                "fifth", string("5"));
+
+        SchemaDTO copy = SchemaDTOUtil.copy(schema);
+
+        assertThat(copy.getProperties().keySet()).containsExactly("first", "second", "third", "fourth", "fifth");
+    }
+
+    @Test
+    void copyKeepsAttributesWhenElementHasAttributes() {
+        SchemaDTO element = withXmlAttributes(string("x"), "z", "1", "a", "2");
+
+        SchemaDTO copy = SchemaDTOUtil.copy(element);
+
+        assertThat(copy.getXml().getAttributes()).containsExactly(entry("z", "1"), entry("a", "2"));
+    }
+
     // ── toJSON ────────────────────────────────────────────────────────────────
 
     @Test
@@ -616,6 +644,54 @@ class SchemaDTOUtilTest {
         // WHEN-THEN
         assertThat(SchemaDTOUtil.toXML(schema))
                 .isEqualTo("<root><note title=\"say &quot;hi&quot; &amp; &lt;bye&gt;\"><v>x</v></note></root>");
+    }
+
+    @Test
+    void toXmlWritesStoredAttributesInOrderWhenElementHasAttributes() {
+        SchemaDTO schema = object("root", withXmlAttributes(object("b", string("x")), "z", "1", "a", "2"));
+
+        String xml = SchemaDTOUtil.toXML(schema);
+
+        assertThat(xml).isEqualTo("<root z=\"1\" a=\"2\"><b>x</b></root>");
+    }
+
+    @Test
+    void toXmlEscapesStoredAttributeValueWhenValueHoldsMarkup() {
+        SchemaDTO schema = object("root", withXmlAttributes(string("x"), "title", "say \"hi\" & <bye>"));
+
+        String xml = SchemaDTOUtil.toXML(schema);
+
+        assertThat(xml).isEqualTo("<root title=\"say &quot;hi&quot; &amp; &lt;bye&gt;\">x</root>");
+    }
+
+    @ParameterizedTest(name = "\"{0}\"")
+    @ValueSource(strings = {"", "1a", "a b", "x><admin/", "!--"})
+    @DisplayName("toXML — an element name that is no XML name is refused, so data cannot add markup")
+    void toXmlThrowsIllegalArgumentExceptionWhenNameIsNotXmlName(String name) {
+        SchemaDTO schema = object("root", object(name, string("x")));
+
+        assertThatThrownBy(() -> SchemaDTOUtil.toXML(schema))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Not a valid XML element or attribute name: " + name);
+    }
+
+    @Test
+    void toXmlThrowsIllegalArgumentExceptionWhenAttributeNameIsNotXmlName() {
+        SchemaDTO schema = object("root", withXmlAttributes(string("x"), "a\"b", "1"));
+
+        assertThatThrownBy(() -> SchemaDTOUtil.toXML(schema))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Not a valid XML element or attribute name: a\"b");
+    }
+
+    @Test
+    @DisplayName("toXML — prefixed, non-ASCII and punctuated names are XML names and are written")
+    void toXmlAcceptsNameWhenNameIsPrefixedOrNonAscii() {
+        SchemaDTO schema = object("ns1:élément", withXmlAttributes(string("x"), "_a-b.c", "1"));
+
+        String xml = SchemaDTOUtil.toXML(schema);
+
+        assertThat(xml).isEqualTo("<ns1:élément _a-b.c=\"1\">x</ns1:élément>");
     }
 
 

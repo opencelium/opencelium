@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.unit.execution.jump;
 
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aGraphQlOperation;
+import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.anXmlOperation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.becon.opencelium.backend.execution.jump.ExecutionJumpGraphBuilder;
@@ -31,6 +32,19 @@ class ExecutionJumpGraphBuilderTest {
         body.put("query", "query Item($id: ID!) { item(id: \"{%#cd34ef.(response).id%}\") { name } }");
         body.put("variables", Map.of("id", "#ab12cd.(response).id"));
         ConnectorEx connector = aConnectorWith(aGraphQlOperation(body));
+
+        JumpGraph graph = ExecutionJumpGraphBuilder.build(connector, List.of());
+
+        assertThat(graph.methodByColor(METHOD_COLOR).referencedColors()).containsExactly("#ab12cd");
+    }
+
+    @Test
+    @DisplayName("build — an XML method depends on the methods its attribute values read")
+    void buildReadsAttributeValuesWhenMethodBodyIsXml() {
+        Map<String, Object> element = new LinkedHashMap<>();
+        element.put("__oc__attributes", Map.of("id", "#ab12cd.(response).id"));
+        element.put("__oc__value", "x");
+        ConnectorEx connector = aConnectorWith(anXmlOperation(Map.of("a", element)));
 
         JumpGraph graph = ExecutionJumpGraphBuilder.build(connector, List.of());
 

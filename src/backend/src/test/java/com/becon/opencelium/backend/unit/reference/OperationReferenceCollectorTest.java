@@ -7,6 +7,7 @@ import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.arr
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.literal;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.object;
 import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.string;
+import static com.becon.opencelium.backend.testutil.fixture.SchemaDTOFixture.withXmlAttributes;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.becon.opencelium.backend.enums.execution.ParamLocation;
@@ -184,5 +185,26 @@ class OperationReferenceCollectorTest {
         Set<String> references = OperationReferenceCollector.collect(operation);
 
         assertThat(references).containsExactly("{token}");
+    }
+
+    @Test
+    void collectReturnsReferenceWhenXmlAttributeHoldsReference() {
+        OperationDTO operation = anOperationWithBody(
+                object("a", withXmlAttributes(string("x"), "id", "#c0ffee.(response).id")));
+
+        Set<String> references = OperationReferenceCollector.collect(operation);
+
+        assertThat(references).containsExactly("#c0ffee.(response).id");
+    }
+
+    @Test
+    @DisplayName("collect — the attributes of an XML element are read even when its text is a reference")
+    void collectReturnsAttributeReferenceWhenElementTextIsReference() {
+        OperationDTO operation = anOperationWithBody(
+                object("a", withXmlAttributes(string("{{global.limit}}"), "lang", "{lang}")));
+
+        Set<String> references = OperationReferenceCollector.collect(operation);
+
+        assertThat(references).containsExactly("{lang}", "{{global.limit}}");
     }
 }

@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.testutil.fixture;
 
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
+import com.becon.opencelium.backend.resource.execution.XmlObjectDTO;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -62,6 +63,27 @@ public class SchemaDTOFixture {
         SchemaDTO schema = new SchemaDTO();
         schema.setType(DataType.OBJECT);
         schema.setProperties(properties);
+
+        return schema;
+    }
+
+    /**
+     * Returns {@code schema} as an XML element with the attributes {@code namesAndValues}, given
+     * as name/value pairs in the order they are written.
+     */
+    public static SchemaDTO withXmlAttributes(SchemaDTO schema, String... namesAndValues) {
+        if (namesAndValues.length % 2 != 0) {
+            throw new IllegalArgumentException("XML attributes must be name/value pairs");
+        }
+
+        Map<String, String> attributes = new LinkedHashMap<>();
+        for (int i = 0; i < namesAndValues.length; i += 2) {
+            attributes.put(namesAndValues[i], namesAndValues[i + 1]);
+        }
+
+        XmlObjectDTO xml = new XmlObjectDTO();
+        xml.setAttributes(attributes);
+        schema.setXml(xml);
 
         return schema;
     }

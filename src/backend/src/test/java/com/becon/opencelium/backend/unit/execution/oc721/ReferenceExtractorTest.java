@@ -976,6 +976,19 @@ public class ReferenceExtractorTest {
         verify(executionManager, never()).getRequestData(any());
     }
 
+    @Test
+    @DisplayName("extractValue — a path into a sent XML body may name its elements with their prefixes")
+    void extractValueReturnsTextWhenRequestXmlBodyIsPrefixed() {
+        Operation operation = OperationFixture.anOperationWithXmlRequest(
+                "<soap:Envelope xmlns:soap=\"urn:s\"><soap:Body><m:Get xmlns:m=\"urn:m\">"
+                        + "<m:Id>5</m:Id></m:Get></soap:Body></soap:Envelope>");
+        when(executionManager.findOperationByColor("#ababab")).thenReturn(Optional.of(operation));
+        when(executionManager.generateKey(operation.getLoopDepth())).thenReturn("#");
+
+        Object result = extractValue("#ababab.(request).body.$.soap:Envelope.soap:Body.m:Get.m:Id");
+
+        assertEquals("5", result);
+    }
 
     private Loop loop(String type, String iterator, String expression) {
         OperatorEx operator = new OperatorEx();

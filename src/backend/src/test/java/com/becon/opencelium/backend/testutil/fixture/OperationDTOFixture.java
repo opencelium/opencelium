@@ -95,9 +95,31 @@ public final class OperationDTOFixture {
                 "POST", endpoint, Map.of("Content-Type", MediaType.APPLICATION_JSON_VALUE), bodyFields, "graphql");
     }
 
+    /**
+     * A POST method with an XML body, stored the way the workflow editor stores XML: every element
+     * is an object of {@code __oc__attributes}, {@code __oc__value} and its child elements.
+     *
+     * @param bodyFields the stored body fields, the root element being the only one
+     */
+    public static MethodMng anXmlMethod(Map<String, Object> bodyFields) {
+        return aMethod("POST", "https://api.example.test/soap",
+                Map.of("Content-Type", MediaType.APPLICATION_XML_VALUE), bodyFields, "raw", "xml");
+    }
+
+    /** The method of {@link #anXmlMethod(Map)}, mapped the way a connection execution maps it. */
+    public static OperationDTO anXmlOperation(Map<String, Object> bodyFields) {
+        return MAPPER.toOperation(anXmlMethod(bodyFields), null);
+    }
+
     private static OperationDTO anHttpOperation(
             String httpMethod, String endpoint, Map<String, String> header, Map<String, Object> bodyFields,
             String data) {
+        return MAPPER.toOperation(aMethod(httpMethod, endpoint, header, bodyFields, data, "json"), null);
+    }
+
+    private static MethodMng aMethod(
+            String httpMethod, String endpoint, Map<String, String> header, Map<String, Object> bodyFields,
+            String data, String format) {
         RequestMng request = new RequestMng();
         request.setMethod(httpMethod);
         request.setEndpoint(endpoint);
@@ -105,7 +127,7 @@ public final class OperationDTOFixture {
         if (bodyFields != null) {
             BodyMng body = new BodyMng();
             body.setType("object");
-            body.setFormat("json");
+            body.setFormat(format);
             body.setData(data);
             body.setFields(new LinkedHashMap<>(bodyFields));
             request.setBody(body);
@@ -123,7 +145,7 @@ public final class OperationDTOFixture {
         method.setRequest(request);
         method.setResponse(response);
 
-        return MAPPER.toOperation(method, null);
+        return method;
     }
 
     /** The same request as {@link #anHttpOperation}, sent by the connector {@code connectorId}. */

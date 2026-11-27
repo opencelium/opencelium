@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.unit.execution.builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.execution.ExecutionManagerImpl;
@@ -10,6 +11,7 @@ import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLDecoder;
@@ -45,7 +47,8 @@ class RequestEntityBuilderTest {
             anEntry("limit", "50"),
             anEntry("meta", "{\"env\":\"prod\",\"tier\":1}"),
             anEntry("empty", "\"\""),
-            anEntry("nothing", "null")));
+            anEntry("nothing", "null"),
+            anEntry("markup", "{\"x><admin>true</admin><y\":\"1\"}")));
 
     @Test
     @DisplayName("createRequest — a global list in the query is one value of JSON text, not a repeated parameter")
@@ -249,7 +252,67 @@ class RequestEntityBuilderTest {
         assertThat(sent.get("name").asText()).isEqualTo("acme");
     }
 
+    // ── XML body ──────────────────────────────────────────────────────────────
+
+    @Test
+    void createRequestResolvesReferenceWhenAttributeValueIsReference() {
+        OperationDTO operation = OperationDTOFixture.anXmlOperation(xmlFields("""
+                {"a": {"__oc__attributes": {"limit": "{{global.limit}}"}, "__oc__value": "x"}}
+                """));
+
+        RequestEntity<Object> request = build(operation);
+
+        assertThat(request.getBody()).isEqualTo("<a limit=\"50\">x</a>");
+    }
+
+    @Test
+    @DisplayName("createRequest — a reference replaces the text of an XML element, not its attributes")
+    void createRequestKeepsAttributesWhenElementTextIsReference() {
+        OperationDTO operation = OperationDTOFixture.anXmlOperation(xmlFields("""
+                {"a": {"__oc__attributes": null,
+                       "b": {"__oc__attributes": {"lang": "de"}, "__oc__value": "{{global.limit}}"}}}
+                """));
+
+        RequestEntity<Object> request = build(operation);
+
+        assertThat(request.getBody()).isEqualTo("<a><b lang=\"de\">50</b></a>");
+    }
+
+    @Test
+    @DisplayName("createRequest — an attribute is text: a referenced map is written as compact JSON text")
+    void createRequestWritesJsonTextWhenAttributeReferenceIsMap() {
+        OperationDTO operation = OperationDTOFixture.anXmlOperation(xmlFields("""
+                {"a": {"__oc__attributes": {"meta": "{{global.meta}}"}, "__oc__value": "x"}}
+                """));
+
+        RequestEntity<Object> request = build(operation);
+
+        assertThat(request.getBody())
+                .isEqualTo("<a meta=\"{&quot;env&quot;:&quot;prod&quot;,&quot;tier&quot;:1}\">x</a>");
+    }
+
+    @Test
+    @DisplayName("createRequest — a key of a referenced object that is no XML name is refused, not sent as markup")
+    void createRequestThrowsWhenReferencedObjectKeyIsNotXmlName() {
+        OperationDTO operation = OperationDTOFixture.anXmlOperation(xmlFields("""
+                {"a": {"__oc__attributes": null,
+                       "b": {"__oc__attributes": null, "__oc__value": "{{global.markup}}"}}}
+                """));
+
+        assertThatThrownBy(() -> build(operation))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("x><admin>true</admin><y");
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    private static Map<String, Object> xmlFields(String json) {
+        try {
+            return JSON.readValue(json, new TypeReference<LinkedHashMap<String, Object>>() {});
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(json, e);
+        }
+    }
 
     private static RequestEntity<Object> build(OperationDTO operation) {
         ExecutionManager manager = new ExecutionManagerImpl(
