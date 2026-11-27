@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { GraphiQL } from 'graphiql';
 // graphiql.css only carries the container/layout rules — the design tokens (--color-base,
 // --px-8, etc.) that those rules read via var(...) are declared in style.css. Without it,
@@ -12,21 +13,28 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useTheme } from '@shared/theme/hooks/useTheme';
 import { useGraphQlBodyEditor } from './useGraphQlBodyEditor';
 import { ForceGraphQlIntrospection } from './ForceGraphQlIntrospection';
+import { createGraphQlMemoryStorage } from './graphQlMemoryStorage';
 
 type Props = { readOnly?: boolean };
 
 export function GraphQlBodyEditor({ readOnly }: Props) {
   const { t } = useI18n('workflow');
   const { themeMode } = useTheme();
-  const { fetcher, updateQuery, initialQuery } = useGraphQlBodyEditor();
+  const { fetcher, updateBody, initialQuery, initialVariables } = useGraphQlBodyEditor();
+  const [storage] = useState(createGraphQlMemoryStorage);
 
-  // Fires on every tab-state change — editing the active tab, switching tabs, adding/closing
-  // a tab — not just edits. That's what makes "the active tab" actually authoritative for
-  // what gets saved: without this, switching to a tab you haven't typed in yet would leave
-  // the previously-active tab's query as the persisted one, contradicting what's on screen.
+  // Fires on every tab-state change — editing the query or variables, switching tabs,
+  // adding/closing a tab — not just edits. That's what makes "the active tab" actually
+  // authoritative for what gets saved: without this, switching to a tab you haven't typed in
+  // yet would leave the previously-active tab's query as the persisted one.
   const handleTabChange = (tabState: TabsState) => {
-    const activeQuery = tabState.tabs[tabState.activeTabIndex]?.query ?? '';
-    updateQuery(activeQuery);
+    if (readOnly) return;
+    const activeTab = tabState.tabs[tabState.activeTabIndex];
+    updateBody({
+      query: activeTab?.query ?? '',
+      variables: activeTab?.variables,
+      operationName: activeTab?.operationName ?? null,
+    });
   };
 
   return (
@@ -35,6 +43,8 @@ export function GraphQlBodyEditor({ readOnly }: Props) {
         <GraphiQL
           fetcher={fetcher}
           initialQuery={initialQuery}
+          initialVariables={initialVariables}
+          storage={storage}
           onTabChange={handleTabChange}
           forcedTheme={themeMode}
           isHeadersEditorEnabled={!readOnly}

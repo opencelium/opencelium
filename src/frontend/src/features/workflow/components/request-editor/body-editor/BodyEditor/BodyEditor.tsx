@@ -8,7 +8,8 @@ export function BodyEditor({ readOnly }: BodyEditorProps) {
   const { method } = useMethodContext();
 
   if (method.request.body?.data === 'graphql') {
-    return <GraphQlBodyEditor readOnly={readOnly} />;
+    // GraphiQL reads the initial query and variables only when it mounts, so another method gets a fresh editor.
+    return <GraphQlBodyEditor key={method.id} readOnly={readOnly} />;
   }
 
   if (method.request.body?.format === 'xml') {
