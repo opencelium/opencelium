@@ -12,16 +12,23 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
 public class SchemaDTOUtil {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    // the 'Name' production of XML 1.0: https://www.w3.org/TR/xml/#NT-Name
+    private static final String XML_NAME_START_CHARS = ":A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF"
+            + "\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF"
+            + "\\uF900-\\uFDCF\\uFDF0-\\uFFFD\\x{10000}-\\x{EFFFF}";
+    private static final Pattern XML_NAME = Pattern.compile("[" + XML_NAME_START_CHARS + "]"
+            + "[" + XML_NAME_START_CHARS + "\\-.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040]*");
 
     public static SchemaDTO copy(SchemaDTO schema) {
         if (schema == null) {
@@ -35,7 +42,8 @@ public class SchemaDTOUtil {
 
         Map<String, SchemaDTO> properties = schema.getProperties();
         if (properties != null) {
-            Map<String, SchemaDTO> temp = new HashMap<>();
+            // keeps the order: XML elements, unlike JSON fields, are read in the order they are sent
+            Map<String, SchemaDTO> temp = new LinkedHashMap<>();
 
             properties.forEach((s, schemaDTO) -> {
                 temp.put(s, SchemaDTOUtil.copy(schemaDTO));
@@ -226,7 +234,7 @@ public class SchemaDTOUtil {
 
 
     private static void writeTag(StringBuilder collector, String name, SchemaDTO value) {
-        String tagName = getName(name, value);
+        String tagName = requireXmlName(getName(name, value));
         String attributes = getAttributes(value);
         String tagValue = getValue(name, value);
 
@@ -270,15 +278,19 @@ public class SchemaDTOUtil {
             return "";
         }
 
-        List<String> attributes = new ArrayList<>();
-        attributes.add("");
+        StringBuilder attributes = new StringBuilder();
 
         // check if we have 'xml/namespace'
         XmlObjectDTO xml = schema.getXml();
         if (xml != null && xml.getNamespace() != null) {
             String prefix = xml.getPrefix() == null ? "" : ":" + xml.getPrefix();
 
-            attributes.add("xmlns" + prefix + "=\"" + escapeXml(xml.getNamespace(), true) + "\"");
+            appendAttribute(attributes, "xmlns" + prefix, xml.getNamespace());
+        }
+
+        // the attributes stored on the element, in stored order
+        if (xml != null) {
+            xml.getAttributes().forEach((name, value) -> appendAttribute(attributes, name, value));
         }
 
         if (schema.getProperties() != null) {
@@ -286,17 +298,40 @@ public class SchemaDTOUtil {
             String prefix = (xml == null || xml.getPrefix() == null) ? "" : xml.getPrefix() + ":";
 
             schema.getProperties().forEach((name, value) -> {
-                if (value.getXml() != null && value.getXml().isAttribute()) {
-                    String attributeName = getName(name, value);
-
-                    String attributeValue = value.getValue() == null ? "" : escapeXml(value.getValue(), true);
-                    attributes.add(prefix + attributeName + "=\"" + attributeValue + "\"");
+                if (isAttribute(value)) {
+                    appendAttribute(attributes, prefix + getName(name, value), value.getValue());
                 }
             });
 
         }
 
-        return String.join(" ", attributes);
+        return attributes.toString();
+    }
+
+    private static void appendAttribute(StringBuilder attributes, String name, String value) {
+        attributes.append(' ')
+                .append(requireXmlName(name))
+                .append("=\"")
+                .append(value == null ? "" : escapeXml(value, true))
+                .append('"');
+    }
+
+    private static boolean isAttribute(SchemaDTO schema) {
+        return schema != null && schema.getXml() != null && schema.getXml().isAttribute();
+    }
+
+    /**
+     * Returns {@code name} if it is an XML name, which an element or an attribute can be called.
+     * A name may come from data, such as the keys of a referenced object, and is written as it is,
+     * so a name like {@code a><b} would change the markup around it.
+     *
+     * @throws IllegalArgumentException if {@code name} is not an XML name
+     */
+    private static String requireXmlName(String name) {
+        if (name == null || !XML_NAME.matcher(name).matches()) {
+            throw new IllegalArgumentException("Not a valid XML element or attribute name: " + name);
+        }
+        return name;
     }
 
     private static String getValue(String name, SchemaDTO value) {
@@ -331,7 +366,7 @@ public class SchemaDTOUtil {
             StringBuilder object = new StringBuilder();
             value.getProperties().forEach((propertyName, propertyValue) -> {
                 // skip attributes
-                if (propertyValue.getXml() == null || !propertyValue.getXml().isAttribute()) {
+                if (!isAttribute(propertyValue)) {
                     writeTag(object, propertyName, propertyValue);
                 }
             });

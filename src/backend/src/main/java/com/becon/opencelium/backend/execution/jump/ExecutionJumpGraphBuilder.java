@@ -284,6 +284,11 @@ public final class ExecutionJumpGraphBuilder {
             result.add(schema.getValue());
         }
 
+        // the attribute values of an XML element
+        if (schema.getXml() != null) {
+            result.addAll(schema.getXml().getAttributes().values());
+        }
+
         if (schema.getItems() != null) {
             for (SchemaDTO item : schema.getItems()) {
                 collectSchemaValues(item, result);

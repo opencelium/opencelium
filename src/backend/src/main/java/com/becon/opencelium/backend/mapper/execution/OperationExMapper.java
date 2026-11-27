@@ -30,10 +30,13 @@ public class OperationExMapper {
     private static final Pattern GLOBAL_REF = Pattern.compile(RegExpression.globalRef);
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
-    private static final MultipleXmlAttrsStrategy MULTIPLE_XML_ATTRS_STRATEGY = MultipleXmlAttrsStrategy.FAIL;
-    private static final String XMLNS_PREFIX = "xmlns:";
     private static final String OC_VALUE = "__oc__value";
     private static final String OC_ATTRIBUTES = "__oc__attributes";
+    // keys of the xml-js format, in which older frontends stored XML bodies
+    private static final String XML_JS_ATTRIBUTES = "_attributes";
+    private static final String XML_JS_TEXT = "_text";
+    private static final String XML_JS_CDATA = "_cdata";
+    private static final Set<String> XML_JS_NON_ELEMENTS = Set.of("_declaration", "_instruction", "_comment", "_doctype");
 
     public OperationExMapper(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
@@ -468,11 +471,11 @@ public class OperationExMapper {
         Map<String, SchemaDTO> props = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
             if (body.getFormat().equals("xml")) {
-                String name = entry.getKey();
-                if (name.matches("^[a-zA-Z ]+:.*$")) {
-                    name = name.substring(name.indexOf(":") + 1);
+                // the stored name is the tag name, prefix included. An xml-js declaration that an
+                // older frontend stored next to the root is not an element
+                if (!XML_JS_NON_ELEMENTS.contains(entry.getKey())) {
+                    props.put(entry.getKey(), getSchemaFromObjectXML(entry.getValue()));
                 }
-                props.put(name, getSchemaFromObjectXML(entry.getValue()));
             } else {
                 props.put(entry.getKey(), getSchemaFromObjectJSON(entry.getValue()));
             }
@@ -500,44 +503,46 @@ public class OperationExMapper {
     }
 
     /**
-     * Resolves XML attributes from a map and sets the corresponding
-     * {@link XmlObjectDTO} in the provided {@link SchemaDTO}.
-     *
-     * <p>At most one attribute is supported, so if multiple attributes
-     * are present, resolution is delegated to {@link MultipleXmlAttrsStrategy}.</p>
-     *
-     * <p>If the attribute name starts with the configured {@code XMLNS_PREFIX},
-     * the prefix is stripped before being assigned to the {@link XmlObjectDTO}.</p>
-     *
-     * @param currSchema the schema object to update
-     * @param map        a map of attribute name → namespace value
+     * Returns the XML data of an element: every entry of its {@code __oc__attributes} becomes an
+     * attribute, in stored order. A namespace declaration ({@code xmlns}, {@code xmlns:p}) is an
+     * attribute like any other and does not change the name of the element.
      */
-    private void setXmlAttributes(SchemaDTO currSchema, Map<String, String> map) {
-        if (map == null || map.isEmpty()) {
-            // No attributes provided → assign an empty XmlObjectDTO
-            currSchema.setXml(new XmlObjectDTO());
-            return;
+    private static XmlObjectDTO toXmlObject(Object attributes) {
+        XmlObjectDTO xml = new XmlObjectDTO();
+        if (attributes == null || "".equals(attributes)) {
+            return xml;
         }
 
-        // Determine which attribute name to use according to the configured strategy
-        String attrName = MultipleXmlAttrsStrategy.applyStrategy(map, MULTIPLE_XML_ATTRS_STRATEGY);
-
-        // Retrieve corresponding namespace value
-        String value = map.get(attrName);
-
-        // If attribute name starts with XMLNS prefix, strip it
-        int startIndexOfPrefix = attrName.indexOf(XMLNS_PREFIX);
-        if (startIndexOfPrefix != -1) {
-            attrName = attrName.substring(startIndexOfPrefix + XMLNS_PREFIX.length());
+        if (!(attributes instanceof Map<?, ?> map)) {
+            throw new IllegalArgumentException("%s of an XML element must be an object".formatted(OC_ATTRIBUTES));
         }
 
-        // Build XmlObjectDTO with resolved prefix + namespace
-        XmlObjectDTO xmlObjectDTO = new XmlObjectDTO();
-        xmlObjectDTO.setPrefix(attrName);
-        xmlObjectDTO.setNamespace(value);
+        Map<String, String> values = new LinkedHashMap<>();
+        map.forEach((name, text) -> values.put(String.valueOf(name), text == null ? "" : String.valueOf(text)));
+        xml.setAttributes(values);
+        return xml;
+    }
 
-        // Attach it to the schema
-        currSchema.setXml(xmlObjectDTO);
+    /**
+     * Returns {@code element} in the format the frontend stores XML in now. Older frontends stored
+     * it in the xml-js format: attributes under {@code _attributes}, text under {@code _text} or
+     * {@code _cdata}, and comments or instructions, which are no elements, under keys of their
+     * own. The frontend rewrites such a body only when its step is saved again.
+     */
+    private static Map<String, Object> fromXmlJs(Map<String, Object> element) {
+        Map<String, Object> result = new LinkedHashMap<>(element.size());
+        element.forEach((key, value) -> {
+            switch (key) {
+                case XML_JS_ATTRIBUTES -> result.put(OC_ATTRIBUTES, value);
+                case XML_JS_TEXT, XML_JS_CDATA -> result.put(OC_VALUE, value);
+                default -> {
+                    if (!XML_JS_NON_ELEMENTS.contains(key)) {
+                        result.put(key, value);
+                    }
+                }
+            }
+        });
+        return result;
     }
 
     private SchemaDTO getSchemaFromObjectXML(Object value) {
@@ -554,48 +559,33 @@ public class OperationExMapper {
             schemaDTO.setType(findTypeOfReference(stringVal));
             schemaDTO.setValue(stringVal);
         } else if (type == DataType.OBJECT) {
-            Map<String, Object> map = (Map<String, Object>) value;
+            Map<String, Object> map = fromXmlJs((Map<String, Object>) value);
             if (map.size() == 2 && map.containsKey(OC_VALUE) && map.containsKey(OC_ATTRIBUTES) || map.size() == 1 && map.containsKey(OC_VALUE)) {
-                String strVal = String.valueOf(map.get(OC_VALUE));
+                Object text = map.get(OC_VALUE);
+                // frontends before OC-1696 stored the text of an empty element as null
+                String strVal = text == null ? "" : String.valueOf(text);
                 schemaDTO.setValue(strVal);
-                if (map.get(OC_VALUE) instanceof Boolean) {
+                if (text instanceof Boolean) {
                     schemaDTO.setType(DataType.BOOLEAN);
-                } else if (map.get(OC_VALUE) instanceof Integer) {
+                } else if (text instanceof Integer) {
                     schemaDTO.setType(DataType.INTEGER);
-                } else if (map.get(OC_VALUE) instanceof Number) {
+                } else if (text instanceof Number) {
                     schemaDTO.setType(DataType.NUMBER);
                 } else {
                     schemaDTO.setType(findTypeOfReference(strVal));
-                }
-                Object attr = map.get(OC_ATTRIBUTES);
-                if (attr != null && !attr.equals("")) {
-                    Map<String, String> attrs = (Map<String, String>) attr;
-                    schemaDTO.setProperties(new HashMap<>());
-                    setXmlAttributes(schemaDTO, attrs);
-                } else {
-                    schemaDTO.setXml(new XmlObjectDTO());
                 }
             } else {
                 schemaDTO.setType(DataType.OBJECT);
                 Map<String, SchemaDTO> fields = new LinkedHashMap<>();
                 schemaDTO.setProperties(fields);
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    if (entry.getKey().equals(OC_ATTRIBUTES)) {
-                        if (entry.getValue() != null && !entry.getValue().equals("")) {
-                            Map<String, String> attrs = (Map<String, String>) entry.getValue();
-                            setXmlAttributes(schemaDTO, attrs);
-                        } else {
-                            schemaDTO.setXml(new XmlObjectDTO());
-                        }
-                    } else {
-                        String name = entry.getKey();
-                        if (name.contains(":")) {
-                            name = name.split(":")[1];
-                        }
-                        fields.put(name, getSchemaFromObjectXML(entry.getValue()));
+                    if (!entry.getKey().equals(OC_ATTRIBUTES)) {
+                        // the stored name is the tag name, prefix included
+                        fields.put(entry.getKey(), getSchemaFromObjectXML(entry.getValue()));
                     }
                 }
             }
+            schemaDTO.setXml(toXmlObject(map.get(OC_ATTRIBUTES)));
         } else if (type == DataType.ARRAY) {
             List<?> items = (List<?>) value;
             schemaDTO.setType(DataType.ARRAY);
@@ -895,51 +885,6 @@ public class OperationExMapper {
 
         public void setFields(List<Node> fields) {
             this.fields = fields;
-        }
-    }
-
-    /**
-     * Defines strategies for handling multiple XML attributes
-     * within the special {@code __oc__attributes} element.
-     *
-     * <p>Since {@link SchemaDTO} currently supports only a single
-     * {@link XmlObjectDTO}, this strategy determines how to pick
-     * one attribute when multiple are provided.</p>
-     *
-     * <ul>
-     *   <li>{@link #ACCEPT_FIRST} – Accepts the first attribute encountered</li>
-     *   <li>{@link #ACCEPT_LAST} – Accepts the last attribute encountered</li>
-     *   <li>{@link #FAIL} – Throws an exception if multiple attributes exist</li>
-     * </ul>
-     */
-    private enum MultipleXmlAttrsStrategy {
-        ACCEPT_FIRST,
-        ACCEPT_LAST,
-        FAIL;
-
-        public static String applyStrategy(Map<String, String> attrs, MultipleXmlAttrsStrategy strategy) {
-            // If there is only one attribute, default to ACCEPT_FIRST (shortcut case).
-            if (attrs.size() == 1) {
-                strategy = ACCEPT_FIRST;
-            }
-
-            return switch (strategy) {
-                case ACCEPT_FIRST -> attrs.keySet()
-                        .stream()
-                        .findFirst()
-                        .orElse(null); // pick first available key
-
-                case ACCEPT_LAST -> attrs.keySet()
-                        .stream()
-                        .reduce((first, second) -> second) // reduce keeps last seen key
-                        .orElse(null);
-
-                case FAIL ->
-                    // Fail fast: multiple attributes not allowed in this mode
-                        throw new RuntimeException(
-                                "Multiple attributes are not allowed within %s".formatted(OC_ATTRIBUTES)
-                        );
-            };
         }
     }
 }

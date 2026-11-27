@@ -49,11 +49,13 @@ public final class OperationReferenceCollector {
             return;
         }
 
-        String value = schema.getValue();
-        if (ReferenceDetector.containsReference(value)) {
-            List<String> embedded = ReferenceScanner.extract(value);
-            references.addAll(embedded.isEmpty() ? List.of(value) : embedded);
+        // the attributes of an XML element are resolved whatever its content
+        if (schema.getXml() != null) {
+            schema.getXml().getAttributes().values().forEach(text -> collect(text, references));
+        }
 
+        String value = schema.getValue();
+        if (collect(value, references)) {
             // a referenced value replaces the whole schema, so nothing below it is resolved
             return;
         }
@@ -65,5 +67,16 @@ public final class OperationReferenceCollector {
         if (schema.getType() == DataType.OBJECT && schema.getProperties() != null) {
             schema.getProperties().values().forEach(property -> collect(property, references));
         }
+    }
+
+    /** Adds the references of {@code text}, and tells whether it holds any. */
+    private static boolean collect(String text, Set<String> references) {
+        if (!ReferenceDetector.containsReference(text)) {
+            return false;
+        }
+
+        List<String> embedded = ReferenceScanner.extract(text);
+        references.addAll(embedded.isEmpty() ? List.of(text) : embedded);
+        return true;
     }
 }

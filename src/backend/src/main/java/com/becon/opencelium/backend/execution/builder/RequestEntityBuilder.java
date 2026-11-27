@@ -13,6 +13,7 @@ import com.becon.opencelium.backend.resource.execution.ParameterDTOUtil;
 import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
+import com.becon.opencelium.backend.resource.execution.XmlObjectDTO;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 import org.springframework.http.HttpHeaders;
@@ -507,6 +508,10 @@ public class RequestEntityBuilder {
             return;
         }
 
+        // a reference replaces the content of an XML element, never the element itself: its
+        // attributes stay, and their references are resolved like the text of the element
+        replaceRefsOfAttributes(schema.getXml());
+
         String value = schema.getValue();
 
         if (ReferenceDetector.containsReference(value)) {
@@ -520,7 +525,6 @@ public class RequestEntityBuilder {
                 schema.setValue(referencedSchema.getValue());
                 schema.setItems(referencedSchema.getItems());
                 schema.setProperties(referencedSchema.getProperties());
-                schema.setXml(referencedSchema.getXml());
             } else {
                 // schema and referencedSchema both not null and have different type
                 DataType requiredType = schema.getType();
@@ -528,7 +532,6 @@ public class RequestEntityBuilder {
                 // do some cleanup to the schema
                 schema.setValue(null);
                 schema.setItems(null);
-                schema.setXml(null);
                 schema.setProperties(null);
 
                 if (requiredType == DataType.ARRAY) {
@@ -562,6 +565,26 @@ public class RequestEntityBuilder {
             // loop through all 'properties' to replace referenced ones
             properties.forEach((name, schemaDTO) -> replaceRefs(schemaDTO));
         }
+    }
+
+    /**
+     * Replaces the references in the attribute values of an XML element. An attribute value is
+     * text, so a referenced list or map becomes compact JSON text and {@code null} an empty string.
+     */
+    private void replaceRefsOfAttributes(XmlObjectDTO xml) {
+        if (xml == null || xml.getAttributes().isEmpty()) {
+            return;
+        }
+
+        Map<String, String> resolved = new LinkedHashMap<>();
+        xml.getAttributes().forEach((name, value) -> {
+            if (ReferenceDetector.containsReference(value)) {
+                resolved.put(name, GlobalValueCaster.toText(references.apply(value)));
+            } else {
+                resolved.put(name, GlobalEscape.isPresent(value) ? GlobalEscape.unescape(value) : value);
+            }
+        });
+        xml.setAttributes(resolved);
     }
 
     private boolean isReferencedPrimary(DataType actual, DataType referenced, String ref) {
