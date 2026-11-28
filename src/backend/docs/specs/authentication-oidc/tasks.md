@@ -33,11 +33,4 @@ The OIDC provider `kc` has the issuer URL of the realm `oc`, and the client ID a
 - **Criteria:** AO-05, AO-08. **Status:** done
 
 ## Task 7: feat(core): link an OIDC login by email, refuse a locked OpenCelium user
-- **Criteria:** AO-07 (rule 2 and the email of rule 3), AO-08 (the answer of the IdP)
-- **Read:** plan: decision 5, Interfaces and contracts (Error codes), Test strategy; architecture: 6.7, decisions 16, 18
-- **Function:** An OIDC login can find its OpenCelium user by email, and a new OpenCelium user gets the email. The browser gets an error code for a locked OpenCelium user or for the email of another OpenCelium user.
-- **Tests:** `OidcUserLookupTest` (full application, more cases), `OidcUsernameTest` (unit, more cases), `OidcCallbackTest` (full application, more cases)
-- **Hand test:** 1. In `mongosh`, give the default admin the email of `bob`. 2. Set `email-link` of `kc` to true, and log in as `bob`: the default admin gets the OIDC link. 3. Lock the default admin in `mongosh`, and log in as `bob` again: the browser goes to `/login/oidc#error=user-locked`. 4. Set `email-link` of `kc` to false, and give the default admin the email of `carol`. 5. Log in as `carol`: the browser goes to `/login/oidc#error=email-taken`.
-- **Size:** approximately 120 lines
-- **Depends on:** task 5
-- **Status:** open
+- **Criteria:** AO-07, AO-08. **Status:** done

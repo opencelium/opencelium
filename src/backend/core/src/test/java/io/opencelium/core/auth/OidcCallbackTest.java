@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -38,6 +39,8 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import io.opencelium.core.secrets.keys.TokenSignature;
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.tenant.TenantDocuments;
+import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.LoginRequests;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
@@ -45,6 +48,7 @@ import io.opencelium.core.testsupport.MutableClock;
 import io.opencelium.core.testsupport.fake.FakeIdp;
 import io.opencelium.core.testsupport.fake.FakeIdp.IdTokenSignature;
 import io.opencelium.core.testsupport.fixture.TokenFixture;
+import io.opencelium.core.testsupport.fixture.UserFixture;
 
 import static io.opencelium.core.testsupport.OidcLoginRequests.CALLBACK_PATH;
 import static io.opencelium.core.testsupport.OidcLoginRequests.assertErrorRedirect;
@@ -75,17 +79,23 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
  * or it comes after the 10 minutes of the login;</li>
  * <li>{@code unknown-provider}: no OIDC provider has the provider ID;</li>
  * <li>{@code idp-error}: the IdP answers with an error, refuses the token request, or gives no discovery document;</li>
- * <li>{@code invalid-id-token}: the ID token has a wrong issuer, audience, signature or nonce, or it expired.</li>
+ * <li>{@code invalid-id-token}: the ID token has a wrong issuer, audience, signature or nonce, or it expired;</li>
+ * <li>{@code user-locked}: the OIDC link or the email of the ID token gives a locked OpenCelium user;</li>
+ * <li>{@code email-taken}: core must make a new OpenCelium user with the verified email of the ID token, and another
+ * OpenCelium user has that email, compared without a difference between upper case and lower case. Without the
+ * email-link option of the OIDC provider of the login, the email does not give that OpenCelium user: the option of
+ * another OIDC provider does not apply.</li>
  * </ul>
- * Core reads and deletes the login record of an answer, so an answer has 1 use. The endpoint is open, and it ignores
- * a bearer token.
+ * The 2 refusals of the OpenCelium user make no OpenCelium user and change no OpenCelium user: a locked OpenCelium user
+ * gets no OIDC link. Core reads and deletes the login record of an answer, so an answer has 1 use. The endpoint is
+ * open, and it ignores a bearer token.
  * <p>
  * The fake IdP is the IdP of the OIDC providers {@code kc}, {@code kc2} and {@code stopped}: it keeps a code for each
  * login of a person, and its token endpoint accepts a code once, with the PKCE verifier, the redirect URI and the
- * client secret of its login. The fake IdP and core have 1 clock, which starts at the real time: MongoDB deletes a
- * login record at its end by the real time. Core keeps the discovery document of an issuer URL for 5 minutes, so the
- * case that removes a discovery document has an issuer URL of its own: a document that core keeps from another case
- * does not change its result.
+ * client secret of its login. The email-link option of each OIDC provider is off, unless a case turns it on. The fake
+ * IdP and core have 1 clock, which starts at the real time: MongoDB deletes a login record at its end by the real
+ * time. Core keeps the discovery document of an issuer URL for 5 minutes, so the case that removes a discovery document
+ * has an issuer URL of its own: a document that core keeps from another case does not change its result.
  */
 @MongoIntegrationTest
 @AutoConfigureMockMvc
@@ -101,6 +111,13 @@ class OidcCallbackTest {
 	private static final String CLIENT_ID = "core";
 
 	private static final String SUBJECT = "f3a1c2d4-5b6e-4f70-8a91-b2c3d4e5f607";
+
+	private static final Map<String, String> PROVIDERS = Map.of("kc", ISSUER_URL, "kc2", OTHER_ISSUER_URL, "stopped",
+			STOPPED_ISSUER_URL);
+
+	private static final String BOB_EMAIL = "bob@example.com";
+
+	private static final String CAROL_EMAIL = "carol@example.com";
 
 	private static final String SELF_HOST_TENANT = "self-host-tenant";
 
@@ -143,6 +160,12 @@ class OidcCallbackTest {
 	@Autowired
 	TokenSignature signature;
 
+	@Autowired
+	TenantRunner tenantRunner;
+
+	@Autowired
+	TenantDocuments documents;
+
 	private final String clientSecret = UUID.randomUUID().toString();
 
 	static ClientHttpRequestFactory fakeIdp() {
@@ -169,8 +192,7 @@ class OidcCallbackTest {
 		IDP.serveDiscoveryDocument(OTHER_ISSUER_URL);
 		IDP.serveDiscoveryDocument(STOPPED_ISSUER_URL);
 		IDP.registerClient(CLIENT_ID, clientSecret);
-		saveProviders(mvc, CLIENT_ID, clientSecret,
-				Map.of("kc", ISSUER_URL, "kc2", OTHER_ISSUER_URL, "stopped", STOPPED_ISSUER_URL));
+		saveProviders(mvc, CLIENT_ID, clientSecret, PROVIDERS);
 		mongo.getCollection("sessions").deleteMany(new Document());
 		mongo.getCollection("oidc_logins").deleteMany(new Document());
 	}
@@ -406,6 +428,92 @@ class OidcCallbackTest {
 						START.minus(Duration.ofMinutes(15)), "exp", START.minus(Duration.ofMinutes(10)))));
 	}
 
+	@Test
+	void callbackRedirectsToTheErrorTargetOfUserLockedWithoutASessionWhenTheOidcLinkGivesALockedOpenCeliumUser() {
+		loginCodeOf(callback(mvc, logInAtTheIdp(mvc, IDP, "kc", newLoginVerifierHash(), SUBJECT, Map.of())));
+		lock(theOnlyNewUser());
+		Document userBefore = theOnlyNewUser();
+		String redirect = logInAtTheIdp(mvc, IDP, "kc", newLoginVerifierHash(), SUBJECT, Map.of());
+
+		MvcTestResult callback = callback(mvc, redirect);
+
+		assertErrorRedirect(callback, "user-locked");
+		assertThat(sessions()).as("the sessions: only the session of the first login").hasSize(1);
+		assertThat(theOnlyNewUser()).as("the locked OpenCelium user of the OIDC link, as before the login")
+			.isEqualTo(userBefore);
+	}
+
+	@Test
+	void callbackRedirectsToTheErrorTargetOfUserLockedWithoutASessionOrAUserWhenTheEmailGivesALockedOpenCeliumUser() {
+		String bob = UserFixture.aUser("bob", UUID.randomUUID().toString())
+			.withEmail(BOB_EMAIL)
+			.locked()
+			.storeIn(tenantRunner, documents)
+			.id();
+		Document bobBefore = userNamed("bob");
+		turnOnTheEmailLinkOption(Set.of("kc"));
+		String redirect = logInAtTheIdp(mvc, IDP, "kc", newLoginVerifierHash(), SUBJECT, verified(BOB_EMAIL));
+
+		MvcTestResult callback = callback(mvc, redirect);
+
+		assertErrorRedirect(callback, "user-locked");
+		assertThat(sessions()).as("the sessions").isEmpty();
+		assertThat(newUsers()).as("the OpenCelium users other than the default admin")
+			.extracting(OidcCallbackTest::idOf)
+			.containsExactly(bob);
+		assertThat(userNamed("bob")).as("the locked OpenCelium user with the email, as before the login")
+			.isEqualTo(bobBefore);
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("takenEmails")
+	void callbackRedirectsToTheErrorTargetOfEmailTakenWithoutASessionOrUserWhenAnotherOpenCeliumUserHasTheVerifiedEmail(
+			String taken, String email, Set<String> emailLink) {
+		UserFixture.aUser("carol", UUID.randomUUID().toString())
+			.withEmail(CAROL_EMAIL)
+			.storeIn(tenantRunner, documents);
+		List<Document> usersBefore = newUsers();
+		turnOnTheEmailLinkOption(emailLink);
+		String redirect = logInAtTheIdp(mvc, IDP, "kc", newLoginVerifierHash(), SUBJECT, verified(email));
+
+		MvcTestResult callback = callback(mvc, redirect);
+
+		assertErrorRedirect(callback, "email-taken");
+		assertThat(sessions()).as("the sessions").isEmpty();
+		assertThat(newUsers()).as("the OpenCelium users other than the default admin, as before the login")
+			.isEqualTo(usersBefore);
+	}
+
+	/**
+	 * The name of each case, the verified email of the ID token of a login through {@code kc}, and the provider IDs
+	 * whose email-link option is on. The stored OpenCelium user {@code carol} has the email {@value #CAROL_EMAIL}.
+	 */
+	static Stream<Arguments> takenEmails() {
+		return Stream.of(arguments("the same letters, the email-link option off", CAROL_EMAIL, Set.of()),
+				arguments("other upper and lower case letters, the email-link option off", "Carol@Example.COM",
+						Set.of()),
+				arguments("the email-link option on for another OIDC provider", CAROL_EMAIL, Set.of("kc2")));
+	}
+
+	/** The claims of an ID token with the email, which the IdP verified. */
+	private static Map<String, Object> verified(String email) {
+		return Map.of("email", email, "email_verified", true);
+	}
+
+	/**
+	 * Saves the OIDC providers again, with the email-link option on for the provider IDs and off for the others. The
+	 * save needs a session of the default admin, which the case does not count.
+	 */
+	private void turnOnTheEmailLinkOption(Set<String> providerIds) {
+		saveProviders(mvc, CLIENT_ID, clientSecret, PROVIDERS, providerIds);
+		mongo.getCollection("sessions").deleteMany(new Document());
+	}
+
+	private void lock(Document user) {
+		mongo.getCollection("users")
+			.updateOne(new Document("_id", user.get("_id")), new Document("$set", new Document("locked", true)));
+	}
+
 	/** The login code, after a check of its signature by core, its issuer and its expiry. */
 	private Jwt decoded(String loginCode) {
 		return signature.decoder(typeOf(loginCode), ISSUER_OF_CORE).decode(loginCode);
@@ -430,6 +538,12 @@ class OidcCallbackTest {
 
 	private static String idOf(Document user) {
 		return String.valueOf(user.get("_id"));
+	}
+
+	private Document userNamed(String username) {
+		Document user = mongo.getCollection("users").find(new Document("username", username)).first();
+		assertThat(user).as("the OpenCelium user " + username).isNotNull();
+		return user;
 	}
 
 	private List<Document> newUsers() {

@@ -13,8 +13,10 @@ import io.opencelium.common.secret.SecretReference;
  * @param clientId     the client ID of core at the IdP
  * @param clientSecret the reference of the client secret in the secret storage, never the client secret; {@code null}
  *                     when the item has none
+ * @param emailLink    the email-link option: an ID token with a verified email may log in as the OpenCelium user with
+ *                     that email; {@code false} when the item does not give the option
  */
-record OidcProvider(String issuerUrl, String clientId, SecretReference clientSecret) {
+record OidcProvider(String issuerUrl, String clientId, SecretReference clientSecret, boolean emailLink) {
 
 	/**
 	 * @param items      the items of the setting of the OIDC providers
@@ -28,7 +30,8 @@ record OidcProvider(String issuerUrl, String clientId, SecretReference clientSec
 					issuerUrl && item.get(OidcProviders.CLIENT_ID) instanceof String clientId) {
 				SecretReference clientSecret = item.get(OidcProviders.CLIENT_SECRET) instanceof SecretReference reference
 						? reference : null;
-				return Optional.of(new OidcProvider(issuerUrl, clientId, clientSecret));
+				boolean emailLink = item.get(OidcProviders.EMAIL_LINK) instanceof Boolean enabled && enabled;
+				return Optional.of(new OidcProvider(issuerUrl, clientId, clientSecret, emailLink));
 			}
 		}
 		return Optional.empty();

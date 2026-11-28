@@ -24,7 +24,13 @@ enum OidcLoginError {
 	LOGIN_EXPIRED("login-expired"),
 
 	/** The ID token has a wrong issuer, audience, signature or nonce, or it expired. */
-	INVALID_ID_TOKEN("invalid-id-token");
+	INVALID_ID_TOKEN("invalid-id-token"),
+
+	/** The OIDC link or the email of the ID token gives an OpenCelium user that is locked. */
+	USER_LOCKED("user-locked"),
+
+	/** Core must make an OpenCelium user with the verified email of the ID token, and another one has that email. */
+	EMAIL_TAKEN("email-taken");
 
 	/** The login page of the frontend for an OIDC login. */
 	static final String FRONTEND_PATH = "/login/oidc";
